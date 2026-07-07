@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "707987982583",
+    "project_id": "hydra-app-mobile-fc5d9",
+    "storage_bucket": "hydra-app-mobile-fc5d9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:707987982583:android:bad26cdade7dd52f0d2bf2",
+        "android_client_info": {
+          "package_name": "com.example.hydra"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDBu46gJxZUcJSrYi1N7SIB9_BOjmBriDo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

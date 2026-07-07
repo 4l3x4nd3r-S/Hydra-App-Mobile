@@ -1,0 +1,158 @@
+{
+  "type": "FeatureCollection",
+  "name": "Puntos_Presion_El_Triunfo",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -69.17201973532023,
+          -12.586770619763174
+        ]
+      },
+      "properties": {
+        "id": "P-01",
+        "direccion": "JR. MARIANO CONZA, ESQUINA JR. CESAR VALLEJO",
+        "sector": 12,
+        "zona": "ALTA",
+        "utm_este": 481315.54,
+        "utm_norte": 8608554.928,
+        "origen": "El Triunfo"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -69.18206802244434,
+          -12.580857464883284
+        ]
+      },
+      "properties": {
+        "id": "P-02",
+        "direccion": "JR. TARAPACA, ESQUINA JR. ALFONSO UGARTE - LIFA",
+        "sector": 12,
+        "zona": "ALTA",
+        "utm_este": 480223.658,
+        "utm_norte": 8609208.089,
+        "origen": "El Triunfo"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -69.17585707962512,
+          -12.569971674835418
+        ]
+      },
+      "properties": {
+        "id": "P-03",
+        "direccion": "JR. VICTORIA, ESQUINA PSJE. S/N - UPIS CONTINENTAL",
+        "sector": 12,
+        "zona": "ALTA",
+        "utm_este": 480897.492,
+        "utm_norte": 8610412.333,
+        "origen": "El Triunfo"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -69.16687693827994,
+          -12.573265270621619
+        ]
+      },
+      "properties": {
+        "id": "P-04",
+        "direccion": "AV. TAMBOPATA, ESQUINA CALLE LOS COLIBRIES - URB. VILLA MERCDES",
+        "sector": 12,
+        "zona": "ALTA",
+        "utm_este": 481873.195,
+        "utm_norte": 8610048.752,
+        "origen": "El Triunfo"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -69.1725818843304,
+          -12.579118643536086
+        ]
+      },
+      "properties": {
+        "id": "P-05",
+        "direccion": "JR. ATAHUALLPA, ESQUINA PSJE. FOTOGRAFO",
+        "sector": 12,
+        "zona": "ALTA",
+        "utm_este": 481253.925,
+        "utm_norte": 8609401.068,
+        "origen": "El Triunfo"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -69.16272019697561,
+          -12.578396839213498
+        ]
+      },
+      "properties": {
+        "id": "P-06",
+        "direccion": "PROLONG. AV. LEON VELARDE, ESQUINA JR. JOSE MENDOZA",
+        "sector": 12,
+        "zona": "ALTA",
+        "utm_este": 482325.068,
+        "utm_norte": 8609481.57,
+        "origen": "El Triunfo"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -69.15649935656506,
+          -12.584227937315132
+        ]
+      },
+      "properties": {
+        "id": "P-07",
+        "direccion": "JR. NADIN HEREDIA (CASA CARPINTERO)",
+        "sector": 12,
+        "zona": "ALTA",
+        "utm_este": 483001.171,
+        "utm_norte": 8608837.159,
+        "origen": "El Triunfo"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -69.16086084856289,
+          -12.591657793614194
+        ]
+      },
+      "properties": {
+        "id": "P-08",
+        "direccion": "AV. LOS HEREOS, ESQUINA PSJE. S/N",
+        "sector": 12,
+        "zona": "ALTA",
+        "utm_este": 482527.931,
+        "utm_norte": 8608015.256,
+        "origen": "El Triunfo"
+      }
+    }
+  ]
+}

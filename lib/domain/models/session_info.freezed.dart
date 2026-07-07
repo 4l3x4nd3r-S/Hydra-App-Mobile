@@ -1,0 +1,179 @@
+// coverage:ignore-file
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint
+// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
+
+part of 'session_info.dart';
+
+// **************************************************************************
+// FreezedGenerator
+// **************************************************************************
+
+T _$identity<T>(T value) => value;
+
+final _privateConstructorUsedError = UnsupportedError(
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+
+/// @nodoc
+mixin _$SessionInfo {
+  bool get valido => throw _privateConstructorUsedError;
+  String get rol => throw _privateConstructorUsedError;
+  String? get nombre => throw _privateConstructorUsedError;
+
+  /// Create a copy of SessionInfo
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $SessionInfoCopyWith<SessionInfo> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $SessionInfoCopyWith<$Res> {
+  factory $SessionInfoCopyWith(
+          SessionInfo value, $Res Function(SessionInfo) then) =
+      _$SessionInfoCopyWithImpl<$Res, SessionInfo>;
+  @useResult
+  $Res call({bool valido, String rol, String? nombre});
+}
+
+/// @nodoc
+class _$SessionInfoCopyWithImpl<$Res, $Val extends SessionInfo>
+    implements $SessionInfoCopyWith<$Res> {
+  _$SessionInfoCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of SessionInfo
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? valido = null,
+    Object? rol = null,
+    Object? nombre = freezed,
+  }) {
+    return _then(_value.copyWith(
+      valido: null == valido
+          ? _value.valido
+          : valido // ignore: cast_nullable_to_non_nullable
+              as bool,
+      rol: null == rol
+          ? _value.rol
+          : rol // ignore: cast_nullable_to_non_nullable
+              as String,
+      nombre: freezed == nombre
+          ? _value.nombre
+          : nombre // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$SessionInfoImplCopyWith<$Res>
+    implements $SessionInfoCopyWith<$Res> {
+  factory _$$SessionInfoImplCopyWith(
+          _$SessionInfoImpl value, $Res Function(_$SessionInfoImpl) then) =
+      __$$SessionInfoImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({bool valido, String rol, String? nombre});
+}
+
+/// @nodoc
+class __$$SessionInfoImplCopyWithImpl<$Res>
+    extends _$SessionInfoCopyWithImpl<$Res, _$SessionInfoImpl>
+    implements _$$SessionInfoImplCopyWith<$Res> {
+  __$$SessionInfoImplCopyWithImpl(
+      _$SessionInfoImpl _value, $Res Function(_$SessionInfoImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of SessionInfo
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? valido = null,
+    Object? rol = null,
+    Object? nombre = freezed,
+  }) {
+    return _then(_$SessionInfoImpl(
+      valido: null == valido
+          ? _value.valido
+          : valido // ignore: cast_nullable_to_non_nullable
+              as bool,
+      rol: null == rol
+          ? _value.rol
+          : rol // ignore: cast_nullable_to_non_nullable
+              as String,
+      nombre: freezed == nombre
+          ? _value.nombre
+          : nombre // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ));
+  }
+}
+
+/// @nodoc
+
+class _$SessionInfoImpl implements _SessionInfo {
+  const _$SessionInfoImpl(
+      {required this.valido, required this.rol, required this.nombre});
+
+  @override
+  final bool valido;
+  @override
+  final String rol;
+  @override
+  final String? nombre;
+
+  @override
+  String toString() {
+    return 'SessionInfo(valido: $valido, rol: $rol, nombre: $nombre)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$SessionInfoImpl &&
+            (identical(other.valido, valido) || other.valido == valido) &&
+            (identical(other.rol, rol) || other.rol == rol) &&
+            (identical(other.nombre, nombre) || other.nombre == nombre));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, valido, rol, nombre);
+
+  /// Create a copy of SessionInfo
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$SessionInfoImplCopyWith<_$SessionInfoImpl> get copyWith =>
+      __$$SessionInfoImplCopyWithImpl<_$SessionInfoImpl>(this, _$identity);
+}
+
+abstract class _SessionInfo implements SessionInfo {
+  const factory _SessionInfo(
+      {required final bool valido,
+      required final String rol,
+      required final String? nombre}) = _$SessionInfoImpl;
+
+  @override
+  bool get valido;
+  @override
+  String get rol;
+  @override
+  String? get nombre;
+
+  /// Create a copy of SessionInfo
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$SessionInfoImplCopyWith<_$SessionInfoImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}

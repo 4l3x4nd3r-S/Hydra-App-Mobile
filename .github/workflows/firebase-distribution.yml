@@ -1,0 +1,45 @@
+name: Distribuir a Firebase (App Distribution)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'lib/**'
+      - 'pubspec.yaml'
+      - 'android/**'
+
+jobs:
+  build-and-deploy:
+    name: Build & Deploy to Firebase
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clonar código
+        uses: actions/checkout@v3
+
+      - name: Configurar Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Configurar Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.22.2'
+          channel: 'stable'
+
+      - name: Instalar dependencias
+        run: flutter pub get
+
+      - name: Compilar APK (Release)
+        run: flutter build apk --release
+
+      - name: Subir a Firebase App Distribution
+        uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          appId: '1:707987982583:android:bad26cdade7dd52f0d2bf2'
+          token: ${{ secrets.FIREBASE_TOKEN }}
+          groups: testers
+          file: build/app/outputs/flutter-apk/app-release.apk
