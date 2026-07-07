@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Clonar código
+      - name: Clonar cÃ³digo
         uses: actions/checkout@v3
 
       - name: Configurar Java
@@ -27,7 +27,6 @@ jobs:
       - name: Configurar Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.2'
           channel: 'stable'
 
       - name: Instalar dependencias
