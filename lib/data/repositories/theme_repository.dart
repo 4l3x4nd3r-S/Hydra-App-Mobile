@@ -9,7 +9,7 @@ class ThemeRepository {
 
   Future<ThemeMode> loadThemeMode() async {
     final saved = await _themeStorage.getThemeMode();
-    return saved == 'light' ? ThemeMode.light : ThemeMode.dark;
+    return saved == 'dark' ? ThemeMode.dark : ThemeMode.light;
   }
 
   Future<void> saveThemeMode(ThemeMode mode) async {

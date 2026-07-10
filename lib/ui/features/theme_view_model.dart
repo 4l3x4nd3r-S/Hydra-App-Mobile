@@ -4,7 +4,7 @@ import '../../data/repositories/theme_repository.dart';
 class ThemeViewModel extends ChangeNotifier {
   final ThemeRepository _themeRepository;
 
-  ThemeMode _mode = ThemeMode.dark;
+  ThemeMode _mode = ThemeMode.light;
   ThemeMode get mode => _mode;
   bool get isLight => _mode == ThemeMode.light;
 

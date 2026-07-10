@@ -84,33 +84,23 @@ class ReclamoListTile extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
 
-              // Title: Tipo Problema
-              Text(
-                data.tipoProblema ?? 'Problema no especificado',
-                style: TextStyle(
-                  color: c.onSurface,
-                  fontFamily: 'Outfit',
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              // Description
+              // Description (contenido principal)
               if (data.descripcion != null) ...[
                 Text(
-                  '"${data.descripcion}"',
+                  data.descripcion!,
                   style: TextStyle(
-                    color: c.onSurfaceVariant,
-                    fontSize: 13,
-                    fontStyle: FontStyle.italic,
+                    color: c.onSurface,
+                    fontFamily: 'Inter',
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14,
+                    height: 1.35,
                   ),
-                  maxLines: 2,
+                  maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
               ],
 
               // Address
@@ -133,6 +123,30 @@ class ReclamoListTile extends StatelessWidget {
                   ),
                 ],
               ),
+              const SizedBox(height: 10),
+
+              // Tipo Problema (chip secundario)
+              if (data.tipoProblema != null)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: c.primary.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      data.tipoProblema!.toUpperCase(),
+                      style: TextStyle(
+                        color: c.primary,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Inter',
+                        letterSpacing: 0.4,
+                      ),
+                    ),
+                  ),
+                ),
               const SizedBox(height: 12),
 
               // Divider

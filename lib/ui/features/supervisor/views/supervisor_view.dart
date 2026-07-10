@@ -18,7 +18,6 @@ import '../view_models/supervisor_os_view_model.dart';
 import '../widgets/nueva_cuadrilla_modal.dart';
 import '../widgets/reclamo_tile_data.dart';
 import '../widgets/reclamo_list_tile.dart';
-import '../../../core/widgets/section_card.dart';
 import '../../os_inbox/widgets/os_inbox_content.dart';
 import '../../os_detail/views/os_detail_view.dart';
 import 'reclamo_detalle_view.dart';
@@ -52,6 +51,7 @@ class _SupervisorBody extends StatefulWidget {
 class _SupervisorBodyState extends State<_SupervisorBody>
     with TickerProviderStateMixin {
   late TabController _tabController;
+  int _selectedSubTabIndex = 0;
 
   @override
   void initState() {
@@ -76,6 +76,27 @@ class _SupervisorBodyState extends State<_SupervisorBody>
       appBar: AppBar(
         backgroundColor: c.background,
         elevation: 0,
+        leadingWidth: 48,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 12.0),
+          child: Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: c.surface,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: c.primary.withValues(alpha: 0.3),
+                width: 2,
+              ),
+            ),
+            child: Icon(
+              Icons.water_drop_rounded,
+              color: c.primary,
+              size: 24,
+            ),
+          ),
+        ),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -342,45 +363,38 @@ class _SupervisorBodyState extends State<_SupervisorBody>
             ),
           ),
         ),
+        if (vm.errorMessageReclamos != null)
+          _buildErrorBanner(c, vm.errorMessageReclamos!),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: c.border),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: _buildSubTabs(c, vm),
+            ),
+          ),
+        ),
         Expanded(
           child: vm.loadingReclamos
               ? Center(
                   child: CircularProgressIndicator(color: c.primary))
-              : RefreshIndicator(
-                  onRefresh: () async => await vm.cargarTodo(),
-                  child: ListView(
-                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-                    children: [
-                      if (vm.errorMessageReclamos != null)
-                        _buildErrorBanner(c, vm.errorMessageReclamos!),
-                      _buildSeccionReclamos(
-                        c,
-                        vm,
-                        'PENDIENTES',
-                        vm.reclamosPendientes,
+              : IndexedStack(
+                  index: _selectedSubTabIndex,
+                  children: [
+                    _buildListaPorEstado(c, vm.reclamosPendientes,
                         'No hay reclamos pendientes',
-                        Icons.report_problem_outlined,
-                      ),
-                      const SizedBox(height: 16),
-                      _buildSeccionReclamos(
-                        c,
-                        vm,
-                        'ASIGNADOS',
-                        vm.reclamosAsignados,
+                        Icons.schedule_outlined),
+                    _buildListaPorEstado(c, vm.reclamosAsignados,
                         'No hay reclamos asignados',
-                        Icons.assignment_turned_in_outlined,
-                      ),
-                      const SizedBox(height: 16),
-                      _buildSeccionReclamos(
-                        c,
-                        vm,
-                        'CERRADOS',
-                        vm.reclamosCerrados,
+                        Icons.assignment_turned_in_outlined),
+                    _buildListaPorEstado(c, vm.reclamosCerrados,
                         'No hay reclamos cerrados',
-                        Icons.check_circle_outline,
-                      ),
-                    ],
-                  ),
+                        Icons.check_circle_outline),
+                  ],
                 ),
         ),
       ],
@@ -418,41 +432,144 @@ class _SupervisorBodyState extends State<_SupervisorBody>
     );
   }
 
-  Widget _buildSeccionReclamos(
-    AppColors c,
-    SupervisorViewModel vm,
-    String titulo,
-    List<Reclamo> reclamos,
-    String emptyMsg,
-    IconData icon,
-  ) {
-    final tiles = reclamos.map((r) {
-      return ReclamoListTile(
-        data: ReclamoTileData.fromReclamo(
-          r,
-          onTap: () async {
-            await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ReclamoDetalleView(
-                  reclamo: r,
-                  cuadrillas: vm.cuadrillas,
+  Widget _buildSubTabs(AppColors c, SupervisorViewModel vm) {
+    final tabs = [
+      ('PENDIENTES', vm.reclamosPendientes.length, const Color(0xFF0A2472)),
+      ('ASIGNADOS', vm.reclamosAsignados.length, const Color(0xFFF59E0B)),
+      ('CERRADOS', vm.reclamosCerrados.length, const Color(0xFF22C55E)),
+    ];
+
+    return Row(
+      children: tabs.asMap().entries.map((entry) {
+        final i = entry.key;
+        final (label, count, color) = entry.value;
+        final isSelected = _selectedSubTabIndex == i;
+
+        return Expanded(
+          child: GestureDetector(
+            onTap: () => setState(() => _selectedSubTabIndex = i),
+            behavior: HitTestBehavior.opaque,
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: isSelected ? color : Colors.transparent,
+                    width: 3,
+                  ),
                 ),
               ),
-            );
-            vm.cargarTodo(silent: true);
-          },
-        ),
-        c: c,
-      );
-    }).toList();
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Flexible(
+                    child: Text(
+                      label,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: 'Outfit',
+                        fontWeight:
+                            isSelected ? FontWeight.w600 : FontWeight.w500,
+                        fontSize: 12,
+                        color: isSelected ? color : c.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 6, vertical: 1),
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      '$count',
+                      style: TextStyle(
+                        color: color,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
 
-    return SectionCard(
-      title: titulo,
-      count: reclamos.length,
-      emptyMessage: emptyMsg,
-      c: c,
-      tiles: tiles,
+  Widget _buildListaPorEstado(
+    AppColors c,
+    List<Reclamo> reclamos,
+    String emptyMsg,
+    IconData emptyIcon,
+  ) {
+    if (reclamos.isEmpty) {
+      return RefreshIndicator(
+        onRefresh: () async {
+          final vm = context.read<SupervisorViewModel>();
+          await vm.cargarTodo();
+        },
+        child: ListView(
+          children: [
+            SizedBox(
+              height: 220,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(emptyIcon,
+                        size: 48,
+                        color: c.onSurfaceVariant.withValues(alpha: 0.4)),
+                    const SizedBox(height: 12),
+                    Text(
+                      emptyMsg,
+                      style: TextStyle(
+                          color: c.onSurfaceVariant, fontSize: 14),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: () async {
+        final vm = context.read<SupervisorViewModel>();
+        await vm.cargarTodo();
+      },
+      child: ListView.builder(
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+        itemCount: reclamos.length,
+        itemBuilder: (context, index) {
+          final r = reclamos[index];
+          return ReclamoListTile(
+            data: ReclamoTileData.fromReclamo(
+              r,
+              onTap: () async {
+                final vm = context.read<SupervisorViewModel>();
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ReclamoDetalleView(
+                      reclamo: r,
+                      cuadrillas: vm.cuadrillas,
+                    ),
+                  ),
+                );
+                vm.cargarTodo(silent: true);
+              },
+            ),
+            c: c,
+          );
+        },
+      ),
     );
   }
 

@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../../../domain/models/os.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/widgets/section_card.dart';
 import 'os_list_tile.dart';
 
-class OsInboxContent extends StatelessWidget {
+class OsInboxContent extends StatefulWidget {
   final List<Os> osActivas;
   final List<Os> osArchivadas;
   final bool isLoading;
@@ -27,121 +26,247 @@ class OsInboxContent extends StatelessWidget {
   });
 
   @override
+  State<OsInboxContent> createState() => _OsInboxContentState();
+}
+
+class _OsInboxContentState extends State<OsInboxContent> {
+  int _selectedSubTabIndex = 0;
+
+  @override
   Widget build(BuildContext context) {
     final c = Theme.of(context).extension<AppColors>()!;
 
-    Widget content = SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (errorMessage != null)
-            Container(
-              width: double.infinity,
-              margin: const EdgeInsets.only(bottom: 16),
-              padding: const EdgeInsets.all(14),
+    return Column(
+      children: [
+        if (widget.errorMessage != null)
+          Container(
+            width: double.infinity,
+            margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: const Color(0xFFDC2626).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: const Color(0xFFDC2626).withValues(alpha: 0.3),
+              ),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.error_outline,
+                    color: Color(0xFFDC2626), size: 20),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    widget.errorMessage!,
+                    style: const TextStyle(
+                      color: Color(0xFFDC2626),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'Inter',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: c.border),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: _buildSubTabs(c),
+            ),
+          ),
+        ),
+        Expanded(
+          child: widget.isLoading
+              ? Center(
+                  child: CircularProgressIndicator(color: c.primary))
+              : IndexedStack(
+                  index: _selectedSubTabIndex,
+                  children: [
+                    _buildListaPorEstado(
+                      c,
+                      widget.osActivas,
+                      'No hay ordenes de servicio activas',
+                      Icons.engineering_outlined,
+                      widget.onTapActiva,
+                    ),
+                    _buildListaPorEstado(
+                      c,
+                      widget.osArchivadas,
+                      'No hay ordenes de servicio archivadas',
+                      Icons.archive_outlined,
+                      widget.onTapArchivada,
+                    ),
+                  ],
+                ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSubTabs(AppColors c) {
+    final tabs = [
+      ('ACTIVAS', widget.osActivas.length, const Color(0xFF0A2472)),
+      ('ARCHIVADAS', widget.osArchivadas.length, const Color(0xFF22C55E)),
+    ];
+
+    return Row(
+      children: tabs.asMap().entries.map((entry) {
+        final i = entry.key;
+        final (label, count, color) = entry.value;
+        final isSelected = _selectedSubTabIndex == i;
+
+        return Expanded(
+          child: GestureDetector(
+            onTap: () => setState(() => _selectedSubTabIndex = i),
+            behavior: HitTestBehavior.opaque,
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
-                color: const Color(0xFFDC2626).withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: const Color(0xFFDC2626).withValues(alpha: 0.3),
+                border: Border(
+                  bottom: BorderSide(
+                    color: isSelected ? color : Colors.transparent,
+                    width: 3,
+                  ),
                 ),
               ),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error_outline,
-                      color: Color(0xFFDC2626), size: 20),
-                  const SizedBox(width: 10),
-                  Expanded(
+                  Flexible(
                     child: Text(
-                      errorMessage!,
-                      style: const TextStyle(
-                        color: Color(0xFFDC2626),
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        fontFamily: 'Inter',
+                      label,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: 'Outfit',
+                        fontWeight:
+                            isSelected ? FontWeight.w600 : FontWeight.w500,
+                        fontSize: 12,
+                        color: isSelected ? color : c.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 6, vertical: 1),
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      '$count',
+                      style: TextStyle(
+                        color: color,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
                 ],
               ),
             ),
-
-          _buildSection(
-            title: 'ACTIVAS',
-            osList: osActivas,
-            emptyMessage: 'No hay ordenes de servicio activas',
-            c: c,
-            onTap: onTapActiva,
           ),
-          const SizedBox(height: 20),
-          _buildSection(
-            title: 'ARCHIVADAS',
-            osList: osArchivadas,
-            emptyMessage: 'No hay ordenes de servicio archivadas',
-            c: c,
-            onTap: onTapArchivada,
-          ),
-          const SizedBox(height: 24),
-        ],
-      ),
+        );
+      }).toList(),
     );
-
-    if (onRefresh != null) {
-      return RefreshIndicator(
-        onRefresh: onRefresh!,
-        child: content,
-      );
-    }
-
-    return content;
   }
 
-  Widget _buildSection({
-    required String title,
-    required List<Os> osList,
-    required String emptyMessage,
-    required AppColors c,
+  Widget _buildListaPorEstado(
+    AppColors c,
+    List<Os> osList,
+    String emptyMsg,
+    IconData emptyIcon,
     void Function(Os os)? onTap,
-  }) {
-    final tiles = osList.map((os) {
-      final readOnly = !(isLiderOfOs?.call(os) ?? true);
-      
-      String? cuadrillaStr;
-      if (os.cuadrilla != null) {
-        final c = os.cuadrilla!;
-        final nombreCompleto = c.lider?.nombre ?? '';
-        final partesNombre = nombreCompleto.split(' ');
-        final primerNombre = partesNombre.isNotEmpty ? partesNombre[0] : '';
-        final primerApellido = partesNombre.length > 1 ? partesNombre[1] : '';
-        final codigoLimpio = (c.codigoGrupo ?? c.id.toString()).replaceAll('#', '').trim();
-        cuadrillaStr = '$codigoLimpio${primerNombre.isNotEmpty ? ' ($primerNombre $primerApellido)'.trimRight() : ''}';
-      } else if (os.cuadrillaId != null) {
-        cuadrillaStr = 'Cuadrilla ${os.cuadrillaId}';
+  ) {
+    if (osList.isEmpty) {
+      final child = ListView(
+        children: [
+          SizedBox(
+            height: 220,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(emptyIcon,
+                      size: 48,
+                      color: c.onSurfaceVariant.withValues(alpha: 0.4)),
+                  const SizedBox(height: 12),
+                  Text(
+                    emptyMsg,
+                    style: TextStyle(
+                        color: c.onSurfaceVariant, fontSize: 14),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      );
+
+      if (widget.onRefresh != null) {
+        return RefreshIndicator(
+            onRefresh: widget.onRefresh!, child: child);
       }
 
-      return OsListTile(
-        data: OsListTileData(
-          id: os.id,
-          numeroOrden: os.numeroOrden,
-          fechaProgramacion: os.fechaProgramacion,
-          tipoProblema: os.reclamo?.tipoProblema ?? os.problemas,
-          direccion: os.reclamo?.direccion,
-          cuadrilla: cuadrillaStr,
-          estado: os.estadoOrden,
-          isReadOnly: readOnly,
-          onTap: onTap != null ? () => onTap(os) : null,
-        ),
-        c: c,
-      );
-    }).toList();
+      return child;
+    }
 
-    return SectionCard(
-      title: title,
-      count: osList.length,
-      emptyMessage: emptyMessage,
-      c: c,
-      tiles: tiles,
+    final child = ListView.builder(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+      itemCount: osList.length,
+      itemBuilder: (context, index) {
+        final os = osList[index];
+        final readOnly = !(widget.isLiderOfOs?.call(os) ?? true);
+
+        String? cuadrillaStr;
+        if (os.cuadrilla != null) {
+          final cu = os.cuadrilla!;
+          final nombreCompleto = cu.lider?.nombre ?? '';
+          final partesNombre = nombreCompleto.split(' ');
+          final primerNombre =
+              partesNombre.isNotEmpty ? partesNombre[0] : '';
+          final primerApellido =
+              partesNombre.length > 1 ? partesNombre[1] : '';
+          final codigoLimpio =
+              (cu.codigoGrupo ?? cu.id.toString())
+                  .replaceAll('#', '')
+                  .trim();
+          cuadrillaStr =
+              '$codigoLimpio${primerNombre.isNotEmpty ? ' ($primerNombre $primerApellido)'.trimRight() : ''}';
+        } else if (os.cuadrillaId != null) {
+          cuadrillaStr = 'Cuadrilla ${os.cuadrillaId}';
+        }
+
+        return OsListTile(
+          data: OsListTileData(
+            id: os.id,
+            numeroOrden: os.numeroOrden,
+            fechaProgramacion: os.fechaProgramacion,
+            tipoProblema: os.reclamo?.tipoProblema,
+            descripcion: os.reclamo?.descripcion,
+            direccion: os.reclamo?.direccion,
+            cuadrilla: cuadrillaStr,
+            estado: os.estadoOrden,
+            isReadOnly: readOnly,
+            onTap: onTap != null ? () => onTap(os) : null,
+          ),
+          c: c,
+        );
+      },
     );
+
+    if (widget.onRefresh != null) {
+      return RefreshIndicator(
+          onRefresh: widget.onRefresh!, child: child);
+    }
+
+    return child;
   }
 }

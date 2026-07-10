@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/status_chip.dart';
 
 class OsListTileData {
   final int id;
   final String? numeroOrden;
   final String? fechaProgramacion;
   final String? tipoProblema;
+  final String? descripcion;
   final String? direccion;
   final String? cuadrilla;
   final String? estado;
@@ -17,6 +19,7 @@ class OsListTileData {
     this.numeroOrden,
     this.fechaProgramacion,
     this.tipoProblema,
+    this.descripcion,
     this.direccion,
     this.cuadrilla,
     this.estado,
@@ -96,46 +99,27 @@ class OsListTile extends StatelessWidget {
                       ],
                     ),
                   ),
-                  if (data.estado != null)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: c.primary.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        data.estado!,
-                        style: TextStyle(
-                          color: c.primary,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 12),
-
-              // Title: Tipo de Problema
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(Icons.build_outlined, size: 18, color: c.onSurface),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      data.tipoProblema ?? 'Problema no especificado',
-                      style: TextStyle(
-                        color: c.onSurface,
-                        fontFamily: 'Outfit',
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                      ),
-                    ),
-                  ),
+                  if (data.estado != null) StatusChip(status: data.estado!),
                 ],
               ),
               const SizedBox(height: 10),
+
+              // Descripción (contenido principal)
+              if (data.descripcion != null) ...[
+                Text(
+                  data.descripcion!,
+                  style: TextStyle(
+                    color: c.onSurface,
+                    fontFamily: 'Inter',
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14,
+                    height: 1.35,
+                  ),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 10),
+              ],
 
               // Address
               Row(
@@ -151,12 +135,36 @@ class OsListTile extends StatelessWidget {
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
                       ),
-                      maxLines: 2,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
               ),
+              const SizedBox(height: 10),
+
+              // Tipo Problema (chip secundario)
+              if (data.tipoProblema != null)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: c.primary.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      data.tipoProblema!.toUpperCase(),
+                      style: TextStyle(
+                        color: c.primary,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Inter',
+                        letterSpacing: 0.4,
+                      ),
+                    ),
+                  ),
+                ),
               const SizedBox(height: 12),
 
               Divider(height: 1, color: c.border.withValues(alpha: 0.5)),

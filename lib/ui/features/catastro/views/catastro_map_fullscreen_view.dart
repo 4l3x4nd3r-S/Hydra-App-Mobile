@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import '../../../core/theme/app_colors.dart';
 import '../view_models/catastro_gis_view_model.dart';
-import 'package:hydra/ui/features/catastro/view_models/catastro_gis_view_model.dart';
 
 class CatastroMapFullscreenView extends StatefulWidget {
   const CatastroMapFullscreenView({super.key});
@@ -17,6 +16,7 @@ class CatastroMapFullscreenView extends StatefulWidget {
 class _CatastroMapFullscreenViewState extends State<CatastroMapFullscreenView> {
   final MapController _mapController = MapController();
   final TextEditingController _searchController = TextEditingController();
+  final DraggableScrollableController _sheetController = DraggableScrollableController();
 
   @override
   void initState() {
@@ -116,6 +116,82 @@ class _CatastroMapFullscreenViewState extends State<CatastroMapFullscreenView> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildLayerToggle({
+    required IconData icon,
+    required Color color,
+    required String title,
+    required int count,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    final c = Theme.of(context).extension<AppColors>()!;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOut,
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: value
+            ? color.withValues(alpha: 0.08)
+            : c.surface.withValues(alpha: 0.4),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: value
+              ? color.withValues(alpha: 0.3)
+              : c.border.withValues(alpha: 0.5),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.15),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: color, size: 20),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: c.onSurface,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Outfit',
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '$count elementos',
+                  style: TextStyle(
+                    color: c.onSurfaceVariant,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Switch(
+            value: value,
+            onChanged: onChanged,
+            activeThumbColor: color,
+            activeTrackColor: color.withValues(alpha: 0.5),
+            inactiveThumbColor: c.onSurfaceVariant,
+            inactiveTrackColor: c.border.withValues(alpha: 0.5),
+          ),
+        ],
+      ),
     );
   }
 
@@ -262,6 +338,7 @@ class _CatastroMapFullscreenViewState extends State<CatastroMapFullscreenView> {
 
           // Glassmorphism Bottom Sheet
           DraggableScrollableSheet(
+            controller: _sheetController,
             initialChildSize: 0.15,
             minChildSize: 0.15,
             maxChildSize: 0.5,
@@ -281,75 +358,141 @@ class _CatastroMapFullscreenViewState extends State<CatastroMapFullscreenView> {
                     )
                   ],
                 ),
-                child: ListView(
-                  controller: scrollController,
-                  padding: const EdgeInsets.all(20),
+                child: Column(
                   children: [
-                    Center(
-                      child: Container(
-                        width: 40,
-                        height: 4,
-                        margin: const EdgeInsets.only(bottom: 20),
-                        decoration: BoxDecoration(
-                          color: c.onSurfaceVariant.withValues(alpha: 0.4),
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                    ),
-                    TextField(
-                      controller: _searchController,
-                      onChanged: (val) {
-                        vm.setSearchQuery(val);
-                        if (val.isNotEmpty) {
-                          // Try to fly to the first result
-                          final firstMatch = [...vm.valvulas, ...vm.puntosPresion].where(
-                            (e) => e.nombre.toLowerCase().contains(val.toLowerCase())
-                          ).firstOrNull;
-                          if (firstMatch != null) {
-                            _flyTo(firstMatch.ubicacion);
-                          }
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onVerticalDragUpdate: (details) {
+                        final screenHeight = MediaQuery.of(context).size.height;
+                        final newSize = _sheetController.size - details.primaryDelta! / screenHeight;
+                        _sheetController.jumpTo(newSize.clamp(0.15, 0.5));
+                      },
+                      onVerticalDragEnd: (details) {
+                        final velocity = details.primaryVelocity ?? 0;
+                        final currentSize = _sheetController.size;
+                        if (velocity < -500) {
+                          _sheetController.animateTo(0.5,
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeOut);
+                        } else if (velocity > 500) {
+                          _sheetController.animateTo(0.15,
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeOut);
+                        } else if (currentSize > 0.325) {
+                          _sheetController.animateTo(0.5,
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeOut);
+                        } else {
+                          _sheetController.animateTo(0.15,
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeOut);
                         }
                       },
-                      style: TextStyle(color: c.onSurface),
-                      decoration: InputDecoration(
-                        hintText: 'Buscar Válvula 45...',
-                        hintStyle: TextStyle(color: c.onSurfaceVariant),
-                        prefixIcon: Icon(Icons.search_rounded, color: c.primary),
-                        filled: true,
-                        fillColor: c.surface.withValues(alpha: 0.5),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide.none,
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                      child: Column(
+                        children: [
+                          Center(
+                            child: Container(
+                              width: 40,
+                              height: 4,
+                                margin: const EdgeInsets.only(
+                                    top: 8, bottom: 16),
+                              decoration: BoxDecoration(
+                                color: c.onSurfaceVariant
+                                    .withValues(alpha: 0.4),
+                                borderRadius:
+                                    BorderRadius.circular(2),
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20),
+                            child: TextField(
+                              controller: _searchController,
+                              onChanged: (val) {
+                                vm.setSearchQuery(val);
+                                if (val.isNotEmpty) {
+                                  final firstMatch = [...vm.valvulas, ...vm.puntosPresion].where(
+                                    (e) => e.nombre.toLowerCase().contains(val.toLowerCase())
+                                  ).firstOrNull;
+                                  if (firstMatch != null) {
+                                    _flyTo(firstMatch.ubicacion);
+                                  }
+                                }
+                              },
+                              style: TextStyle(
+                                  color: c.onSurface),
+                              decoration: InputDecoration(
+                                isDense: true,
+                                hintText: 'Buscar Válvula 45...',
+                                hintStyle: TextStyle(
+                                    color: c.onSurfaceVariant),
+                                prefixIcon: Icon(
+                                    Icons.search_rounded,
+                                    color: c.primary),
+                                filled: true,
+                                fillColor: c.surface
+                                    .withValues(alpha: 0.5),
+                                border: OutlineInputBorder(
+                                  borderRadius:
+                                      BorderRadius.circular(16),
+                                  borderSide: BorderSide.none,
+                                ),
+                                contentPadding:
+                                    const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 8),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 24),
-                    Text('Capas del Mapa', style: TextStyle(color: c.onSurface, fontWeight: FontWeight.bold, fontSize: 16)),
-                    const SizedBox(height: 8),
-                    SwitchListTile(
-                      title: Text('Sectores', style: TextStyle(color: c.onSurface)),
-                      subtitle: Text('${vm.sectores.length} elementos', style: TextStyle(color: c.onSurfaceVariant, fontSize: 12)),
-                      value: vm.showPipesAndSectors,
-                      onChanged: vm.togglePipesAndSectors,
-                      activeColor: c.primary,
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                    SwitchListTile(
-                      title: Text('Válvulas', style: TextStyle(color: c.onSurface)),
-                      subtitle: Text('${vm.valvulas.length} elementos', style: TextStyle(color: c.onSurfaceVariant, fontSize: 12)),
-                      value: vm.showValves,
-                      onChanged: vm.toggleValves,
-                      activeColor: c.primary,
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                    SwitchListTile(
-                      title: Text('Puntos de Presión', style: TextStyle(color: c.onSurface)),
-                      subtitle: Text('${vm.puntosPresion.length} elementos', style: TextStyle(color: c.onSurfaceVariant, fontSize: 12)),
-                      value: vm.showPressurePoints,
-                      onChanged: vm.togglePressurePoints,
-                      activeColor: c.primary,
-                      contentPadding: EdgeInsets.zero,
+                    const SizedBox(height: 16),
+                    Expanded(
+                      child: ListView(
+                        controller: scrollController,
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                         children: [
+                          Row(
+                            children: [
+                              Icon(Icons.layers_rounded, size: 18, color: c.primary),
+                              const SizedBox(width: 8),
+                              Text('Capas del Mapa',
+                                  style: TextStyle(
+                                      color: c.onSurface,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      fontFamily: 'Outfit')),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          _buildLayerToggle(
+                            icon: Icons.layers_outlined,
+                            color: const Color(0xFF8B5CF6),
+                            title: 'Sectores',
+                            count: vm.sectores.length,
+                            value: vm.showPipesAndSectors,
+                            onChanged: vm.togglePipesAndSectors,
+                          ),
+                          _buildLayerToggle(
+                            icon: Icons.build_circle_rounded,
+                            color: const Color(0xFFEF4444),
+                            title: 'Válvulas',
+                            count: vm.valvulas.length,
+                            value: vm.showValves,
+                            onChanged: vm.toggleValves,
+                          ),
+                          _buildLayerToggle(
+                            icon: Icons.water_drop_rounded,
+                            color: const Color(0xFF3B82F6),
+                            title: 'Puntos de Presión',
+                            count: vm.puntosPresion.length,
+                            value: vm.showPressurePoints,
+                            onChanged: vm.togglePressurePoints,
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),

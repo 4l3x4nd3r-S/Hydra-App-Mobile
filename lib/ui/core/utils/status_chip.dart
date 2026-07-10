@@ -21,6 +21,7 @@ class StatusChip extends StatelessWidget {
         return const Color(0xFFF59E0B);
       case 'ATENDIDO':
       case 'COMPLETADO':
+      case 'CERRADO':
         return const Color(0xFF22C55E);
       case 'RECHAZADO':
       case 'ARCHIVADO':

@@ -52,7 +52,7 @@ class AppColors extends ThemeExtension<AppColors> {
   static const AppColors dark = AppColors(
     background: Color(0xFF0A0A0A),
     surface: Color(0xFF1C1C1C),
-    border: Color(0xFF2E2E2E),
+    border: Color(0xFF475569),
     primary: Color(0xFF0A2472),
     onSurface: Colors.white,
     onSurfaceVariant: Color(0xFFB0B0B0),
@@ -61,7 +61,7 @@ class AppColors extends ThemeExtension<AppColors> {
   static const AppColors light = AppColors(
     background: Color(0xFFF8FAFC),
     surface: Color(0xFFFFFFFF),
-    border: Color(0xFFE2E8F0),
+    border: Color(0xFF94A3B8),
     primary: Color(0xFF0A2472),
     onSurface: Color(0xFF0F172A),
     onSurfaceVariant: Color(0xFF64748B),

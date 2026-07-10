@@ -95,38 +95,15 @@ class _ReclamoDetalleBodyState extends State<_ReclamoDetalleBody> {
               _buildFieldItem(
                   c, 'Correo electronico', r.email),
             ]),
-            if ((r.estado ?? 'PENDIENTE').toUpperCase() == 'PENDIENTE') ...[
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: c.primary,
-                    shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(12)),
-                  ),
-                  icon: const Icon(
-                      Icons.assignment_turned_in_rounded,
-                      color: Colors.white),
-                  label: const Text(
-                      'ASIGNAR A UNA CUADRILLA',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                          fontFamily: 'Outfit')),
-                  onPressed: vm.creandoOs
-                      ? null
-                      : () => _mostrarModalAsignarCuadrilla(),
-                ),
-              ),
-              const SizedBox(height: 24),
-            ],
+            const SizedBox(height: 24),
           ],
         ),
       ),
+      bottomNavigationBar: (r.estado ?? 'PENDIENTE')
+                  .toUpperCase() ==
+              'PENDIENTE'
+          ? _buildStickyActionBar(c, r, vm)
+          : null,
     );
   }
 
@@ -172,14 +149,90 @@ class _ReclamoDetalleBodyState extends State<_ReclamoDetalleBody> {
     );
   }
 
+  Widget _buildStickyActionBar(
+      AppColors c, Reclamo r, ReclamoDetalleViewModel vm) {
+    return Material(
+      color: c.surface,
+      elevation: 8,
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: c.primary.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                      color: c.primary.withValues(alpha: 0.2)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.assignment_outlined,
+                        size: 18, color: c.primary),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Asignar a una cuadrilla para crear Orden de Servicio',
+                        style: TextStyle(
+                          color: c.onSurface,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: c.primary,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                  icon: const Icon(
+                      Icons.assignment_turned_in_rounded,
+                      color: Colors.white),
+                  label: const Text(
+                    'ASIGNAR A UNA CUADRILLA',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                      fontFamily: 'Outfit',
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                  onPressed: vm.creandoOs
+                      ? null
+                      : () => _mostrarModalAsignarCuadrilla(),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildFieldItem(AppColors c, String label, dynamic value,
       {bool isMultiline = false}) {
     final displayValue =
         value?.toString() ?? 'No disponible';
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label,
               style: TextStyle(
@@ -250,6 +303,7 @@ class _ReclamoDetalleBodyState extends State<_ReclamoDetalleBody> {
     return showModalBottomSheet<bool>(
       context: context,
       backgroundColor: c.surface,
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius:
             BorderRadius.vertical(top: Radius.circular(20)),
@@ -289,104 +343,295 @@ class _AsignarCuadrillaBodyState
   @override
   Widget build(BuildContext context) {
     final c = widget.c;
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Seleccionar Cuadrilla',
-              style: TextStyle(
-                  fontFamily: 'Outfit',
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: c.onSurface)),
-          const SizedBox(height: 4),
-          Text(
-              'Esta accion creara una Orden de Servicio',
-              style: TextStyle(
-                  color: c.onSurfaceVariant, fontSize: 12)),
-          const SizedBox(height: 20),
-          ...widget.cuadrillas.map((cu) {
-            return RadioListTile<int>(
-              activeColor: c.primary,
-              title: Text(cu.codigoGrupo ?? '',
-                  style: TextStyle(
-                      color: c.onSurface,
-                      fontWeight: FontWeight.bold)),
-              subtitle: Text(
-                  cu.especialidad ?? "Sin especialidad",
-                  style: TextStyle(
-                      color: c.onSurfaceVariant,
-                      fontSize: 11)),
-              value: cu.id,
-              groupValue: _cuadrillaSeleccionada,
-              onChanged: (v) => setState(
-                  () => _cuadrillaSeleccionada = v),
-            );
-          }),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: c.primary,
-                shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(12)),
+    final maxHeight =
+        MediaQuery.of(context).size.height * 0.85;
+
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: maxHeight),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color:
+                      c.onSurfaceVariant.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-              onPressed:
-                  _procesando || _cuadrillaSeleccionada == null
-                      ? null
-                      : () async {
-                          setState(() => _procesando = true);
-                          final ok = await widget.onConfirmar(
-                              _cuadrillaSeleccionada!);
-                          if (!context.mounted) return;
-                          if (ok) {
-                            Navigator.pop(context, true);
-                            Navigator.pop(context);
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(const SnackBar(
-                              content: Text('OS creada exitosamente'),
-                              backgroundColor:
-                                  Color(0xFF22C55E),
-                            ));
-                          } else {
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(SnackBar(
-                              content: Text(
-                                  widget.ultimoError ??
-                                      'Error al crear O.S.'),
-                              backgroundColor:
-                                  const Color(0xFFDC2626),
-                            ));
-                          }
-                          if (mounted) {
-                            setState(() => _procesando = false);
-                          }
-                        },
-              child: _procesando
-                  ? const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Text(
-                      'CONFIRMAR Y CREAR O.S.',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Outfit')),
             ),
-          ),
-          const SizedBox(height: 8),
-        ],
+            Text('Seleccionar Cuadrilla',
+                style: TextStyle(
+                    fontFamily: 'Outfit',
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: c.onSurface)),
+            const SizedBox(height: 4),
+            Text('Esta accion creara una Orden de Servicio',
+                style: TextStyle(
+                    color: c.onSurfaceVariant, fontSize: 12)),
+            const SizedBox(height: 16),
+            if (widget.cuadrillas.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 40),
+                child: Center(
+                  child: Text(
+                    'No hay cuadrillas disponibles',
+                    style: TextStyle(
+                        color: c.onSurfaceVariant,
+                        fontSize: 14),
+                  ),
+                ),
+              )
+            else if (widget.cuadrillas.length <= 3)
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: widget.cuadrillas
+                    .map((cu) => _buildCuadrillaOption(
+                        cu,
+                        _cuadrillaSeleccionada ==
+                            cu.id))
+                    .toList(),
+              )
+            else
+              ListView(
+                shrinkWrap: true,
+                physics:
+                    const NeverScrollableScrollPhysics(),
+                children: widget.cuadrillas
+                    .map((cu) => _buildCuadrillaOption(
+                        cu,
+                        _cuadrillaSeleccionada ==
+                            cu.id))
+                    .toList(),
+              ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: c.primary,
+                  shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(12)),
+                ),
+                onPressed: _procesando ||
+                        _cuadrillaSeleccionada == null
+                    ? null
+                    : () async {
+                        setState(
+                            () => _procesando = true);
+                        final ok = await widget.onConfirmar(
+                            _cuadrillaSeleccionada!);
+                        if (!context.mounted) return;
+                        if (ok) {
+                          Navigator.pop(context, true);
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context)
+                              .showSnackBar(const SnackBar(
+                            content: Text(
+                                'OS creada exitosamente'),
+                            backgroundColor:
+                                Color(0xFF22C55E),
+                          ));
+                        } else {
+                          ScaffoldMessenger.of(context)
+                              .showSnackBar(SnackBar(
+                            content: Text(
+                                widget.ultimoError ??
+                                    'Error al crear O.S.'),
+                            backgroundColor:
+                                const Color(0xFFDC2626),
+                          ));
+                        }
+                        if (mounted) {
+                          setState(
+                              () => _procesando = false);
+                        }
+                      },
+                child: _procesando
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text(
+                        'CONFIRMAR Y CREAR O.S.',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Outfit')),
+              ),
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  Widget _buildCuadrillaOption(Cuadrilla cu, bool isSelected) {
+    final c = widget.c;
+    final totalPersonas = (cu.lider != null ? 1 : 0) +
+        (cu.chofer != null ? 1 : 0) +
+        (cu.operador != null ? 1 : 0) +
+        cu.apoyos.length;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: InkWell(
+        onTap: () =>
+            setState(() => _cuadrillaSeleccionada = cu.id),
+        borderRadius: BorderRadius.circular(14),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? c.primary.withValues(alpha: 0.08)
+                : c.surface,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: isSelected ? c.primary : c.border,
+              width: isSelected ? 2 : 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 22,
+                backgroundColor:
+                    c.primary.withValues(alpha: 0.15),
+                child: Text(
+                  _getIniciales(cu.lider?.nombre),
+                  style: TextStyle(
+                    color: c.primary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            cu.codigoGrupo ??
+                                'Sin código',
+                            style: TextStyle(
+                              color: c.onSurface,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              fontFamily: 'Outfit',
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        if (cu.especialidad != null)
+                          Container(
+                            padding:
+                                const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2),
+                            decoration: BoxDecoration(
+                              color: c.primary
+                                  .withValues(alpha: 0.12),
+                              borderRadius:
+                                  BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              cu.especialidad!,
+                              style: TextStyle(
+                                color: c.primary,
+                                fontSize: 10,
+                                fontWeight:
+                                    FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    if (cu.lider != null)
+                      Text(
+                        'Líder: ${cu.lider!.nombre}',
+                        style: TextStyle(
+                          color: c.onSurfaceVariant,
+                          fontSize: 12,
+                        ),
+                      ),
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        Icon(Icons.groups_outlined,
+                            size: 13,
+                            color:
+                                c.onSurfaceVariant),
+                        const SizedBox(width: 4),
+                        Text(
+                          '$totalPersonas integrantes',
+                          style: TextStyle(
+                            color: c.onSurfaceVariant,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              AnimatedContainer(
+                duration:
+                    const Duration(milliseconds: 200),
+                width: 22,
+                height: 22,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: isSelected
+                        ? c.primary
+                        : c.border,
+                    width: 2,
+                  ),
+                  color: isSelected
+                      ? c.primary
+                      : Colors.transparent,
+                ),
+                child: isSelected
+                    ? const Icon(Icons.check,
+                        size: 14,
+                        color: Colors.white)
+                    : null,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _getIniciales(String? nombre) {
+    if (nombre == null || nombre.isEmpty) return '?';
+    final partes =
+        nombre.trim().split(RegExp(r'\s+'));
+    if (partes.length >= 2) {
+      return '${partes[0][0]}${partes[1][0]}'
+          .toUpperCase();
+    }
+    return partes[0][0].toUpperCase();
   }
 }
