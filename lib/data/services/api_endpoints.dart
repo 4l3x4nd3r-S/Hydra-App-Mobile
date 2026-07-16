@@ -1,5 +1,6 @@
 class ApiEndpoints {
-  static const String baseUrl = 'http://192.168.1.16:8000/api/v1';
+  static const String baseUrl =
+      'https://hydra-backend-hx7p.onrender.com/api/v1';
   static const String login = '/auth/login';
   static const String refreshSession = '/auth/refresh';
   static const String ordenesServicio = '/ordenes-servicio';
