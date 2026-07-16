@@ -67,39 +67,30 @@ class _LoginBodyState extends State<_LoginBody> {
 
     return Scaffold(
       backgroundColor: c.background,
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: IconButton(
-                    icon: Icon(
-                      themeVm.isLight
-                          ? Icons.dark_mode_rounded
-                          : Icons.light_mode_rounded,
-                      color: c.onSurfaceVariant,
-                    ),
-                    onPressed: () => themeVm.toggle(),
-                  ),
-                ),
-                Container(
+      body: SafeArea(
+        child: Stack(
+          children: [
+            Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(24, 56, 24, 24),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     color: c.surface,
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: c.primary.withValues(alpha: 0.3),
+                      color: c.onSurface.withValues(alpha: 0.15),
                       width: 2,
                     ),
                   ),
                   child: Icon(
                     Icons.water_drop_rounded,
-                    color: c.primary,
+                    color: c.onSurface,
                     size: 60,
                   ),
                 ),
@@ -116,7 +107,7 @@ class _LoginBodyState extends State<_LoginBody> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Sistema de Gestion de Ordenes de Servicio',
+                  'Sistema de Gestión de Órdenes de Servicio',
                   style: TextStyle(
                     fontFamily: 'Inter',
                     fontSize: 13,
@@ -132,15 +123,15 @@ class _LoginBodyState extends State<_LoginBody> {
                     color: c.primary,
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: const Text(
-                    'EMAPAT S.A.',
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 11,
-                      color: Colors.white,
-                      letterSpacing: 1.5,
+                    child: Text(
+                      'EMAPAT S.A.',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 11,
+                        color: c.onPrimary,
+                        letterSpacing: 1.5,
+                      ),
                     ),
-                  ),
                 ),
                 const SizedBox(height: 40),
                 TextFormField(
@@ -148,10 +139,10 @@ class _LoginBodyState extends State<_LoginBody> {
                   style: TextStyle(color: c.onSurface),
                   textInputAction: TextInputAction.next,
                   decoration: InputDecoration(
-                    labelText: 'Codigo de Empleado',
+                    labelText: 'Código de Empleado',
                     labelStyle: TextStyle(color: c.onSurfaceVariant),
                     prefixIcon: Icon(Icons.badge_outlined,
-                        color: c.primary),
+                        color: c.onSurfaceVariant),
                     filled: true,
                     fillColor: c.surface,
                     border: OutlineInputBorder(
@@ -180,10 +171,10 @@ class _LoginBodyState extends State<_LoginBody> {
                   textInputAction: TextInputAction.done,
                   onFieldSubmitted: (_) => _handleLogin(),
                   decoration: InputDecoration(
-                    labelText: 'Contrasena',
+                    labelText: 'Contraseña',
                     labelStyle: TextStyle(color: c.onSurfaceVariant),
                     prefixIcon: Icon(Icons.lock_outline_rounded,
-                        color: c.primary),
+                        color: c.onSurfaceVariant),
                     suffixIcon: IconButton(
                       icon: Icon(
                         vm.obscurePassword
@@ -230,18 +221,18 @@ class _LoginBodyState extends State<_LoginBody> {
                     ),
                     onPressed: vm.loading ? null : _handleLogin,
                     child: vm.loading
-                        ? const SizedBox(
-                            width: 22,
-                            height: 22,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2.5,
-                            ),
-                          )
-                        : const Text(
+                         ? SizedBox(
+                             width: 22,
+                             height: 22,
+                             child: CircularProgressIndicator(
+                               color: c.onPrimary,
+                               strokeWidth: 2.5,
+                             ),
+                           )
+                        : Text(
                             'INGRESAR AL SISTEMA',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: c.onPrimary,
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
                               fontFamily: 'Outfit',
@@ -249,11 +240,27 @@ class _LoginBodyState extends State<_LoginBody> {
                           ),
                   ),
                 ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
-      ),
+        Positioned(
+          top: 8,
+          right: 8,
+          child: IconButton(
+            icon: Icon(
+              themeVm.isLight
+                  ? Icons.dark_mode_rounded
+                  : Icons.light_mode_rounded,
+              color: c.onSurfaceVariant,
+            ),
+            onPressed: () => themeVm.toggle(),
+          ),
+        ),
+      ],
+    ),
+    ),
     );
   }
 }

@@ -32,6 +32,6 @@ class Os with _$Os {
     @Default([]) List<String> fotosSolucionUrls,
     Reclamo? reclamo,
     Cuadrilla? cuadrilla,
-    @Default([]) List<Gasfitero> responsables,
+    Gasfitero? responsable,
   }) = _Os;
 }

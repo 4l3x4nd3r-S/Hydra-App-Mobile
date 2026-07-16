@@ -14,10 +14,11 @@ class StatusChip extends StatelessWidget {
     final norm = status.toUpperCase().replaceAll(' ', '_');
     switch (norm) {
       case 'PENDIENTE':
-        return const Color(0xFF0A2472);
+        return const Color(0xFF60A5FA);
       case 'ASIGNADO':
       case 'EN_PROCESO':
       case 'EN PROCESO':
+      case 'PENDIENTE_DE_SINCRONIZAR':
         return const Color(0xFFF59E0B);
       case 'ATENDIDO':
       case 'COMPLETADO':
@@ -34,6 +35,9 @@ class StatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chipColor = color ?? colorForStatus(status);
+    final normalized = status.toUpperCase().replaceAll(' ', '_');
+    final label =
+        normalized == 'PENDIENTE_DE_SINCRONIZAR' ? 'POR SINCRONIZAR' : status;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -43,7 +47,7 @@ class StatusChip extends StatelessWidget {
         border: Border.all(color: chipColor.withValues(alpha: 0.3)),
       ),
       child: Text(
-        status,
+        label,
         style: TextStyle(
           color: chipColor,
           fontSize: 10,

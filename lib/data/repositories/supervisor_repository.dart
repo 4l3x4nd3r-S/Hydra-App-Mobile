@@ -2,6 +2,7 @@ import '../models/reclamo_dto.dart';
 import '../models/cuadrilla_dto.dart';
 import '../models/gasfitero_dto.dart';
 import '../models/os_dto.dart';
+import '../models/responsable_dto.dart';
 import '../services/supervisor_api_service.dart';
 import '../../domain/models/reclamo.dart';
 import '../../domain/models/cuadrilla.dart';
@@ -18,8 +19,7 @@ class SupervisorRepository {
     final response = await _apiService.getReclamos();
     if (response.statusCode == 200 && response.data is List) {
       return (response.data as List)
-          .map((json) =>
-              ReclamoDto.fromJson(json as Map<String, dynamic>))
+          .map((json) => ReclamoDto.fromJson(json as Map<String, dynamic>))
           .map(_reclamoToDomain)
           .toList();
     }
@@ -41,33 +41,30 @@ class SupervisorRepository {
     final response = await _apiService.getCuadrillas();
     if (response.statusCode == 200 && response.data is List) {
       return (response.data as List)
-          .map((json) =>
-              CuadrillaDto.fromJson(json as Map<String, dynamic>))
+          .map((json) => CuadrillaDto.fromJson(json as Map<String, dynamic>))
           .map(_cuadrillaToDomain)
           .toList();
     }
     return [];
   }
 
-  Future<List<Gasfitero>> getgasfiteros({String? area}) async {
-    final response = await _apiService.getgasfiteros(area: area);
+  Future<List<Gasfitero>> getgasfiteros() async {
+    final response = await _apiService.getgasfiteros();
     if (response.statusCode == 200 && response.data is List) {
       return (response.data as List)
-          .map((json) =>
-              GasfiteroDto.fromJson(json as Map<String, dynamic>))
-          .map(_GasfiteroToDomain)
+          .map((json) => GasfiteroDto.fromJson(json as Map<String, dynamic>))
+          .map(_gasfiteroToDomain)
           .toList();
     }
     return [];
   }
 
-  Future<List<Gasfitero>> getgasfiterosDisponibles({String? area}) async {
-    final response = await _apiService.getgasfiterosDisponibles(area: area);
+  Future<List<Gasfitero>> getgasfiterosDisponibles() async {
+    final response = await _apiService.getgasfiterosDisponibles();
     if (response.statusCode == 200 && response.data is List) {
       return (response.data as List)
-          .map((json) =>
-              GasfiteroDto.fromJson(json as Map<String, dynamic>))
-          .map(_GasfiteroToDomain)
+          .map((json) => GasfiteroDto.fromJson(json as Map<String, dynamic>))
+          .map(_gasfiteroToDomain)
           .toList();
     }
     return [];
@@ -81,23 +78,19 @@ class SupervisorRepository {
       reclamoId: reclamoId,
       cuadrillaId: cuadrillaId,
     );
-    final dto =
-        OsDto.fromJson(response.data as Map<String, dynamic>);
+    final dto = OsDto.fromJson(response.data as Map<String, dynamic>);
     return _osToDomain(dto);
   }
 
   Future<Cuadrilla> getCuadrilla(int id) async {
     final response = await _apiService.getCuadrilla(id);
-    final dto =
-        CuadrillaDto.fromJson(response.data as Map<String, dynamic>);
+    final dto = CuadrillaDto.fromJson(response.data as Map<String, dynamic>);
     return _cuadrillaToDomain(dto);
   }
 
   Future<Reclamo> crearReclamo(Reclamo borrador) async {
-    final response =
-        await _apiService.crearReclamo(_toCreateJson(borrador));
-    final dto = ReclamoDto.fromJson(
-        response.data as Map<String, dynamic>);
+    final response = await _apiService.crearReclamo(_toCreateJson(borrador));
+    final dto = ReclamoDto.fromJson(response.data as Map<String, dynamic>);
     return _reclamoToDomain(dto);
   }
 
@@ -123,8 +116,27 @@ class SupervisorRepository {
     );
   }
 
+  Future<Cuadrilla> updateCuadrillaPersonal({
+    required int cuadrillaId,
+    required int liderId,
+    required List<int> apoyosIds,
+    int? choferId,
+    int? operadorId,
+  }) async {
+    final response = await _apiService.updatePersonal(
+      cuadrillaId: cuadrillaId,
+      personal: {
+        'lider_id': liderId,
+        'apoyos_ids': apoyosIds,
+        'chofer_id': choferId,
+        'operador_id': operadorId,
+      },
+    );
+    final dto = CuadrillaDto.fromJson(response.data as Map<String, dynamic>);
+    return _cuadrillaToDomain(dto);
+  }
+
   Future<Cuadrilla> createCuadrilla({
-    required String codigoGrupo,
     required String especialidad,
     int? liderId,
     List<int> apoyosIds = const [],
@@ -132,7 +144,6 @@ class SupervisorRepository {
     int? operadorId,
   }) async {
     final body = <String, dynamic>{
-      'codigo_grupo': codigoGrupo,
       'especialidad': especialidad,
     };
     if (liderId != null) {
@@ -144,8 +155,7 @@ class SupervisorRepository {
       };
     }
     final response = await _apiService.createCuadrilla(body);
-    final dto =
-        CuadrillaDto.fromJson(response.data as Map<String, dynamic>);
+    final dto = CuadrillaDto.fromJson(response.data as Map<String, dynamic>);
     return _cuadrillaToDomain(dto);
   }
 
@@ -196,7 +206,20 @@ class SupervisorRepository {
       fotosProblemaUrls: dto.fotosProblemaUrls,
       fotosSolucionUrls: dto.fotosSolucionUrls,
       reclamo: dto.reclamo != null ? _reclamoToDomain(dto.reclamo!) : null,
-      cuadrilla: dto.cuadrilla != null ? _cuadrillaToDomain(dto.cuadrilla!) : null,
+      cuadrilla:
+          dto.cuadrilla != null ? _cuadrillaToDomain(dto.cuadrilla!) : null,
+      responsable: dto.responsable != null
+          ? _responsableToDomain(dto.responsable!)
+          : null,
+    );
+  }
+
+  Gasfitero _responsableToDomain(ResponsableDto dto) {
+    return Gasfitero(
+      id: dto.id,
+      nombre: dto.nombre,
+      codigoEmpleado: dto.codigoEmpleado,
+      cargo: dto.cargo,
     );
   }
 
@@ -205,14 +228,14 @@ class SupervisorRepository {
       id: dto.id,
       codigoGrupo: dto.codigoGrupo,
       especialidad: dto.especialidad,
-      lider: dto.lider != null ? _GasfiteroToDomain(dto.lider!) : null,
-      apoyos: dto.apoyos.map(_GasfiteroToDomain).toList(),
-      chofer: dto.chofer != null ? _GasfiteroToDomain(dto.chofer!) : null,
-      operador: dto.operador != null ? _GasfiteroToDomain(dto.operador!) : null,
+      lider: dto.lider != null ? _gasfiteroToDomain(dto.lider!) : null,
+      apoyos: dto.apoyos.map(_gasfiteroToDomain).toList(),
+      chofer: dto.chofer != null ? _gasfiteroToDomain(dto.chofer!) : null,
+      operador: dto.operador != null ? _gasfiteroToDomain(dto.operador!) : null,
     );
   }
 
-  Gasfitero _GasfiteroToDomain(GasfiteroDto dto) {
+  Gasfitero _gasfiteroToDomain(GasfiteroDto dto) {
     return Gasfitero(
       id: dto.id,
       nombre: dto.nombre,

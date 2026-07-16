@@ -326,7 +326,7 @@ class _CatastroMapFullscreenViewState extends State<CatastroMapFullscreenView> {
                       child: Center(
                         child: Text(
                           markers.length.toString(),
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                          style: TextStyle(color: c.onPrimary, fontWeight: FontWeight.bold, fontSize: 12),
                         ),
                       ),
                     );

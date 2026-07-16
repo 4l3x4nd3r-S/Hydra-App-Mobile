@@ -7,17 +7,15 @@ class EspecialidadOption {
   final String label;
   const EspecialidadOption(this.value, this.label);
 
-  static const distribucion = EspecialidadOption('Agua', 'Área de Distribución');
-  static const mantenimiento = EspecialidadOption('Desagüe', 'Área de Mantenimiento');
-  static const List<EspecialidadOption> all = [distribucion, mantenimiento];
+  static const agua = EspecialidadOption('Agua', 'Agua');
+  static const desague = EspecialidadOption('Desagüe', 'Desagüe');
+  static const List<EspecialidadOption> all = [agua, desague];
 }
 
 class NuevaCuadrillaViewModel extends ChangeNotifier {
   final SupervisorRepository _supervisorRepository;
 
-  final TextEditingController nombreController = TextEditingController();
-
-  EspecialidadOption _especialidad = EspecialidadOption.distribucion;
+  EspecialidadOption _especialidad = EspecialidadOption.agua;
   EspecialidadOption get especialidad => _especialidad;
 
   List<Gasfitero> _gasfiteros = [];
@@ -41,15 +39,20 @@ class NuevaCuadrillaViewModel extends ChangeNotifier {
   String? _errorMsg;
   String? get errorMsg => _errorMsg;
 
-  bool get canSubmit =>
-      nombreController.text.trim().isNotEmpty && _lider != null;
+  bool get canSubmit => _lider != null && cantidadIntegrantes >= 2;
+
+  int get cantidadIntegrantes => <int>{
+        if (_lider != null) _lider!.id,
+        ..._apoyos.map((integrante) => integrante.id),
+        if (_chofer != null) _chofer!.id,
+        if (_operador != null) _operador!.id,
+      }.length;
 
   bool _loadingGasfiteros = true;
   bool get loadingGasfiteros => _loadingGasfiteros;
 
   NuevaCuadrillaViewModel({required SupervisorRepository supervisorRepository})
       : _supervisorRepository = supervisorRepository {
-    nombreController.addListener(notifyListeners);
     _cargargasfiteros();
   }
 
@@ -61,49 +64,43 @@ class NuevaCuadrillaViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  String get _areaFiltro => _especialidad.value == 'Agua' ? 'DISTRIBUCION' : 'MANTENIMIENTO';
-
   List<Gasfitero> get gasfiterosDisponiblesParaRol {
     final idsYaSeleccionados = <int>{};
     if (_lider != null) idsYaSeleccionados.add(_lider!.id);
     idsYaSeleccionados.addAll(_apoyos.map((t) => t.id));
 
-    return _gasfiteros
-        .where((t) {
-          if ((t.area ?? '').toUpperCase() != _areaFiltro) return false;
-          if (idsYaSeleccionados.contains(t.id)) return false;
-          final c = (t.cargo ?? '').toUpperCase();
-          if (c.contains('CHOFER') || c.contains('OPERADOR')) return false;
-          return true;
-        })
-        .toList();
+    return _gasfiteros.where((t) {
+      if ((t.area ?? '').toUpperCase() != 'MANTENIMIENTO') return false;
+      if (idsYaSeleccionados.contains(t.id)) return false;
+      final c = (t.cargo ?? '').toUpperCase();
+      if (c.contains('CHOFER') || c.contains('OPERADOR')) return false;
+      return true;
+    }).toList();
   }
 
   List<Gasfitero> get gasfiterosDisponiblesParaApoyos {
     final idsEnOtrosRoles = <int>{};
     if (_lider != null) idsEnOtrosRoles.add(_lider!.id);
 
-    return _gasfiteros
-        .where((t) {
-          if ((t.area ?? '').toUpperCase() != _areaFiltro) return false;
-          if (idsEnOtrosRoles.contains(t.id)) return false;
-          final c = (t.cargo ?? '').toUpperCase();
-          if (c.contains('CHOFER') || c.contains('OPERADOR')) return false;
-          return true;
-        })
-        .toList();
+    return _gasfiteros.where((t) {
+      if ((t.area ?? '').toUpperCase() != 'MANTENIMIENTO') return false;
+      if (idsEnOtrosRoles.contains(t.id)) return false;
+      final c = (t.cargo ?? '').toUpperCase();
+      if (c.contains('CHOFER') || c.contains('OPERADOR')) return false;
+      return true;
+    }).toList();
   }
 
   List<Gasfitero> get choferesDisponibles {
     return _gasfiteros.where((t) {
-      if ((t.area ?? '').toUpperCase() != _areaFiltro) return false;
+      if ((t.area ?? '').toUpperCase() != 'MANTENIMIENTO') return false;
       return (t.cargo ?? '').toUpperCase().contains('CHOFER');
     }).toList();
   }
 
   List<Gasfitero> get operadoresDisponibles {
     return _gasfiteros.where((t) {
-      if ((t.area ?? '').toUpperCase() != _areaFiltro) return false;
+      if ((t.area ?? '').toUpperCase() != 'MANTENIMIENTO') return false;
       return (t.cargo ?? '').toUpperCase().contains('OPERADOR');
     }).toList();
   }
@@ -111,10 +108,11 @@ class NuevaCuadrillaViewModel extends ChangeNotifier {
   void setEspecialidad(EspecialidadOption opcion) {
     if (_especialidad.value != opcion.value) {
       _especialidad = opcion;
-      if (_lider != null && (_lider!.area ?? '').toUpperCase() != _areaFiltro) {
-        _lider = null;
+      if (_especialidad == EspecialidadOption.agua) {
+        _chofer = null;
+      } else {
+        _operador = null;
       }
-      _apoyos.removeWhere((t) => (t.area ?? '').toUpperCase() != _areaFiltro);
       _errorMsg = null;
       notifyListeners();
     }
@@ -137,6 +135,15 @@ class NuevaCuadrillaViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setApoyos(Iterable<Gasfitero> apoyos) {
+    final idsAgregados = <int>{};
+    _apoyos = apoyos
+        .where((apoyo) => apoyo.id != _lider?.id && idsAgregados.add(apoyo.id))
+        .toList();
+    _errorMsg = null;
+    notifyListeners();
+  }
+
   void setChofer(Gasfitero? t) {
     _chofer = t;
     _errorMsg = null;
@@ -150,14 +157,13 @@ class NuevaCuadrillaViewModel extends ChangeNotifier {
   }
 
   bool validar() {
-    final nombre = nombreController.text.trim();
-    if (nombre.isEmpty) {
-      _errorMsg = 'El nombre de la cuadrilla es obligatorio';
+    if (_lider == null) {
+      _errorMsg = 'Debe asignar un Gasfitero Principal';
       notifyListeners();
       return false;
     }
-    if (_lider == null) {
-      _errorMsg = 'Debe asignar un Gasfitero Principal';
+    if (cantidadIntegrantes < 2) {
+      _errorMsg = 'La cuadrilla debe tener al menos 2 integrantes';
       notifyListeners();
       return false;
     }
@@ -174,7 +180,6 @@ class NuevaCuadrillaViewModel extends ChangeNotifier {
 
     try {
       await _supervisorRepository.createCuadrilla(
-        codigoGrupo: nombreController.text.trim(),
         especialidad: _especialidad.value,
         liderId: _lider!.id,
         apoyosIds: _apoyos.map((t) => t.id).toList(),
@@ -190,12 +195,5 @@ class NuevaCuadrillaViewModel extends ChangeNotifier {
       notifyListeners();
       return false;
     }
-  }
-
-  @override
-  void dispose() {
-    nombreController.removeListener(notifyListeners);
-    nombreController.dispose();
-    super.dispose();
   }
 }

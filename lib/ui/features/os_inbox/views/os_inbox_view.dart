@@ -45,6 +45,27 @@ class _OsInboxBody extends StatelessWidget {
         backgroundColor: c.background,
         elevation: 0,
         automaticallyImplyLeading: false,
+        leadingWidth: 48,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 12.0),
+          child: Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: c.surface,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: c.primary.withValues(alpha: 0.3),
+                width: 2,
+              ),
+            ),
+            child: Icon(
+              Icons.water_drop_rounded,
+              color: themeVm.isLight ? c.primary : c.onSurface,
+              size: 24,
+            ),
+          ),
+        ),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -66,16 +87,17 @@ class _OsInboxBody extends StatelessWidget {
             padding: const EdgeInsets.only(right: 8.0),
             child: PopupMenuButton<String>(
               offset: const Offset(0, 56),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16)),
               color: c.surface,
               elevation: 4,
               icon: CircleAvatar(
                 radius: 18,
-                backgroundColor: c.primary.withValues(alpha: 0.1),
+                backgroundColor: c.onSurface.withValues(alpha: 0.12),
                 child: Text(
                   vm.userName.isNotEmpty ? vm.userName[0].toUpperCase() : 'U',
                   style: TextStyle(
-                    color: c.primary,
+                    color: c.onSurface,
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
@@ -100,7 +122,8 @@ class _OsInboxBody extends StatelessWidget {
                     if (context.mounted) {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (context) => const LoginView()),
+                        MaterialPageRoute(
+                            builder: (context) => const LoginView()),
                       );
                     }
                     break;
@@ -112,9 +135,14 @@ class _OsInboxBody extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(vm.userName.isNotEmpty ? vm.userName : 'Usuario', 
-                          style: TextStyle(color: c.onSurface, fontWeight: FontWeight.bold, fontSize: 14)),
-                      Text(vm.userRole, style: TextStyle(color: c.onSurfaceVariant, fontSize: 12)),
+                      Text(vm.userName.isNotEmpty ? vm.userName : 'Usuario',
+                          style: TextStyle(
+                              color: c.onSurface,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14)),
+                      Text(vm.userRole,
+                          style: TextStyle(
+                              color: c.onSurfaceVariant, fontSize: 12)),
                     ],
                   ),
                 ),
@@ -123,7 +151,8 @@ class _OsInboxBody extends StatelessWidget {
                   value: 'profile',
                   child: Row(
                     children: [
-                      Icon(Icons.account_circle_outlined, color: c.onSurfaceVariant, size: 20),
+                      Icon(Icons.account_circle_outlined,
+                          color: c.onSurfaceVariant, size: 20),
                       const SizedBox(width: 12),
                       Text('Ver Perfil', style: TextStyle(color: c.onSurface)),
                     ],
@@ -134,23 +163,28 @@ class _OsInboxBody extends StatelessWidget {
                   child: Row(
                     children: [
                       Icon(
-                        themeVm.isLight ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
+                        themeVm.isLight
+                            ? Icons.dark_mode_outlined
+                            : Icons.light_mode_outlined,
                         color: c.onSurfaceVariant,
                         size: 20,
                       ),
                       const SizedBox(width: 12),
-                      Text(themeVm.isLight ? 'Modo Oscuro' : 'Modo Claro', style: TextStyle(color: c.onSurface)),
+                      Text(themeVm.isLight ? 'Modo Oscuro' : 'Modo Claro',
+                          style: TextStyle(color: c.onSurface)),
                     ],
                   ),
                 ),
                 const PopupMenuDivider(),
-                PopupMenuItem(
+                const PopupMenuItem(
                   value: 'logout',
                   child: Row(
                     children: [
-                      Icon(Icons.logout_rounded, color: const Color(0xFFDC2626), size: 20),
-                      const SizedBox(width: 12),
-                      const Text('Cerrar Sesión', style: TextStyle(color: Color(0xFFDC2626))),
+                      Icon(Icons.logout_rounded,
+                          color: Color(0xFFDC2626), size: 20),
+                      SizedBox(width: 12),
+                      Text('Cerrar Sesión',
+                          style: TextStyle(color: Color(0xFFDC2626))),
                     ],
                   ),
                 ),
@@ -163,15 +197,22 @@ class _OsInboxBody extends StatelessWidget {
         osActivas: vm.osActivas,
         osArchivadas: vm.osArchivadas,
         isLoading: vm.recargandoOs,
-        isLiderOfOs: vm.isLiderOfOs,
+        errorMessage: vm.syncErrorMessage,
+        pendingSyncCount: vm.pendingSyncCount,
+        pendingSyncOrders: vm.pendingSyncOrders,
+        isSyncing: vm.sincronizandoManual,
+        onSync: vm.syncManual,
+        onRefresh: vm.refreshOs,
+        isLiderOfOs: vm.canExecuteOs,
         onTapActiva: (os) {
-          final isLider = vm.isLiderOfOs(os);
+          final isLider = vm.canExecuteOs(os);
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => OsDetailView(
                 os: os,
                 showReadOnlyBanner: !isLider,
+                isGasfiteroView: true,
                 onRegistrarSolucion: isLider
                     ? () async {
                         try {
@@ -182,23 +223,28 @@ class _OsInboxBody extends StatelessWidget {
                           debugPrint('Error starting OS: $e');
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: const Text('Aviso: Ocurrió un problema al iniciar la O.S.'),
-                                duration: const Duration(seconds: 3),
+                              const SnackBar(
+                                content: Text(
+                                  'No se pudo iniciar la O.S. Inténtelo nuevamente.',
+                                ),
+                                duration: Duration(seconds: 3),
                               ),
                             );
                           }
+                          return;
                         }
-                        
+
                         // We fetch the updated OS from the ViewModel so it has the new "EN_PROCESO" status and Start Date
-                        final updatedOs = vm.osActivas.firstWhere((o) => o.id == os.id, orElse: () => os);
+                        final updatedOs = vm.osActivas
+                            .firstWhere((o) => o.id == os.id, orElse: () => os);
 
                         if (context.mounted) {
                           // Navegamos al formulario de ejecución (Solución)
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => OsExecutionView(os: updatedOs),
+                              builder: (context) =>
+                                  OsExecutionView(os: updatedOs),
                             ),
                           );
                         }
@@ -212,7 +258,7 @@ class _OsInboxBody extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => OsDetailView(os: os),
+              builder: (context) => OsDetailView(os: os, isGasfiteroView: true),
             ),
           );
         },

@@ -9,6 +9,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.primary,
     required this.onSurface,
     required this.onSurfaceVariant,
+    required this.onPrimary,
   });
 
   final Color background;
@@ -17,6 +18,7 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color primary;
   final Color onSurface;
   final Color onSurfaceVariant;
+  final Color onPrimary;
 
   @override
   AppColors copyWith({
@@ -26,6 +28,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? primary,
     Color? onSurface,
     Color? onSurfaceVariant,
+    Color? onPrimary,
   }) =>
       AppColors(
         background: background ?? this.background,
@@ -34,6 +37,7 @@ class AppColors extends ThemeExtension<AppColors> {
         primary: primary ?? this.primary,
         onSurface: onSurface ?? this.onSurface,
         onSurfaceVariant: onSurfaceVariant ?? this.onSurfaceVariant,
+        onPrimary: onPrimary ?? this.onPrimary,
       );
 
   @override
@@ -46,6 +50,7 @@ class AppColors extends ThemeExtension<AppColors> {
       primary: Color.lerp(primary, other.primary, t)!,
       onSurface: Color.lerp(onSurface, other.onSurface, t)!,
       onSurfaceVariant: Color.lerp(onSurfaceVariant, other.onSurfaceVariant, t)!,
+      onPrimary: Color.lerp(onPrimary, other.onPrimary, t)!,
     );
   }
 
@@ -53,9 +58,10 @@ class AppColors extends ThemeExtension<AppColors> {
     background: Color(0xFF0A0A0A),
     surface: Color(0xFF1C1C1C),
     border: Color(0xFF475569),
-    primary: Color(0xFF0A2472),
+    primary: Color(0xFF60A5FA),
     onSurface: Colors.white,
     onSurfaceVariant: Color(0xFFB0B0B0),
+    onPrimary: const Color(0xFF0F172A),
   );
 
   static const AppColors light = AppColors(
@@ -65,5 +71,6 @@ class AppColors extends ThemeExtension<AppColors> {
     primary: Color(0xFF0A2472),
     onSurface: Color(0xFF0F172A),
     onSurfaceVariant: Color(0xFF64748B),
+    onPrimary: Colors.white,
   );
 }

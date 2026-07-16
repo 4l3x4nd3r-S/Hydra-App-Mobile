@@ -23,14 +23,16 @@ class AuthRepository {
     );
 
     final String token = data['access_token'] as String;
+    final String? refreshToken = data['refresh_token'] as String?;
     final userJson = data['user'] as Map<String, dynamic>? ?? {};
-    final String nombre =
-        userJson['nombre'] as String? ?? 'Usuario';
-    final String rol =
-        userJson['rol'] as String? ?? 'GASFITERO';
+    final String nombre = userJson['nombre'] as String? ?? 'Usuario';
+    final String rol = userJson['rol'] as String? ?? 'GASFITERO';
     final int? userId = userJson['id'] as int?;
 
     await _sessionStorage.saveToken(token);
+    if (refreshToken != null) {
+      await _sessionStorage.saveRefreshToken(refreshToken);
+    }
     await _sessionStorage.saveUserName(nombre);
     await _sessionStorage.saveUserRole(rol);
     await _sessionStorage.saveUserCode(codigoEmpleado);
@@ -46,9 +48,27 @@ class AuthRepository {
     if (!hasSession) return null;
 
     try {
-      await _authApiService.me();
-      final rol = await _sessionStorage.getUserRole() ?? 'GASFITERO';
-      return SessionInfo(valido: true, rol: rol, nombre: null);
+      final userJson = await _authApiService.me();
+      final rol = userJson['rol'] as String? ??
+          await _sessionStorage.getUserRole() ??
+          'GASFITERO';
+      final nombre =
+          userJson['nombre'] as String? ?? await _sessionStorage.getUserName();
+      final userId = userJson['id'] as int?;
+      final codigoEmpleado = userJson['codigo_empleado'] as String?;
+
+      await _sessionStorage.saveUserRole(rol);
+      if (nombre != null) {
+        await _sessionStorage.saveUserName(nombre);
+      }
+      if (userId != null) {
+        await _sessionStorage.saveUserId(userId);
+      }
+      if (codigoEmpleado != null) {
+        await _sessionStorage.saveUserCode(codigoEmpleado);
+      }
+
+      return SessionInfo(valido: true, rol: rol, nombre: nombre);
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
         await _sessionStorage.clearSession();

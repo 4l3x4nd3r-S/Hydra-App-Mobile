@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'reclamo_dto.dart';
 import 'cuadrilla_dto.dart';
+import 'responsable_dto.dart';
 
 part 'os_dto.freezed.dart';
 part 'os_dto.g.dart';
@@ -32,6 +33,7 @@ class OsDto with _$OsDto {
     @JsonKey(name: 'fotos_solucion_urls') @Default([]) List<String> fotosSolucionUrls,
     @JsonKey(name: 'reclamo') ReclamoDto? reclamo,
     @JsonKey(name: 'cuadrilla') CuadrillaDto? cuadrilla,
+    @JsonKey(name: 'responsable') ResponsableDto? responsable,
   }) = _OsDto;
 
   factory OsDto.fromJson(Map<String, dynamic> json) => _$OsDtoFromJson(json);

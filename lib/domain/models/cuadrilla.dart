@@ -15,3 +15,14 @@ class Cuadrilla with _$Cuadrilla {
     Gasfitero? operador,
   }) = _Cuadrilla;
 }
+
+extension CuadrillaIntegrantes on Cuadrilla {
+  int get cantidadIntegrantes => {
+        if (lider != null) lider!.id,
+        if (chofer != null) chofer!.id,
+        if (operador != null) operador!.id,
+        ...apoyos.map((integrante) => integrante.id),
+      }.length;
+
+  bool get tieneIntegrantesMinimos => cantidadIntegrantes >= 2;
+}

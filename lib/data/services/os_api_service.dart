@@ -11,11 +11,16 @@ class OsApiService {
     return _apiClient.dio.get(ApiEndpoints.ordenesServicio);
   }
 
+  Future<Response> getOrden(int ordenId) async {
+    return _apiClient.dio.get('${ApiEndpoints.ordenesServicio}/$ordenId');
+  }
+
   Future<Response> iniciarOrden(int ordenId) async {
     return _apiClient.dio.post(ApiEndpoints.iniciarOrden(ordenId));
   }
 
-  Future<Response> finalizarOrden(int ordenId, Map<String, dynamic> body) async {
+  Future<Response> finalizarOrden(
+      int ordenId, Map<String, dynamic> body) async {
     return _apiClient.dio.post(
       ApiEndpoints.finalizarOrden(ordenId),
       data: body,
@@ -26,6 +31,13 @@ class OsApiService {
     final formData = FormData.fromMap({
       'file': await MultipartFile.fromFile(filePath),
     });
-    return _apiClient.dio.post(ApiEndpoints.uploads, data: formData);
+    return _apiClient.dio.post(
+      ApiEndpoints.uploads,
+      data: formData,
+      options: Options(
+        sendTimeout: const Duration(minutes: 2),
+        receiveTimeout: const Duration(minutes: 2),
+      ),
+    );
   }
 }

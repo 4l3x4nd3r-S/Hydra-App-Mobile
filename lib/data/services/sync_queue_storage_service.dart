@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -16,7 +18,7 @@ class SyncQueueStorageService {
 
     return await openDatabase(
       path,
-      version: 7,
+      version: 9,
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
@@ -50,10 +52,12 @@ class SyncQueueStorageService {
         value TEXT NOT NULL
       )
     ''');
+
+    await _createAssignedOrdersCache(db);
+    await _createPendingOrderStarts(db);
   }
 
-  Future<void> _upgradeDB(
-      Database db, int oldVersion, int newVersion) async {
+  Future<void> _upgradeDB(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 4) {
       await db.execute('DROP TABLE IF EXISTS offline_sync_queue');
       await db.execute('''
@@ -111,6 +115,69 @@ class SyncQueueStorageService {
         )
       ''');
     }
+    if (oldVersion < 8) {
+      await _createAssignedOrdersCache(db);
+    }
+    if (oldVersion < 9) {
+      await _createPendingOrderStarts(db);
+    }
+  }
+
+  Future<void> _createAssignedOrdersCache(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS assigned_orders_cache (
+        os_id INTEGER PRIMARY KEY,
+        payload TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      )
+    ''');
+  }
+
+  Future<void> _createPendingOrderStarts(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS offline_order_starts (
+        os_id INTEGER PRIMARY KEY,
+        started_at TEXT NOT NULL,
+        status TEXT NOT NULL,
+        created_at TEXT NOT NULL
+      )
+    ''');
+  }
+
+  Future<void> savePendingOrderStart({
+    required int osId,
+    required String startedAt,
+  }) async {
+    final db = await database;
+    await db.insert(
+      'offline_order_starts',
+      {
+        'os_id': osId,
+        'started_at': startedAt,
+        'status': 'PENDING_SYNC',
+        'created_at': DateTime.now().toIso8601String(),
+      },
+      conflictAlgorithm: ConflictAlgorithm.ignore,
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> getPendingOrderStarts() async {
+    final db = await database;
+    return db.query(
+      'offline_order_starts',
+      where: 'status = ?',
+      whereArgs: ['PENDING_SYNC'],
+      orderBy: 'created_at ASC',
+    );
+  }
+
+  Future<void> markOrderStartSynced(int osId) async {
+    final db = await database;
+    await db.delete(
+      'offline_order_starts',
+      where: 'os_id = ?',
+      whereArgs: [osId],
+    );
   }
 
   Future<void> insertPending({
@@ -170,11 +237,109 @@ class SyncQueueStorageService {
 
   Future<void> markSynced(int osId) async {
     final db = await database;
-    await db.update(
+    await db.delete(
       'offline_sync_queue',
-      {'status': 'SYNCED'},
       where: 'os_id = ?',
       whereArgs: [osId],
     );
+  }
+
+  Future<void> updatePendingProblemPhotos(int osId, String paths) async {
+    final db = await database;
+    await db.update(
+      'offline_sync_queue',
+      {'fotos_problema_urls': paths},
+      where: 'os_id = ?',
+      whereArgs: [osId],
+    );
+  }
+
+  Future<void> updatePendingSolutionPhotos(int osId, String paths) async {
+    final db = await database;
+    await db.update(
+      'offline_sync_queue',
+      {'fotos_solucion_urls': paths},
+      where: 'os_id = ?',
+      whereArgs: [osId],
+    );
+  }
+
+  Future<void> replaceAssignedOrdersCache(
+    List<Map<String, dynamic>> orders,
+  ) async {
+    final db = await database;
+    await db.transaction((txn) async {
+      await txn.delete('assigned_orders_cache');
+      final batch = txn.batch();
+      final updatedAt = DateTime.now().toIso8601String();
+      for (final order in orders) {
+        final osId = order['id'];
+        if (osId is! int) continue;
+        batch.insert(
+          'assigned_orders_cache',
+          {
+            'os_id': osId,
+            'payload': jsonEncode(order),
+            'updated_at': updatedAt,
+          },
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+      await batch.commit(noResult: true);
+    });
+  }
+
+  Future<List<Map<String, dynamic>>> getAssignedOrdersCache() async {
+    final db = await database;
+    final rows = await db.query(
+      'assigned_orders_cache',
+      orderBy: 'os_id ASC',
+    );
+    return rows.map((row) {
+      final decoded = jsonDecode(row['payload'] as String);
+      return Map<String, dynamic>.from(decoded as Map);
+    }).toList();
+  }
+
+  Future<void> upsertAssignedOrderCache(Map<String, dynamic> order) async {
+    final osId = order['id'];
+    if (osId is! int) return;
+
+    final db = await database;
+    await db.insert(
+      'assigned_orders_cache',
+      {
+        'os_id': osId,
+        'payload': jsonEncode(order),
+        'updated_at': DateTime.now().toIso8601String(),
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<void> markCachedOrderStarted({
+    required int osId,
+    required String startedAt,
+  }) async {
+    final db = await database;
+    final rows = await db.query(
+      'assigned_orders_cache',
+      columns: ['payload'],
+      where: 'os_id = ?',
+      whereArgs: [osId],
+      limit: 1,
+    );
+    if (rows.isEmpty) return;
+
+    final decoded = jsonDecode(rows.first['payload'] as String);
+    final order = Map<String, dynamic>.from(decoded as Map);
+    order['estado_orden'] = 'EN_PROCESO';
+    order['fecha_ejecucion_inicio'] = startedAt;
+    await upsertAssignedOrderCache(order);
+  }
+
+  Future<void> clearAssignedOrdersCache() async {
+    final db = await database;
+    await db.delete('assigned_orders_cache');
   }
 }

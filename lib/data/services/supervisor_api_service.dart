@@ -22,16 +22,12 @@ class SupervisorApiService {
     return _apiClient.dio.get('/supervisor/cuadrillas');
   }
 
-  Future<Response> getgasfiteros({String? area}) async {
-    return _apiClient.dio.get('/supervisor/tecnicos', queryParameters: {
-      if (area != null) 'area': area,
-    });
+  Future<Response> getgasfiteros() async {
+    return _apiClient.dio.get('/supervisor/tecnicos');
   }
 
-  Future<Response> getgasfiterosDisponibles({String? area}) async {
-    return _apiClient.dio.get('/supervisor/tecnicos-disponibles', queryParameters: {
-      if (area != null) 'area': area,
-    });
+  Future<Response> getgasfiterosDisponibles() async {
+    return _apiClient.dio.get('/supervisor/tecnicos-disponibles');
   }
 
   Future<Response> createOrdenServicioFromReclamo({
@@ -67,6 +63,16 @@ class SupervisorApiService {
   }) async {
     return _apiClient.dio.delete(
       '/cuadrillas/$cuadrillaId/personal/$usuarioId',
+    );
+  }
+
+  Future<Response> updatePersonal({
+    required int cuadrillaId,
+    required Map<String, dynamic> personal,
+  }) async {
+    return _apiClient.dio.patch(
+      '/cuadrillas/$cuadrillaId/personal',
+      data: personal,
     );
   }
 

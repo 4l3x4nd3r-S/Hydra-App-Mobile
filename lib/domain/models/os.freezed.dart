@@ -40,7 +40,7 @@ mixin _$Os {
   List<String> get fotosSolucionUrls => throw _privateConstructorUsedError;
   Reclamo? get reclamo => throw _privateConstructorUsedError;
   Cuadrilla? get cuadrilla => throw _privateConstructorUsedError;
-  List<Gasfitero> get responsables => throw _privateConstructorUsedError;
+  Gasfitero? get responsable => throw _privateConstructorUsedError;
 
   /// Create a copy of Os
   /// with the given fields replaced by the non-null parameter values.
@@ -78,10 +78,11 @@ abstract class $OsCopyWith<$Res> {
       List<String> fotosSolucionUrls,
       Reclamo? reclamo,
       Cuadrilla? cuadrilla,
-      List<Gasfitero> responsables});
+      Gasfitero? responsable});
 
   $ReclamoCopyWith<$Res>? get reclamo;
   $CuadrillaCopyWith<$Res>? get cuadrilla;
+  $GasfiteroCopyWith<$Res>? get responsable;
 }
 
 /// @nodoc
@@ -122,7 +123,7 @@ class _$OsCopyWithImpl<$Res, $Val extends Os> implements $OsCopyWith<$Res> {
     Object? fotosSolucionUrls = null,
     Object? reclamo = freezed,
     Object? cuadrilla = freezed,
-    Object? responsables = null,
+    Object? responsable = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -221,10 +222,10 @@ class _$OsCopyWithImpl<$Res, $Val extends Os> implements $OsCopyWith<$Res> {
           ? _value.cuadrilla
           : cuadrilla // ignore: cast_nullable_to_non_nullable
               as Cuadrilla?,
-      responsables: null == responsables
-          ? _value.responsables
-          : responsables // ignore: cast_nullable_to_non_nullable
-              as List<Gasfitero>,
+      responsable: freezed == responsable
+          ? _value.responsable
+          : responsable // ignore: cast_nullable_to_non_nullable
+              as Gasfitero?,
     ) as $Val);
   }
 
@@ -253,6 +254,20 @@ class _$OsCopyWithImpl<$Res, $Val extends Os> implements $OsCopyWith<$Res> {
 
     return $CuadrillaCopyWith<$Res>(_value.cuadrilla!, (value) {
       return _then(_value.copyWith(cuadrilla: value) as $Val);
+    });
+  }
+
+  /// Create a copy of Os
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $GasfiteroCopyWith<$Res>? get responsable {
+    if (_value.responsable == null) {
+      return null;
+    }
+
+    return $GasfiteroCopyWith<$Res>(_value.responsable!, (value) {
+      return _then(_value.copyWith(responsable: value) as $Val);
     });
   }
 }
@@ -288,12 +303,14 @@ abstract class _$$OsImplCopyWith<$Res> implements $OsCopyWith<$Res> {
       List<String> fotosSolucionUrls,
       Reclamo? reclamo,
       Cuadrilla? cuadrilla,
-      List<Gasfitero> responsables});
+      Gasfitero? responsable});
 
   @override
   $ReclamoCopyWith<$Res>? get reclamo;
   @override
   $CuadrillaCopyWith<$Res>? get cuadrilla;
+  @override
+  $GasfiteroCopyWith<$Res>? get responsable;
 }
 
 /// @nodoc
@@ -331,7 +348,7 @@ class __$$OsImplCopyWithImpl<$Res> extends _$OsCopyWithImpl<$Res, _$OsImpl>
     Object? fotosSolucionUrls = null,
     Object? reclamo = freezed,
     Object? cuadrilla = freezed,
-    Object? responsables = null,
+    Object? responsable = freezed,
   }) {
     return _then(_$OsImpl(
       id: null == id
@@ -430,10 +447,10 @@ class __$$OsImplCopyWithImpl<$Res> extends _$OsCopyWithImpl<$Res, _$OsImpl>
           ? _value.cuadrilla
           : cuadrilla // ignore: cast_nullable_to_non_nullable
               as Cuadrilla?,
-      responsables: null == responsables
-          ? _value._responsables
-          : responsables // ignore: cast_nullable_to_non_nullable
-              as List<Gasfitero>,
+      responsable: freezed == responsable
+          ? _value.responsable
+          : responsable // ignore: cast_nullable_to_non_nullable
+              as Gasfitero?,
     ));
   }
 }
@@ -466,10 +483,9 @@ class _$OsImpl implements _Os {
       final List<String> fotosSolucionUrls = const [],
       this.reclamo,
       this.cuadrilla,
-      final List<Gasfitero> responsables = const []})
+      this.responsable})
       : _fotosProblemaUrls = fotosProblemaUrls,
-        _fotosSolucionUrls = fotosSolucionUrls,
-        _responsables = responsables;
+        _fotosSolucionUrls = fotosSolucionUrls;
 
   @override
   final int id;
@@ -535,18 +551,12 @@ class _$OsImpl implements _Os {
   final Reclamo? reclamo;
   @override
   final Cuadrilla? cuadrilla;
-  final List<Gasfitero> _responsables;
   @override
-  @JsonKey()
-  List<Gasfitero> get responsables {
-    if (_responsables is EqualUnmodifiableListView) return _responsables;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_responsables);
-  }
+  final Gasfitero? responsable;
 
   @override
   String toString() {
-    return 'Os(id: $id, numeroOrden: $numeroOrden, reclamoId: $reclamoId, supervisorId: $supervisorId, cuadrillaId: $cuadrillaId, sectorId: $sectorId, fechaProgramacion: $fechaProgramacion, fechaEjecucionInicio: $fechaEjecucionInicio, fechaEjecucionFin: $fechaEjecucionFin, estadoOrden: $estadoOrden, insumosUtilizados: $insumosUtilizados, observacionesGasfitero: $observacionesGasfitero, rutaCarpetaEvidencias: $rutaCarpetaEvidencias, createdAt: $createdAt, trabajoEjecutado: $trabajoEjecutado, problemas: $problemas, soluciones: $soluciones, comentariosInstrucciones: $comentariosInstrucciones, latitud: $latitud, longitud: $longitud, fotosProblemaUrls: $fotosProblemaUrls, fotosSolucionUrls: $fotosSolucionUrls, reclamo: $reclamo, cuadrilla: $cuadrilla, responsables: $responsables)';
+    return 'Os(id: $id, numeroOrden: $numeroOrden, reclamoId: $reclamoId, supervisorId: $supervisorId, cuadrillaId: $cuadrillaId, sectorId: $sectorId, fechaProgramacion: $fechaProgramacion, fechaEjecucionInicio: $fechaEjecucionInicio, fechaEjecucionFin: $fechaEjecucionFin, estadoOrden: $estadoOrden, insumosUtilizados: $insumosUtilizados, observacionesGasfitero: $observacionesGasfitero, rutaCarpetaEvidencias: $rutaCarpetaEvidencias, createdAt: $createdAt, trabajoEjecutado: $trabajoEjecutado, problemas: $problemas, soluciones: $soluciones, comentariosInstrucciones: $comentariosInstrucciones, latitud: $latitud, longitud: $longitud, fotosProblemaUrls: $fotosProblemaUrls, fotosSolucionUrls: $fotosSolucionUrls, reclamo: $reclamo, cuadrilla: $cuadrilla, responsable: $responsable)';
   }
 
   @override
@@ -600,8 +610,8 @@ class _$OsImpl implements _Os {
             (identical(other.reclamo, reclamo) || other.reclamo == reclamo) &&
             (identical(other.cuadrilla, cuadrilla) ||
                 other.cuadrilla == cuadrilla) &&
-            const DeepCollectionEquality()
-                .equals(other._responsables, _responsables));
+            (identical(other.responsable, responsable) ||
+                other.responsable == responsable));
   }
 
   @override
@@ -631,7 +641,7 @@ class _$OsImpl implements _Os {
         const DeepCollectionEquality().hash(_fotosSolucionUrls),
         reclamo,
         cuadrilla,
-        const DeepCollectionEquality().hash(_responsables)
+        responsable
       ]);
 
   /// Create a copy of Os
@@ -669,7 +679,7 @@ abstract class _Os implements Os {
       final List<String> fotosSolucionUrls,
       final Reclamo? reclamo,
       final Cuadrilla? cuadrilla,
-      final List<Gasfitero> responsables}) = _$OsImpl;
+      final Gasfitero? responsable}) = _$OsImpl;
 
   @override
   int get id;
@@ -720,7 +730,7 @@ abstract class _Os implements Os {
   @override
   Cuadrilla? get cuadrilla;
   @override
-  List<Gasfitero> get responsables;
+  Gasfitero? get responsable;
 
   /// Create a copy of Os
   /// with the given fields replaced by the non-null parameter values.

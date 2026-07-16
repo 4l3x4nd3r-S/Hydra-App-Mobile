@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../../domain/enums/tipo_problema.dart';
 import '../../../../domain/models/os.dart';
 import '../../../../domain/use_cases/save_os_report_use_case.dart';
 import '../../../core/theme/app_colors.dart';
@@ -73,11 +74,58 @@ class _OsExecutionBody extends StatelessWidget {
               onPressed: vm.isLocating ? null : () => vm.recordLocation(),
               c: c,
             ),
+            if (vm.lastLocationError != null) ...[
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFDC2626).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: const Color(0xFFDC2626).withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.error_outline,
+                        color: Color(0xFFDC2626), size: 18),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        vm.errorMsg ?? '',
+                        style: const TextStyle(
+                            color: Color(0xFFDC2626), fontSize: 13),
+                      ),
+                    ),
+                    if (vm.lastLocationError == LocationError.serviceDisabled)
+                      TextButton(
+                        onPressed: vm.openLocationSettings,
+                        child: const Text('Activar GPS',
+                            style: TextStyle(
+                                color: Color(0xFF0EA5E9),
+                                fontWeight: FontWeight.bold)),
+                      ),
+                    if (vm.lastLocationError ==
+                        LocationError.permissionDeniedForever)
+                      TextButton(
+                        onPressed: vm.openAppSettings,
+                        child: const Text('Ajustes',
+                            style: TextStyle(
+                                color: Color(0xFF0EA5E9),
+                                fontWeight: FontWeight.bold)),
+                      ),
+                  ],
+                ),
+              ),
+            ],
             if (vm.latitud != null && vm.longitud != null) ...[
               const SizedBox(height: 8),
               Text(
                 'Lat: ${vm.latitud}, Lon: ${vm.longitud}',
-                style: TextStyle(color: c.primary, fontWeight: FontWeight.bold, fontSize: 13),
+                style: TextStyle(
+                    color: c.primary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13),
               ),
               const SizedBox(height: 8),
               Container(
@@ -101,7 +149,8 @@ class _OsExecutionBody extends StatelessWidget {
                       ),
                       children: [
                         TileLayer(
-                          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                          urlTemplate:
+                              'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                           userAgentPackageName: 'com.emapat.hydra',
                         ),
                         MarkerLayer(
@@ -125,38 +174,17 @@ class _OsExecutionBody extends StatelessWidget {
               ),
             ],
             const SizedBox(height: 16),
-            _buildEditableFechaPicker(context, c, 'Fecha Hora Inicio', vm.fechaInicio, vm.updateFechaInicio),
+            _buildEditableFechaPicker(context, c, 'Fecha Hora Inicio',
+                vm.fechaInicio, vm.updateFechaInicio,
+                minimumDateTime: DateTime.now()),
             const SizedBox(height: 12),
-            OsDetailActionButton(
-              icon: Icons.camera_alt_outlined,
-              label: 'Fotos del problema',
-              onPressed: () => vm.takeFotoProblema(),
+            _buildPhotoEvidenceSection(
               c: c,
+              title: 'Fotos del problema',
+              photos: vm.fotosProblema,
+              onAdd: vm.takeFotoProblema,
+              onRemove: vm.removeFotoProblema,
             ),
-            if (vm.fotosProblema.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              SizedBox(
-                height: 80,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: vm.fotosProblema.length,
-                  itemBuilder: (ctx, i) {
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.file(
-                          File(vm.fotosProblema[i]),
-                          width: 80,
-                          height: 80,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
             const SizedBox(height: 16),
             _buildTextField(
               c: c,
@@ -190,39 +218,23 @@ class _OsExecutionBody extends StatelessWidget {
               maxLines: 2,
             ),
             const SizedBox(height: 16),
-            OsDetailActionButton(
-              icon: Icons.camera_alt_outlined,
-              label: 'Fotos de la solucion',
-              onPressed: () => vm.takeFotoSolucion(),
+            _buildPhotoEvidenceSection(
               c: c,
+              title: 'Fotos de la solución',
+              photos: vm.fotosSolucion,
+              onAdd: vm.takeFotoSolucion,
+              onRemove: vm.removeFotoSolucion,
             ),
-            if (vm.fotosSolucion.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              SizedBox(
-                height: 80,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: vm.fotosSolucion.length,
-                  itemBuilder: (ctx, i) {
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.file(
-                          File(vm.fotosSolucion[i]),
-                          width: 80,
-                          height: 80,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
             const SizedBox(height: 12),
-            _buildEditableFechaPicker(context, c, 'Fecha Hora Fin', vm.fechaFin, vm.updateFechaFin),
-            
+            _buildEditableFechaPicker(
+              context,
+              c,
+              'Fecha Hora Fin',
+              vm.fechaFin,
+              vm.updateFechaFin,
+              minimumDateTime: vm.fechaInicio ?? DateTime.now(),
+              mustBeAfterMinimum: true,
+            ),
             if (vm.errorMsg != null) ...[
               const SizedBox(height: 12),
               Text(
@@ -234,7 +246,6 @@ class _OsExecutionBody extends StatelessWidget {
               ),
             ],
             const SizedBox(height: 32),
-            
             Row(
               children: [
                 Expanded(
@@ -267,6 +278,7 @@ class _OsExecutionBody extends StatelessWidget {
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: c.primary,
+                        alignment: Alignment.center,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -277,9 +289,9 @@ class _OsExecutionBody extends StatelessWidget {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text(
-                                'Guardado correctamente. Sincronizando en segundo plano...',
+                                'O.S. guardada en el dispositivo. Se enviará cuando haya conexión.',
                               ),
-                              backgroundColor: Color(0xFF22C55E),
+                              backgroundColor: Color(0xFFF59E0B),
                             ),
                           );
                           Navigator.pop(context);
@@ -292,10 +304,11 @@ class _OsExecutionBody extends StatelessWidget {
                           );
                         }
                       },
-                      child: const Text(
-                        'GUARDAR',
+                      child: Text(
+                        'GUARDAR Y FINALIZAR',
+                        textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: Colors.white,
+                          color: c.onPrimary,
                           fontWeight: FontWeight.bold,
                           fontSize: 15,
                           fontFamily: 'Outfit',
@@ -319,15 +332,18 @@ class _OsExecutionBody extends StatelessWidget {
       title: 'Inf. de Reclamo',
       c: c,
       fields: [
-        MapEntry('Numero', os.numeroOrden ?? ''),
-        MapEntry('Solicitante', r?.nombreSolicitante ?? ''),
-        MapEntry('Tipo', r?.tipoProblema ?? ''),
+        MapEntry('N° de O.S.', os.numeroOrden ?? ''),
         MapEntry('Formato', r?.formato ?? ''),
-        MapEntry('Descripcion', r?.descripcion ?? ''),
-        MapEntry('Direccion', r?.direccion ?? ''),
-        MapEntry('Telefono', r?.telefono ?? ''),
-        MapEntry('Email', r?.email ?? ''),
+        MapEntry(
+          'Tipo',
+          TipoProblema.etiquetaDescriptiva(r?.tipoProblema),
+        ),
         MapEntry('Medidor', r?.numeroMedidor ?? ''),
+        MapEntry('Telefono', r?.telefono ?? ''),
+        MapEntry('Solicitante', r?.nombreSolicitante ?? ''),
+        MapEntry('Email', r?.email ?? ''),
+        MapEntry('Direccion', r?.direccion ?? ''),
+        MapEntry('Descripcion', r?.descripcion ?? ''),
         MapEntry('Fecha registro', r?.fechaRegistro ?? ''),
       ],
     );
@@ -335,14 +351,16 @@ class _OsExecutionBody extends StatelessWidget {
 
   Widget _buildCuadrillaSection(AppColors c, Os os) {
     final cuadrilla = os.cuadrilla;
-    final cuadrillaTexto = cuadrilla != null
-        ? '${cuadrilla.codigoGrupo ?? "Cuadrilla ${cuadrilla.id}"} - ${cuadrilla.especialidad ?? ""}'
-        : '';
+    final codigo = (cuadrilla?.codigoGrupo ?? cuadrilla?.id.toString() ?? '')
+        .replaceFirst(RegExp(r'^Cuadrilla\s+', caseSensitive: false), '');
+    final cuadrillaTexto = cuadrilla == null
+        ? ''
+        : '$codigo · ${cuadrilla.especialidad ?? "Sin especialidad"}';
     return OsDetailSection(
       title: 'Cuadrilla',
       c: c,
       fields: [
-        MapEntry('Cuadrilla', cuadrillaTexto),
+        MapEntry('Identificación', cuadrillaTexto),
       ],
     );
   }
@@ -379,50 +397,57 @@ class _OsExecutionBody extends StatelessWidget {
     AppColors c,
     String label,
     DateTime? date,
-    ValueChanged<DateTime> onChanged,
-  ) {
-    final dateStr = date != null ? DateFormat('yyyy-MM-dd HH:mm').format(date) : '-';
+    bool Function(DateTime) onChanged, {
+    required DateTime minimumDateTime,
+    bool mustBeAfterMinimum = false,
+  }) {
+    final dateStr =
+        date != null ? DateFormat('yyyy-MM-dd HH:mm').format(date) : '-';
     return InkWell(
       onTap: () async {
+        final now = DateTime.now();
+        final today = DateTime(now.year, now.month, now.day);
+        final minimumDay = DateTime(
+          minimumDateTime.year,
+          minimumDateTime.month,
+          minimumDateTime.day,
+        );
+        final firstDate = minimumDay.isAfter(today) ? minimumDay : today;
+        final selectedInitialDate =
+            date == null || date.isBefore(firstDate) ? firstDate : date;
         final d = await showDatePicker(
           context: context,
-          initialDate: date ?? DateTime.now(),
-          firstDate: DateTime(2020),
+          initialDate: selectedInitialDate,
+          firstDate: firstDate,
           lastDate: DateTime(2030),
-          builder: (context, child) {
-            return Theme(
-              data: Theme.of(context).copyWith(
-                colorScheme: ColorScheme.light(
-                  primary: c.primary,
-                  onPrimary: Colors.white,
-                  surface: c.surface,
-                  onSurface: c.onSurface,
-                ),
-              ),
-              child: child!,
-            );
-          },
         );
         if (d != null && context.mounted) {
           final t = await showTimePicker(
             context: context,
             initialTime: TimeOfDay.fromDateTime(date ?? DateTime.now()),
-            builder: (context, child) {
-              return Theme(
-                data: Theme.of(context).copyWith(
-                  colorScheme: ColorScheme.light(
-                    primary: c.primary,
-                    onPrimary: Colors.white,
-                    surface: c.surface,
-                    onSurface: c.onSurface,
-                  ),
-                ),
-                child: child!,
-              );
-            },
           );
           if (t != null) {
+            if (!context.mounted) return;
             final combined = DateTime(d.year, d.month, d.day, t.hour, t.minute);
+            final minimumMinute = DateTime(
+              minimumDateTime.year,
+              minimumDateTime.month,
+              minimumDateTime.day,
+              minimumDateTime.hour,
+              minimumDateTime.minute,
+            );
+            final isInvalid = mustBeAfterMinimum
+                ? !combined.isAfter(minimumMinute)
+                : combined.isBefore(minimumMinute);
+            if (isInvalid) {
+              final message = mustBeAfterMinimum
+                  ? 'La finalización debe ser posterior al inicio.'
+                  : 'No puede seleccionar una fecha u hora pasada.';
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(message)),
+              );
+              return;
+            }
             onChanged(combined);
           }
         }
@@ -431,10 +456,12 @@ class _OsExecutionBody extends StatelessWidget {
       child: InputDecorator(
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: TextStyle(color: c.primary, fontWeight: FontWeight.bold, fontSize: 13),
+          labelStyle: TextStyle(
+              color: c.primary, fontWeight: FontWeight.bold, fontSize: 13),
           filled: true,
           fillColor: c.surface,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(color: c.border),
@@ -443,28 +470,407 @@ class _OsExecutionBody extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(color: c.border),
           ),
-          suffixIcon: Icon(Icons.edit_calendar_rounded, color: c.primary, size: 20),
+          suffixIcon:
+              Icon(Icons.edit_calendar_rounded, color: c.primary, size: 20),
           floatingLabelBehavior: FloatingLabelBehavior.always,
         ),
         child: Text(
           dateStr,
-          style: TextStyle(color: c.onSurface, fontSize: 14, fontWeight: FontWeight.w500),
+          style: TextStyle(
+              color: c.onSurface, fontSize: 14, fontWeight: FontWeight.w500),
         ),
       ),
     );
   }
 
-  String _formatDate(String? isoString) {
-    if (isoString == null || isoString.isEmpty) return '-';
-    try {
-      final d = DateTime.parse(isoString).toLocal();
-      return DateFormat('yyyy-MM-dd HH:mm').format(d);
-    } catch (_) {
-      return isoString;
-    }
+  Widget _buildPhotoEvidenceSection({
+    required AppColors c,
+    required String title,
+    required List<String> photos,
+    required VoidCallback onAdd,
+    required ValueChanged<int> onRemove,
+  }) {
+    final photoLabel = photos.length == 1 ? '1 foto' : '${photos.length} fotos';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(7),
+              decoration: BoxDecoration(
+                color: c.primary.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                Icons.photo_camera_outlined,
+                color: c.primary,
+                size: 18,
+              ),
+            ),
+            const SizedBox(width: 9),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      color: c.onSurface,
+                      fontFamily: 'Outfit',
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    photos.isEmpty
+                        ? 'Agrega una o varias evidencias fotográficas'
+                        : '$photoLabel agregadas · Toca una para ampliarla',
+                    style: TextStyle(
+                      color: c.onSurfaceVariant,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        if (photos.isEmpty)
+          Semantics(
+            button: true,
+            label: 'Tomar la primera foto para $title',
+            child: InkWell(
+              onTap: onAdd,
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 18),
+                decoration: BoxDecoration(
+                  color: c.primary.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: c.primary.withValues(alpha: 0.45),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.add_a_photo_outlined,
+                      color: c.primary,
+                      size: 28,
+                    ),
+                    const SizedBox(height: 7),
+                    Text(
+                      'TOMAR PRIMERA FOTO',
+                      style: TextStyle(
+                        color: c.primary,
+                        fontFamily: 'Outfit',
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          )
+        else
+          LayoutBuilder(
+            builder: (context, constraints) {
+              const spacing = 10.0;
+              final tileWidth = (constraints.maxWidth - spacing * 2) / 3;
+
+              return Wrap(
+                spacing: spacing,
+                runSpacing: spacing,
+                children: [
+                  for (var index = 0; index < photos.length; index++)
+                    _buildPhotoThumbnail(
+                      c: c,
+                      path: photos[index],
+                      index: index,
+                      size: tileWidth,
+                      onPreview: () => _showPhotoPreview(
+                        context,
+                        path: photos[index],
+                        index: index,
+                      ),
+                      onRemove: () => onRemove(index),
+                    ),
+                  _buildAddPhotoTile(
+                    c: c,
+                    size: tileWidth,
+                    onAdd: onAdd,
+                  ),
+                ],
+              );
+            },
+          ),
+      ],
+    );
   }
 
+  Widget _buildPhotoThumbnail({
+    required AppColors c,
+    required String path,
+    required int index,
+    required double size,
+    required VoidCallback onPreview,
+    required VoidCallback onRemove,
+  }) {
+    return Semantics(
+      label: 'Foto ${index + 1}',
+      child: SizedBox(
+        width: size,
+        height: size,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Positioned.fill(
+              child: Material(
+                color: Colors.transparent,
+                borderRadius: BorderRadius.circular(12),
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  onTap: onPreview,
+                  child: Image.file(
+                    File(path),
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      color: c.surface,
+                      alignment: Alignment.center,
+                      child: Icon(
+                        Icons.broken_image_outlined,
+                        color: c.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Positioned.fill(
+              child: IgnorePointer(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: c.border),
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              top: -6,
+              right: -6,
+              child: Semantics(
+                button: true,
+                label: 'Quitar foto ${index + 1}',
+                child: Tooltip(
+                  message: 'Quitar foto',
+                  child: Material(
+                    color: const Color(0xFFDC2626),
+                    shape: const CircleBorder(),
+                    elevation: 3,
+                    child: InkWell(
+                      customBorder: const CircleBorder(),
+                      onTap: onRemove,
+                      child: const SizedBox(
+                        width: 28,
+                        height: 28,
+                        child: Icon(
+                          Icons.remove_rounded,
+                          color: Colors.white,
+                          size: 19,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
+  Future<void> _showPhotoPreview(
+    BuildContext context, {
+    required String path,
+    required int index,
+  }) {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      barrierColor: Colors.black.withValues(alpha: 0.88),
+      builder: (dialogContext) {
+        final screenHeight = MediaQuery.sizeOf(dialogContext).height;
+
+        return Dialog(
+          insetPadding:
+              const EdgeInsets.symmetric(horizontal: 14, vertical: 28),
+          backgroundColor: const Color(0xFF0B0B0B),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: SizedBox(
+            width: double.infinity,
+            height: screenHeight * 0.82,
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 10, 8, 8),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Foto ${index + 1}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'Outfit',
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      Semantics(
+                        button: true,
+                        label: 'Cerrar previsualización',
+                        child: TextButton.icon(
+                          onPressed: () => Navigator.of(dialogContext).pop(),
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            backgroundColor:
+                                Colors.white.withValues(alpha: 0.10),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 11,
+                              vertical: 7,
+                            ),
+                          ),
+                          icon: const Icon(Icons.close_rounded, size: 20),
+                          label: const Text(
+                            'Cerrar',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1, color: Color(0xFF2B2B2B)),
+                Expanded(
+                  child: InteractiveViewer(
+                    minScale: 1,
+                    maxScale: 4,
+                    child: Center(
+                      child: Image.file(
+                        File(path),
+                        width: double.infinity,
+                        height: double.infinity,
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, __, ___) => const Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.broken_image_outlined,
+                              color: Colors.white54,
+                              size: 48,
+                            ),
+                            SizedBox(height: 10),
+                            Text(
+                              'No se pudo mostrar la imagen',
+                              style: TextStyle(color: Colors.white70),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.pinch_outlined,
+                        color: Colors.white60,
+                        size: 17,
+                      ),
+                      SizedBox(width: 7),
+                      Text(
+                        'Pellizca para ampliar la imagen',
+                        style: TextStyle(color: Colors.white60, fontSize: 11),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildAddPhotoTile({
+    required AppColors c,
+    required double size,
+    required VoidCallback onAdd,
+  }) {
+    return Semantics(
+      button: true,
+      label: 'Agregar otra foto',
+      child: InkWell(
+        onTap: onAdd,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            color: c.primary.withValues(alpha: 0.07),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: c.primary.withValues(alpha: 0.55),
+              width: 1.4,
+            ),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(7),
+                decoration: BoxDecoration(
+                  color: c.primary,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.add_rounded,
+                  color: c.onPrimary,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(height: 7),
+              Text(
+                'AGREGAR',
+                style: TextStyle(
+                  color: c.primary,
+                  fontFamily: 'Outfit',
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.4,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   Widget _buildTextField({
     required AppColors c,
@@ -480,11 +886,13 @@ class _OsExecutionBody extends StatelessWidget {
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
-        labelStyle: TextStyle(color: c.primary, fontWeight: FontWeight.bold, fontSize: 13),
+        labelStyle: TextStyle(
+            color: c.primary, fontWeight: FontWeight.bold, fontSize: 13),
         hintStyle: TextStyle(color: c.onSurfaceVariant.withValues(alpha: 0.5)),
         filled: true,
         fillColor: c.surface,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: c.border),

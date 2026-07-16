@@ -68,8 +68,8 @@ class _NuevoReclamoBodyState extends State<_NuevoReclamoBody> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _buildSectionHeader(c, Icons.person_rounded,
-                  'DATOS DEL RECLAMANTE'),
+              _buildSectionHeader(
+                  c, Icons.person_rounded, 'DATOS DEL RECLAMANTE'),
               const SizedBox(height: 16),
               _buildTextField(
                 c: c,
@@ -86,8 +86,11 @@ class _NuevoReclamoBodyState extends State<_NuevoReclamoBody> {
                 label: 'N\u00b0 de Medidor',
                 hint: 'Ej: 1041998',
                 keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                maxLength: 8,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(7),
+                ],
+                maxLength: 7,
                 error: vm.fieldErrors['numero_medidor'],
                 onChanged: (_) => vm.clearFieldError('numero_medidor'),
               ),
@@ -123,8 +126,8 @@ class _NuevoReclamoBodyState extends State<_NuevoReclamoBody> {
                 onChanged: (_) => vm.clearFieldError('direccion'),
               ),
               const SizedBox(height: 32),
-              _buildSectionHeader(
-                  c, Icons.report_problem_rounded, 'INFORMACI\u00d3N DEL RECLAMO'),
+              _buildSectionHeader(c, Icons.report_problem_rounded,
+                  'INFORMACI\u00d3N DEL RECLAMO'),
               const SizedBox(height: 16),
               _buildDateTimeField(
                 context,
@@ -146,9 +149,13 @@ class _NuevoReclamoBodyState extends State<_NuevoReclamoBody> {
                 c: c,
                 controller: vm.codigoController,
                 label: 'C\u00f3digo de Solicitud',
-                hint: 'Ej: 123456',
+                hint: 'Ej: 12345',
                 keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(5),
+                ],
+                maxLength: 5,
                 error: vm.fieldErrors['codigo_solicitud'],
                 onChanged: (_) => vm.clearFieldError('codigo_solicitud'),
               ),
@@ -165,8 +172,8 @@ class _NuevoReclamoBodyState extends State<_NuevoReclamoBody> {
                 c: c,
                 label: 'Tipo de Problema',
                 value: vm.tipoProblema,
-                options: NuevoReclamoViewModel.tiposProblema,
-                subtitles: NuevoReclamoViewModel.descripcionesProblema,
+                options: vm.tiposProblema,
+                subtitles: vm.descripcionesProblema,
                 onChanged: vm.setTipoProblema,
               ),
               const SizedBox(height: 16),
@@ -240,9 +247,13 @@ class _NuevoReclamoBodyState extends State<_NuevoReclamoBody> {
                                   backgroundColor: Color(0xFF22C55E),
                                 ));
                                 Navigator.pop(context, true);
-                              } else if (!ok && mounted && vm.fieldErrors.isNotEmpty) {
-                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                                  content: Text('Por favor, corrija los errores marcados en rojo'),
+                              } else if (!ok &&
+                                  mounted &&
+                                  vm.fieldErrors.isNotEmpty) {
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(const SnackBar(
+                                  content: Text(
+                                      'Por favor, corrija los errores marcados en rojo'),
                                   backgroundColor: Color(0xFFDC2626),
                                   behavior: SnackBarBehavior.floating,
                                 ));
@@ -254,15 +265,15 @@ class _NuevoReclamoBodyState extends State<_NuevoReclamoBody> {
                               }
                             },
                       child: vm.submitting
-                          ? const SizedBox(
+                          ? SizedBox(
                               width: 22,
                               height: 22,
                               child: CircularProgressIndicator(
-                                  color: Colors.white, strokeWidth: 2.5),
+                                  color: c.onPrimary, strokeWidth: 2.5),
                             )
-                          : const Text('Guardar',
+                          : Text('Guardar',
                               style: TextStyle(
-                                  color: Colors.white,
+                                  color: c.onPrimary,
                                   fontFamily: 'Outfit',
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16)),
@@ -278,8 +289,7 @@ class _NuevoReclamoBodyState extends State<_NuevoReclamoBody> {
     );
   }
 
-  Widget _buildSectionHeader(
-      AppColors c, IconData icon, String title) {
+  Widget _buildSectionHeader(AppColors c, IconData icon, String title) {
     return Row(
       children: [
         Container(
@@ -324,14 +334,16 @@ class _NuevoReclamoBodyState extends State<_NuevoReclamoBody> {
         labelText: label,
         hintText: hint,
         labelStyle: TextStyle(color: c.onSurfaceVariant, fontSize: 14),
-        hintStyle: TextStyle(color: c.onSurfaceVariant.withValues(alpha: 0.5), fontSize: 13),
+        hintStyle: TextStyle(
+            color: c.onSurfaceVariant.withValues(alpha: 0.5), fontSize: 13),
         errorText: error,
         errorStyle: const TextStyle(color: Color(0xFFDC2626), fontSize: 12),
         filled: true,
         fillColor: c.surface,
         counterText: '',
         border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none),
         enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(color: c.border)),
@@ -430,7 +442,8 @@ class _NuevoReclamoBodyState extends State<_NuevoReclamoBody> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                     child: Text(
                       label,
                       style: TextStyle(
@@ -459,29 +472,43 @@ class _NuevoReclamoBodyState extends State<_NuevoReclamoBody> {
                               Navigator.pop(ctx);
                             },
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 14),
                               child: Row(
-                                crossAxisAlignment: subtitle != null ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+                                crossAxisAlignment: subtitle != null
+                                    ? CrossAxisAlignment.start
+                                    : CrossAxisAlignment.center,
                                 children: [
                                   Padding(
-                                    padding: EdgeInsets.only(top: subtitle != null ? 2.0 : 0.0),
+                                    padding: EdgeInsets.only(
+                                        top: subtitle != null ? 2.0 : 0.0),
                                     child: Icon(
-                                      selected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-                                      color: selected ? c.primary : c.onSurfaceVariant.withValues(alpha: 0.5),
+                                      selected
+                                          ? Icons.radio_button_checked
+                                          : Icons.radio_button_unchecked,
+                                      color: selected
+                                          ? c.primary
+                                          : c.onSurfaceVariant
+                                              .withValues(alpha: 0.5),
                                       size: 20,
                                     ),
                                   ),
                                   const SizedBox(width: 16),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           opt,
                                           style: TextStyle(
-                                            color: selected ? c.primary : c.onSurface,
+                                            color: selected
+                                                ? c.primary
+                                                : c.onSurface,
                                             fontSize: 16,
-                                            fontWeight: selected ? FontWeight.bold : FontWeight.w500,
+                                            fontWeight: selected
+                                                ? FontWeight.bold
+                                                : FontWeight.w500,
                                           ),
                                         ),
                                         if (subtitle != null) ...[
@@ -517,13 +544,23 @@ class _NuevoReclamoBodyState extends State<_NuevoReclamoBody> {
           labelStyle: TextStyle(color: c.onSurfaceVariant, fontSize: 14),
           filled: true,
           fillColor: c.surface,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: c.border)),
-          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: c.border)),
-          suffixIcon: Icon(Icons.keyboard_arrow_down_rounded, color: c.onSurfaceVariant, size: 20),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+          border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none),
+          enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: c.border)),
+          focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: c.border)),
+          suffixIcon: Icon(Icons.keyboard_arrow_down_rounded,
+              color: c.onSurfaceVariant, size: 20),
         ),
-        child: Text(value, style: TextStyle(color: c.onSurface, fontSize: 15, fontWeight: FontWeight.w500)),
+        child: Text(value,
+            style: TextStyle(
+                color: c.onSurface, fontSize: 15, fontWeight: FontWeight.w500)),
       ),
     );
   }
@@ -546,38 +583,15 @@ class _NuevoReclamoBodyState extends State<_NuevoReclamoBody> {
           initialDate: value,
           firstDate: DateTime(2020),
           lastDate: DateTime(2100),
-          builder: (context, child) {
-            return Theme(
-              data: Theme.of(context).copyWith(
-                colorScheme: ColorScheme.light(
-                  primary: c.primary,
-                  onPrimary: Colors.white,
-                  onSurface: c.onSurface,
-                ),
-              ),
-              child: child!,
-            );
-          },
         );
         if (date != null && context.mounted) {
           final time = await showTimePicker(
             context: context,
             initialTime: TimeOfDay.fromDateTime(value),
-            builder: (context, child) {
-              return Theme(
-                data: Theme.of(context).copyWith(
-                  colorScheme: ColorScheme.light(
-                    primary: c.primary,
-                    onPrimary: Colors.white,
-                    onSurface: c.onSurface,
-                  ),
-                ),
-                child: child!,
-              );
-            },
           );
           if (time != null) {
-            onChanged(DateTime(date.year, date.month, date.day, time.hour, time.minute));
+            onChanged(DateTime(
+                date.year, date.month, date.day, time.hour, time.minute));
           }
         }
       },
@@ -587,15 +601,24 @@ class _NuevoReclamoBodyState extends State<_NuevoReclamoBody> {
           labelStyle: TextStyle(color: c.onSurfaceVariant, fontSize: 14),
           filled: true,
           fillColor: c.surface,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: c.border)),
-          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: c.border)),
-          suffixIcon: Icon(Icons.calendar_today_rounded, color: c.onSurfaceVariant, size: 20),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+          border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none),
+          enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: c.border)),
+          focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: c.border)),
+          suffixIcon: Icon(Icons.calendar_today_rounded,
+              color: c.onSurfaceVariant, size: 20),
         ),
         child: Text(
           formatDateTime(value),
-          style: TextStyle(color: c.onSurface, fontSize: 15, fontWeight: FontWeight.w500),
+          style: TextStyle(
+              color: c.onSurface, fontSize: 15, fontWeight: FontWeight.w500),
         ),
       ),
     );

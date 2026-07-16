@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:hydra/domain/models/reclamo.dart';
 import 'package:hydra/domain/models/cuadrilla.dart';
+import 'package:hydra/domain/models/gasfitero.dart';
 import 'package:hydra/domain/use_cases/create_os_from_reclamo_use_case.dart';
 import 'package:hydra/ui/core/theme/app_colors.dart';
 import 'package:hydra/ui/features/supervisor/views/reclamo_detalle_view.dart';
@@ -18,6 +19,7 @@ class TestAppColors extends AppColors {
           surface: Colors.white,
           onSurface: const Color(0xFF1A1A1A),
           onSurfaceVariant: const Color(0xFF6B7280),
+          onPrimary: Colors.white,
           border: const Color(0xFFE5E7EB),
         );
 }
@@ -25,28 +27,48 @@ class TestAppColors extends AppColors {
 void main() {
   final testReclamo = Reclamo(
     id: 1,
-    formato: 'F-001',
-    codigoSolicitud: 'CS-001',
+    formato: 'Anexo 6',
+    codigoSolicitud: '00001',
     estado: 'PENDIENTE',
     descripcion: 'Fuga visible en tuberia principal',
     direccion: 'Av. Peru 123',
     nombreSolicitante: 'Juan Perez',
     telefono: '987654321',
     email: 'juan@example.com',
-    numeroMedidor: 'M-001',
-    canalEntrada: 'TELEFONO',
-    tipoProblema: 'FUGA',
+    numeroMedidor: '0000001',
+    canalEntrada: 'Presencial',
+    tipoProblema: 'OP-3',
     fechaRegistro: '2026-07-01T10:00:00',
   );
 
   final testCuadrillas = [
-    Cuadrilla(id: 1, codigoGrupo: 'Grupo #1'),
-    Cuadrilla(id: 2, codigoGrupo: 'Grupo #2'),
+    Cuadrilla(
+      id: 1,
+      codigoGrupo: 'Grupo #1',
+      especialidad: 'Agua',
+      lider: Gasfitero(id: 1, nombre: 'Lider Uno'),
+      apoyos: [Gasfitero(id: 2, nombre: 'Apoyo Uno')],
+    ),
+    Cuadrilla(
+      id: 2,
+      codigoGrupo: 'Grupo #2',
+      especialidad: 'Desagüe',
+      lider: Gasfitero(id: 3, nombre: 'Lider Dos'),
+      apoyos: [Gasfitero(id: 4, nombre: 'Apoyo Dos')],
+    ),
+    Cuadrilla(
+      id: 3,
+      codigoGrupo: 'Grupo individual',
+      especialidad: 'Desagüe',
+      lider: Gasfitero(id: 5, nombre: 'Lider Solo'),
+    ),
   ];
 
   Widget createTestWidget({
     required FakeCreateOsFromReclamoUseCase fakeUseCase,
     required ReclamoDetalleViewModel vm,
+    List<Cuadrilla>? cuadrillas,
+    Reclamo? reclamo,
   }) {
     return MaterialApp(
       theme: ThemeData(
@@ -58,8 +80,8 @@ void main() {
           ChangeNotifierProvider<ReclamoDetalleViewModel>.value(value: vm),
         ],
         child: ReclamoDetalleView(
-          reclamo: testReclamo,
-          cuadrillas: testCuadrillas,
+          reclamo: reclamo ?? testReclamo,
+          cuadrillas: cuadrillas ?? testCuadrillas,
         ),
       ),
     );
@@ -103,8 +125,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Seleccionar Cuadrilla'), findsOneWidget);
-      expect(find.text('Grupo #1'), findsOneWidget);
+      expect(find.text('Grupo #1'), findsNothing);
       expect(find.text('Grupo #2'), findsOneWidget);
+      expect(find.text('Grupo individual'), findsNothing);
+      expect(find.text('Persona'), findsNothing);
       expect(find.text('CONFIRMAR Y CREAR O.S.'), findsOneWidget);
     });
 
@@ -128,10 +152,56 @@ void main() {
       await tester.tap(find.text('ASIGNAR A UNA CUADRILLA'));
       await tester.pumpAndSettle();
 
-      final button = tester.widget<ElevatedButton>(
-        find.widgetWithText(ElevatedButton, 'CONFIRMAR Y CREAR O.S.'),
+      final button = tester.widget<FilledButton>(
+        find.widgetWithText(FilledButton, 'CONFIRMAR Y CREAR O.S.'),
       );
       expect(button.onPressed, isNull);
+    });
+
+    testWidgets('modal ajusta su altura cuando hay una sola cuadrilla',
+        (tester) async {
+      tester.view.physicalSize = const Size(480, 1000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final fakeUseCase = FakeCreateOsFromReclamoUseCase();
+      final vm = ReclamoDetalleViewModel(
+        reclamo: testReclamo,
+        createOsUseCase: fakeUseCase,
+      );
+      await tester.pumpWidget(createTestWidget(
+        fakeUseCase: fakeUseCase,
+        vm: vm,
+        cuadrillas: [testCuadrillas[1]],
+      ));
+
+      await tester.tap(find.text('ASIGNAR A UNA CUADRILLA'));
+      await tester.pumpAndSettle();
+
+      final modalHeight = tester.getSize(find.byType(BottomSheet)).height;
+      expect(modalHeight, lessThan(600));
+    });
+
+    testWidgets('Formato 1 muestra solo las cuadrillas de Agua',
+        (tester) async {
+      final fakeUseCase = FakeCreateOsFromReclamoUseCase();
+      final reclamoAgua = testReclamo.copyWith(formato: 'Formato 1');
+      final vm = ReclamoDetalleViewModel(
+        reclamo: reclamoAgua,
+        createOsUseCase: fakeUseCase,
+      );
+      await tester.pumpWidget(createTestWidget(
+        fakeUseCase: fakeUseCase,
+        vm: vm,
+        reclamo: reclamoAgua,
+      ));
+
+      await tester.tap(find.text('ASIGNAR A UNA CUADRILLA'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Grupo #1'), findsOneWidget);
+      expect(find.text('Grupo #2'), findsNothing);
     });
   });
 }

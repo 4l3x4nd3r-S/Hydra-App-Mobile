@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../../domain/enums/tipo_problema.dart';
 import '../../../../domain/models/os.dart';
-import '../../../../domain/models/cuadrilla.dart';
 import '../../../core/theme/app_colors.dart';
 import '../view_models/os_detail_view_model.dart';
 import '../widgets/os_detail_section.dart';
-import '../widgets/os_detail_action_button.dart';
 import '../../../../data/services/api_endpoints.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -13,12 +12,14 @@ import 'package:latlong2/latlong.dart';
 class OsDetailView extends StatelessWidget {
   final Os os;
   final bool showReadOnlyBanner;
+  final bool isGasfiteroView;
   final VoidCallback? onRegistrarSolucion;
 
   const OsDetailView({
     super.key,
     required this.os,
     this.showReadOnlyBanner = false,
+    this.isGasfiteroView = false,
     this.onRegistrarSolucion,
   });
 
@@ -28,6 +29,7 @@ class OsDetailView extends StatelessWidget {
       create: (_) => OsDetailViewModel(os: os),
       child: _OsDetailBody(
         showReadOnlyBanner: showReadOnlyBanner,
+        isGasfiteroView: isGasfiteroView,
         onRegistrarSolucion: onRegistrarSolucion,
       ),
     );
@@ -36,10 +38,12 @@ class OsDetailView extends StatelessWidget {
 
 class _OsDetailBody extends StatelessWidget {
   final bool showReadOnlyBanner;
+  final bool isGasfiteroView;
   final VoidCallback? onRegistrarSolucion;
 
   const _OsDetailBody({
     this.showReadOnlyBanner = false,
+    this.isGasfiteroView = false,
     this.onRegistrarSolucion,
   });
 
@@ -51,7 +55,8 @@ class _OsDetailBody extends StatelessWidget {
 
     debugPrint('OsDetailView build - os.id: ${os.id}');
     debugPrint('OsDetailView build - os.reclamo: ${os.reclamo}');
-    debugPrint('OsDetailView build - os.reclamo?.nombreSolicitante: ${os.reclamo?.nombreSolicitante}');
+    debugPrint(
+        'OsDetailView build - os.reclamo?.nombreSolicitante: ${os.reclamo?.nombreSolicitante}');
     debugPrint('OsDetailView build - os.cuadrilla: ${os.cuadrilla}');
 
     return Scaffold(
@@ -64,7 +69,7 @@ class _OsDetailBody extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'INFORMACION DE LA ORDEN DE SERVICIO',
+          'INFORMACIÓN DE LA ORDEN DE SERVICIO',
           style: TextStyle(
             fontFamily: 'Outfit',
             fontSize: 15,
@@ -73,83 +78,116 @@ class _OsDetailBody extends StatelessWidget {
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 16),
-            _buildReclamoSection(c, os),
-            const SizedBox(height: 12),
-            _buildCuadrillaSection(c, os),
-            const SizedBox(height: 12),
-            _buildResponsablesSection(c, os),
-            if (os.fechaEjecucionInicio != null) ...[
-              _buildFechaInicioSection(c, os, vm),
-              const SizedBox(height: 12),
-            ],
-            if (os.fotosProblemaUrls.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              _buildFotosSection(c, 'Fotos del problema', os.fotosProblemaUrls),
-              const SizedBox(height: 12),
-            ],
-            if (os.trabajoEjecutado != null && os.trabajoEjecutado!.isNotEmpty) ...[
-              _buildTrabajoEjecutadoSection(c, os),
-              const SizedBox(height: 12),
-            ],
-            if (os.problemas != null && os.problemas!.isNotEmpty || os.soluciones != null && os.soluciones!.isNotEmpty) ...[
-              _buildProblemasSolucionesSection(c, os),
-              const SizedBox(height: 12),
-            ],
-            if (os.comentariosInstrucciones != null && os.comentariosInstrucciones!.isNotEmpty) ...[
-              _buildComentariosSection(c, os),
-              const SizedBox(height: 12),
-            ],
-            if (os.observacionesGasfitero != null && os.observacionesGasfitero!.isNotEmpty) ...[
-              _buildObservacionesSection(c, os),
-              const SizedBox(height: 12),
-            ],
-            if (os.fotosSolucionUrls.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              _buildFotosSection(c, 'Fotos de la solucion', os.fotosSolucionUrls),
-              const SizedBox(height: 12),
-            ],
-            if (os.fechaEjecucionFin != null) ...[
-              _buildFechaFinSection(c, os, vm),
-              const SizedBox(height: 12),
-            ],
-            if (os.latitud != null && os.longitud != null) ...[
-              _buildMapSection(c, os),
-              const SizedBox(height: 12),
-            ],
-            const SizedBox(height: 24),
-            if (onRegistrarSolucion != null) ...[
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0EA5E9), // Cyan para resaltar la acción primaria
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+      body: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (showReadOnlyBanner) ...[
+                    _buildReadOnlyNotice(c),
+                    const SizedBox(height: 12),
+                  ],
+                  const SizedBox(height: 16),
+                  _buildReclamoSection(c, os),
+                  if (!(isGasfiteroView && os.responsable != null)) ...[
+                    if (os.cuadrilla != null) ...[
+                      const SizedBox(height: 12),
+                      _buildCuadrillaSection(c, os),
+                    ],
+                    const SizedBox(height: 12),
+                    _buildResponsablesSection(c, os),
+                  ],
+                  if (os.fechaEjecucionInicio != null) ...[
+                    _buildFechaInicioSection(c, os, vm),
+                    const SizedBox(height: 12),
+                  ],
+                  if (os.fotosProblemaUrls.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    _buildFotosSection(
+                        c, 'Fotos del problema', os.fotosProblemaUrls),
+                    const SizedBox(height: 12),
+                  ],
+                  if (os.trabajoEjecutado != null &&
+                      os.trabajoEjecutado!.isNotEmpty) ...[
+                    _buildTrabajoEjecutadoSection(c, os),
+                    const SizedBox(height: 12),
+                  ],
+                  if (os.problemas != null && os.problemas!.isNotEmpty ||
+                      os.soluciones != null && os.soluciones!.isNotEmpty) ...[
+                    _buildProblemasSolucionesSection(c, os),
+                    const SizedBox(height: 12),
+                  ],
+                  if (os.comentariosInstrucciones != null &&
+                      os.comentariosInstrucciones!.isNotEmpty) ...[
+                    _buildComentariosSection(c, os),
+                    const SizedBox(height: 12),
+                  ],
+                  if (os.observacionesGasfitero != null &&
+                      os.observacionesGasfitero!.isNotEmpty) ...[
+                    _buildObservacionesSection(c, os),
+                    const SizedBox(height: 12),
+                  ],
+                  if (os.fotosSolucionUrls.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    _buildFotosSection(
+                        c, 'Fotos de la solucion', os.fotosSolucionUrls),
+                    const SizedBox(height: 12),
+                  ],
+                  if (os.fechaEjecucionFin != null) ...[
+                    _buildFechaFinSection(c, os, vm),
+                    const SizedBox(height: 12),
+                  ],
+                  if (os.latitud != null && os.longitud != null) ...[
+                    _buildMapSection(c, os),
+                    const SizedBox(height: 12),
+                  ],
+                ],
+              ),
+            ),
+          ),
+          if (onRegistrarSolucion != null)
+            Container(
+              decoration: BoxDecoration(
+                color: c.surface,
+                border: Border(
+                  top: BorderSide(
+                    color: c.border.withValues(alpha: 0.3),
+                    width: 1,
                   ),
-                  onPressed: onRegistrarSolucion,
-                  child: const Text(
-                    'REGISTRAR SOLUCION',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      fontFamily: 'Outfit',
+                ),
+              ),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+              child: SafeArea(
+                top: false,
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: c.primary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    onPressed: onRegistrarSolucion,
+                    child: Text(
+                      'REGISTRAR SOLUCION',
+                      style: TextStyle(
+                        color: c.onPrimary,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        fontFamily: 'Outfit',
+                      ),
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
-            ],
-          ],
-        ),
+            ),
+        ],
       ),
     );
   }
@@ -161,19 +199,20 @@ class _OsDetailBody extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFFF59E0B).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.3)),
+        border:
+            Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.3)),
       ),
-      child: Row(
+      child: const Row(
         children: [
-          Icon(Icons.info_outline_rounded, color: const Color(0xFFB45309), size: 18),
-          const SizedBox(width: 10),
+          Icon(Icons.info_outline_rounded, color: Color(0xFFB45309), size: 18),
+          SizedBox(width: 10),
           Expanded(
             child: Text(
-              'Nada de esta informacion es editable',
+              'Esta información es solo de lectura',
               style: TextStyle(
                 fontFamily: 'Inter',
                 fontSize: 13,
-                color: const Color(0xFFB45309),
+                color: Color(0xFFB45309),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -186,7 +225,8 @@ class _OsDetailBody extends StatelessWidget {
   Widget _buildReclamoSection(AppColors c, Os os) {
     final r = os.reclamo;
     debugPrint('_buildReclamoSection - r: $r');
-    debugPrint('_buildReclamoSection - r?.nombreSolicitante: ${r?.nombreSolicitante}');
+    debugPrint(
+        '_buildReclamoSection - r?.nombreSolicitante: ${r?.nombreSolicitante}');
     debugPrint('_buildReclamoSection - r?.tipoProblema: ${r?.tipoProblema}');
     debugPrint('_buildReclamoSection - r?.formato: ${r?.formato}');
     debugPrint('_buildReclamoSection - r?.descripcion: ${r?.descripcion}');
@@ -199,15 +239,18 @@ class _OsDetailBody extends StatelessWidget {
       title: 'Inf. de Reclamo',
       c: c,
       fields: [
-        MapEntry('Numero', os.numeroOrden ?? ''),
-        MapEntry('Solicitante', r?.nombreSolicitante ?? ''),
-        MapEntry('Tipo', r?.tipoProblema ?? ''),
+        MapEntry('N° de O.S.', os.numeroOrden ?? ''),
         MapEntry('Formato', r?.formato ?? ''),
-        MapEntry('Descripcion', r?.descripcion ?? ''),
-        MapEntry('Direccion', r?.direccion ?? ''),
-        MapEntry('Telefono', r?.telefono ?? ''),
-        MapEntry('Email', r?.email ?? ''),
+        MapEntry(
+          'Tipo',
+          TipoProblema.etiquetaDescriptiva(r?.tipoProblema),
+        ),
         MapEntry('Medidor', r?.numeroMedidor ?? ''),
+        MapEntry('Telefono', r?.telefono ?? ''),
+        MapEntry('Solicitante', r?.nombreSolicitante ?? ''),
+        MapEntry('Email', r?.email ?? ''),
+        MapEntry('Direccion', r?.direccion ?? ''),
+        MapEntry('Descripcion', r?.descripcion ?? ''),
         MapEntry('Fecha registro', r?.fechaRegistro ?? ''),
       ],
     );
@@ -215,21 +258,29 @@ class _OsDetailBody extends StatelessWidget {
 
   Widget _buildCuadrillaSection(AppColors c, Os os) {
     final cuadrilla = os.cuadrilla;
-    final cuadrillaTexto = cuadrilla != null
-        ? '${cuadrilla.codigoGrupo ?? "Cuadrilla ${cuadrilla.id}"} - ${cuadrilla.especialidad ?? ""}'
-        : '';
+    final codigo = (cuadrilla?.codigoGrupo ?? cuadrilla?.id.toString() ?? '')
+        .replaceFirst(RegExp(r'^Cuadrilla\s+', caseSensitive: false), '');
+    final cuadrillaTexto = cuadrilla == null
+        ? ''
+        : '$codigo · ${cuadrilla.especialidad ?? "Sin especialidad"}';
     return OsDetailSection(
       title: 'Cuadrilla',
       c: c,
       fields: [
-        MapEntry('Cuadrilla', cuadrillaTexto),
+        MapEntry('Identificación', cuadrillaTexto),
       ],
     );
   }
 
   Widget _buildResponsablesSection(AppColors c, Os os) {
-    final cuadrilla = os.cuadrilla;
     final fields = <MapEntry<String, String>>[];
+
+    if (os.responsable != null) {
+      fields
+          .add(MapEntry('Responsable', os.responsable!.nombre ?? 'Sin nombre'));
+    }
+
+    final cuadrilla = os.cuadrilla;
     if (cuadrilla != null) {
       if (cuadrilla.lider != null) {
         fields.add(MapEntry('Líder', cuadrilla.lider!.nombre ?? '-'));
@@ -290,7 +341,8 @@ class _OsDetailBody extends StatelessWidget {
       title: 'Comentarios / Instrucciones Especiales',
       c: c,
       fields: [
-        MapEntry('Comentarios / Instr. Esp.', os.comentariosInstrucciones ?? ''),
+        MapEntry(
+            'Comentarios / Instr. Esp.', os.comentariosInstrucciones ?? ''),
       ],
     );
   }
@@ -309,7 +361,7 @@ class _OsDetailBody extends StatelessWidget {
     final fields = [
       MapEntry('Fecha Hora Fin', vm.formatDate(os.fechaEjecucionFin)),
     ];
-    
+
     return OsDetailSection(
       title: 'Fecha Hora Fin',
       c: c,
@@ -352,7 +404,8 @@ class _OsDetailBody extends StatelessWidget {
                 ),
                 children: [
                   TileLayer(
-                    urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    urlTemplate:
+                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                     userAgentPackageName: 'com.emapat.hydra',
                   ),
                   MarkerLayer(
@@ -417,7 +470,8 @@ class _OsDetailBody extends StatelessWidget {
                       width: 120,
                       height: 120,
                       color: c.surface,
-                      child: Icon(Icons.broken_image_rounded, color: c.onSurfaceVariant),
+                      child: Icon(Icons.broken_image_rounded,
+                          color: c.onSurfaceVariant),
                     ),
                   ),
                 ),
@@ -428,6 +482,4 @@ class _OsDetailBody extends StatelessWidget {
       ],
     );
   }
-
-
 }

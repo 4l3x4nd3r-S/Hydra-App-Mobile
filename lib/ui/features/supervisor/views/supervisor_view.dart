@@ -7,7 +7,6 @@ import '../../../../domain/models/cuadrilla.dart';
 import '../../../../domain/models/gasfitero.dart';
 import '../../../../domain/models/reclamo.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/profile_modal.dart';
 import '../../theme_view_model.dart';
 import '../../auth/views/login_view.dart';
@@ -32,8 +31,7 @@ class SupervisorView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => SupervisorViewModel(
-        supervisorRepository:
-            context.read<SupervisorRepository>(),
+        supervisorRepository: context.read<SupervisorRepository>(),
         authRepository: context.read<AuthRepository>(),
       ),
       child: const _SupervisorBody(),
@@ -92,7 +90,7 @@ class _SupervisorBodyState extends State<_SupervisorBody>
             ),
             child: Icon(
               Icons.water_drop_rounded,
-              color: c.primary,
+              color: themeVm.isLight ? c.primary : c.onSurface,
               size: 24,
             ),
           ),
@@ -118,16 +116,17 @@ class _SupervisorBodyState extends State<_SupervisorBody>
             padding: const EdgeInsets.only(right: 8.0),
             child: PopupMenuButton<String>(
               offset: const Offset(0, 56),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16)),
               color: c.surface,
               elevation: 4,
               icon: CircleAvatar(
                 radius: 18,
-                backgroundColor: c.primary.withValues(alpha: 0.1),
+                backgroundColor: c.onSurface.withValues(alpha: 0.12),
                 child: Text(
                   vm.userName.isNotEmpty ? vm.userName[0].toUpperCase() : 'U',
                   style: TextStyle(
-                    color: c.primary,
+                    color: themeVm.isLight ? c.primary : c.onSurface,
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
@@ -140,7 +139,6 @@ class _SupervisorBodyState extends State<_SupervisorBody>
                       context,
                       userName: vm.userName,
                       role: vm.userRole,
-                      dni: vm.userCode,
                     );
                     break;
                   case 'theme':
@@ -152,7 +150,8 @@ class _SupervisorBodyState extends State<_SupervisorBody>
                     if (mounted) {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (context) => const LoginView()),
+                        MaterialPageRoute(
+                            builder: (context) => const LoginView()),
                       );
                     }
                     break;
@@ -164,9 +163,14 @@ class _SupervisorBodyState extends State<_SupervisorBody>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(vm.userName.isNotEmpty ? vm.userName : 'Usuario', 
-                          style: TextStyle(color: c.onSurface, fontWeight: FontWeight.bold, fontSize: 14)),
-                      Text(vm.userRole, style: TextStyle(color: c.onSurfaceVariant, fontSize: 12)),
+                      Text(vm.userName.isNotEmpty ? vm.userName : 'Usuario',
+                          style: TextStyle(
+                              color: c.onSurface,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14)),
+                      Text(vm.userRole,
+                          style: TextStyle(
+                              color: c.onSurfaceVariant, fontSize: 12)),
                     ],
                   ),
                 ),
@@ -175,7 +179,8 @@ class _SupervisorBodyState extends State<_SupervisorBody>
                   value: 'profile',
                   child: Row(
                     children: [
-                      Icon(Icons.account_circle_outlined, color: c.onSurfaceVariant, size: 20),
+                      Icon(Icons.account_circle_outlined,
+                          color: c.onSurfaceVariant, size: 20),
                       const SizedBox(width: 12),
                       Text('Ver Perfil', style: TextStyle(color: c.onSurface)),
                     ],
@@ -186,12 +191,15 @@ class _SupervisorBodyState extends State<_SupervisorBody>
                   child: Row(
                     children: [
                       Icon(
-                        themeVm.isLight ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
+                        themeVm.isLight
+                            ? Icons.dark_mode_outlined
+                            : Icons.light_mode_outlined,
                         color: c.onSurfaceVariant,
                         size: 20,
                       ),
                       const SizedBox(width: 12),
-                      Text(themeVm.isLight ? 'Modo Oscuro' : 'Modo Claro', style: TextStyle(color: c.onSurface)),
+                      Text(themeVm.isLight ? 'Modo Oscuro' : 'Modo Claro',
+                          style: TextStyle(color: c.onSurface)),
                     ],
                   ),
                 ),
@@ -200,9 +208,13 @@ class _SupervisorBodyState extends State<_SupervisorBody>
                   value: 'logout',
                   child: Row(
                     children: [
-                      Icon(Icons.logout_rounded, color: Colors.redAccent, size: 20),
+                      Icon(Icons.logout_rounded,
+                          color: Colors.redAccent, size: 20),
                       const SizedBox(width: 12),
-                      Text('Cerrar Sesión', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w500)),
+                      Text('Cerrar Sesión',
+                          style: TextStyle(
+                              color: Colors.redAccent,
+                              fontWeight: FontWeight.w500)),
                     ],
                   ),
                 ),
@@ -225,17 +237,16 @@ class _SupervisorBodyState extends State<_SupervisorBody>
                 indicatorSize: TabBarIndicatorSize.tab,
                 dividerColor: Colors.transparent,
                 indicator: BoxDecoration(
-                  color: c.primary,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: c.primary.withValues(alpha: 0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    )
-                  ]
-                ),
-                labelColor: Colors.white,
+                    color: c.primary,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: c.primary.withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      )
+                    ]),
+                labelColor: c.onPrimary,
                 unselectedLabelColor: c.onSurfaceVariant,
                 labelStyle: const TextStyle(
                   fontFamily: 'Outfit',
@@ -347,11 +358,13 @@ class _SupervisorBodyState extends State<_SupervisorBody>
               onPressed: () async {
                 final result = await Navigator.push<bool>(
                   context,
-                  MaterialPageRoute(
-                      builder: (_) => const NuevoReclamoView()),
+                  MaterialPageRoute(builder: (_) => const NuevoReclamoView()),
                 );
                 if (result == true && mounted) {
-                  vm.cargarTodo(silent: false);
+                  if (_selectedSubTabIndex != 0) {
+                    setState(() => _selectedSubTabIndex = 0);
+                  }
+                  await vm.cargarTodo(silent: false);
                 }
               },
               icon: const Icon(Icons.add_rounded, size: 20),
@@ -380,20 +393,19 @@ class _SupervisorBodyState extends State<_SupervisorBody>
         ),
         Expanded(
           child: vm.loadingReclamos
-              ? Center(
-                  child: CircularProgressIndicator(color: c.primary))
+              ? Center(child: CircularProgressIndicator(color: c.primary))
               : IndexedStack(
                   index: _selectedSubTabIndex,
                   children: [
                     _buildListaPorEstado(c, vm.reclamosPendientes,
-                        'No hay reclamos pendientes',
-                        Icons.schedule_outlined),
-                    _buildListaPorEstado(c, vm.reclamosAsignados,
+                        'No hay reclamos pendientes', Icons.schedule_outlined),
+                    _buildListaPorEstado(
+                        c,
+                        vm.reclamosAsignados,
                         'No hay reclamos asignados',
                         Icons.assignment_turned_in_outlined),
                     _buildListaPorEstado(c, vm.reclamosCerrados,
-                        'No hay reclamos cerrados',
-                        Icons.check_circle_outline),
+                        'No hay reclamos cerrados', Icons.check_circle_outline),
                   ],
                 ),
         ),
@@ -434,7 +446,7 @@ class _SupervisorBodyState extends State<_SupervisorBody>
 
   Widget _buildSubTabs(AppColors c, SupervisorViewModel vm) {
     final tabs = [
-      ('PENDIENTES', vm.reclamosPendientes.length, const Color(0xFF0A2472)),
+      ('PENDIENTES', vm.reclamosPendientes.length, c.primary),
       ('ASIGNADOS', vm.reclamosAsignados.length, const Color(0xFFF59E0B)),
       ('CERRADOS', vm.reclamosCerrados.length, const Color(0xFF22C55E)),
     ];
@@ -477,8 +489,8 @@ class _SupervisorBodyState extends State<_SupervisorBody>
                   ),
                   const SizedBox(width: 6),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 6, vertical: 1),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                     decoration: BoxDecoration(
                       color: color.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
@@ -527,8 +539,7 @@ class _SupervisorBodyState extends State<_SupervisorBody>
                     const SizedBox(height: 12),
                     Text(
                       emptyMsg,
-                      style: TextStyle(
-                          color: c.onSurfaceVariant, fontSize: 14),
+                      style: TextStyle(color: c.onSurfaceVariant, fontSize: 14),
                     ),
                   ],
                 ),
@@ -580,12 +591,12 @@ class _SupervisorBodyState extends State<_SupervisorBody>
         supervisorRepository: context.read<SupervisorRepository>(),
       ),
       child: Consumer<SupervisorOsViewModel>(
-          builder: (context, vm, _) => OsInboxContent(
-            osActivas: vm.osActivas,
-            osArchivadas: vm.osArchivadas,
-            isLoading: vm.isLoading,
-            errorMessage: vm.errorMessage,
-            onRefresh: () async => await vm.cargarTodo(),
+        builder: (context, vm, _) => OsInboxContent(
+          osActivas: vm.osActivas,
+          osArchivadas: vm.osArchivadas,
+          isLoading: vm.isLoading,
+          errorMessage: vm.errorMessage,
+          onRefresh: () async => await vm.cargarTodo(),
           onTapActiva: (os) {
             Navigator.push(
               context,
@@ -611,9 +622,8 @@ class _SupervisorBodyState extends State<_SupervisorBody>
     final c = Theme.of(context).extension<AppColors>()!;
     final vm = context.watch<SupervisorViewModel>();
 
-    final agua = vm.cuadrillas
-        .where((cu) => (cu.especialidad ?? '') == 'Agua')
-        .toList();
+    final agua =
+        vm.cuadrillas.where((cu) => (cu.especialidad ?? '') == 'Agua').toList();
     final desague = vm.cuadrillas
         .where((cu) => (cu.especialidad ?? '') == 'Desagüe')
         .toList();
@@ -663,19 +673,19 @@ class _SupervisorBodyState extends State<_SupervisorBody>
           _buildHeader(c, vm),
           const SizedBox(height: 16),
           if (agua.isNotEmpty) ...[
-            _buildSectionLabel('Área de Distribución', c),
+            _buildSectionLabel('Agua', agua.length, c),
             const SizedBox(height: 8),
             ...agua.map((cu) => _buildCuadrillaCard(cu)),
             const SizedBox(height: 20),
           ],
           if (desague.isNotEmpty) ...[
-            _buildSectionLabel('Área de Mantenimiento', c),
+            _buildSectionLabel('Desagüe', desague.length, c),
             const SizedBox(height: 8),
             ...desague.map((cu) => _buildCuadrillaCard(cu)),
             const SizedBox(height: 20),
           ],
           if (sinClasificar.isNotEmpty) ...[
-            _buildSectionLabel('Sin clasificar', c),
+            _buildSectionLabel('Sin clasificar', sinClasificar.length, c),
             const SizedBox(height: 8),
             ...sinClasificar.map((cu) => _buildCuadrillaCard(cu)),
           ],
@@ -698,77 +708,90 @@ class _SupervisorBodyState extends State<_SupervisorBody>
       width: double.infinity,
       height: 48,
       child: FilledButton.tonalIcon(
-            style: FilledButton.styleFrom(
-              backgroundColor: c.primary.withValues(alpha: 0.12),
-              foregroundColor: c.primary,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            onPressed: () async {
-              final creada = await showNuevaCuadrillaModal(context);
-              if (creada == true) {
-                await vm.cargarTodo(silent: false);
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Cuadrilla creada correctamente'),
-                      backgroundColor: Color(0xFF22C55E),
-                    ),
-                  );
-                }
-              }
-            },
-            icon: const Icon(Icons.add_rounded, size: 20),
-            label: const Text(
-              'NUEVA CUADRILLA',
-              style: TextStyle(
-                fontFamily: 'Outfit',
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-                letterSpacing: 0.6,
-              ),
-            ),
+        style: FilledButton.styleFrom(
+          backgroundColor: c.primary.withValues(alpha: 0.12),
+          foregroundColor: c.primary,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
           ),
+        ),
+        onPressed: () async {
+          final creada = await showNuevaCuadrillaModal(context);
+          if (creada == true) {
+            await vm.cargarTodo(silent: false);
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Cuadrilla creada correctamente'),
+                  backgroundColor: Color(0xFF22C55E),
+                ),
+              );
+            }
+          }
+        },
+        icon: const Icon(Icons.add_rounded, size: 20),
+        label: const Text(
+          'NUEVA CUADRILLA',
+          style: TextStyle(
+            fontFamily: 'Outfit',
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+            letterSpacing: 0.6,
+          ),
+        ),
+      ),
     );
   }
 
-  Widget _buildSectionLabel(String text, AppColors c) {
+  Widget _buildSectionLabel(String text, int cantidad, AppColors c) {
     return Padding(
       padding: const EdgeInsets.only(left: 4, bottom: 4),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontFamily: 'Outfit',
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-          color: c.primary,
-        ),
+      child: Row(
+        children: [
+          Text(
+            text,
+            style: TextStyle(
+              fontFamily: 'Outfit',
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: c.primary,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              color: c.primary.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              '$cantidad',
+              style: TextStyle(
+                color: c.primary,
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildCuadrillaCard(Cuadrilla cu) {
     final c = Theme.of(context).extension<AppColors>()!;
-    
-    // Titulo
-    final nombreCompleto = cu.lider?.nombre ?? 'Sin líder';
-    final partesNombre = nombreCompleto.split(' ').where((s) => s.isNotEmpty).toList();
-    
-    String nombreFormateado = nombreCompleto;
-    if (partesNombre.length > 1) {
-      final inicial = partesNombre[0][0].toUpperCase();
-      final apellido = partesNombre[1];
-      nombreFormateado = '$inicial. $apellido';
-    } else if (partesNombre.isNotEmpty) {
-      nombreFormateado = partesNombre[0];
-    }
-
-    final codigoLimpio = (cu.codigoGrupo ?? cu.id.toString()).replaceAll('#', '').trim();
-    final titulo = nombreCompleto != 'Sin líder' ? '$codigoLimpio - $nombreFormateado' : codigoLimpio;
-
-    // Integrantes
-    final personal = (cu.lider != null ? 1 : 0) + cu.apoyos.length + (cu.chofer != null ? 1 : 0) + (cu.operador != null ? 1 : 0);
+    final identificador = cu.codigoGrupo?.trim().isNotEmpty == true
+        ? cu.codigoGrupo!.trim()
+        : 'Cuadrilla sin identificar';
+    final nombreLider = cu.lider?.nombre?.trim().isNotEmpty == true
+        ? cu.lider!.nombre!.trim()
+        : 'Sin líder asignado';
+    final palabras = nombreLider
+        .split(RegExp(r'\s+'))
+        .where((palabra) => palabra.isNotEmpty)
+        .take(2);
+    final iniciales =
+        palabras.map((palabra) => palabra[0]).join().toUpperCase();
 
     return Card(
       color: c.surface,
@@ -797,50 +820,82 @@ class _SupervisorBodyState extends State<_SupervisorBody>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Title
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
                     child: Text(
-                      titulo,
+                      identificador,
                       style: TextStyle(
                         color: c.onSurface,
                         fontFamily: 'Outfit',
                         fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                        fontSize: 17,
                       ),
                     ),
                   ),
-                  Icon(Icons.chevron_right_rounded, color: c.onSurfaceVariant),
                 ],
               ),
               const SizedBox(height: 12),
-              
-              // Carga Laboral (Placeholder till API supports it)
-              Row(
-                children: [
-                  Icon(Icons.assignment_outlined, size: 16, color: c.primary),
-                  const SizedBox(width: 8),
-                  Text(
-                    'O.S. Pendientes: 0', // TODO: Fetch from backend
-                    style: TextStyle(
-                      color: c.primary,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: c.background.withValues(alpha: 0.65),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 18,
+                      backgroundColor: c.primary.withValues(alpha: 0.14),
+                      child: Text(
+                        iniciales.isEmpty ? '—' : iniciales,
+                        style: TextStyle(
+                          color: c.primary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'LÍDER DE CUADRILLA',
+                            style: TextStyle(
+                              color: c.onSurfaceVariant,
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.7,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            nombreLider,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: c.onSurface,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 8),
-
-              // Personal operativo
+              const SizedBox(height: 10),
               Row(
                 children: [
-                  Icon(Icons.groups_outlined, size: 16, color: c.onSurfaceVariant),
+                  Icon(Icons.groups_outlined,
+                      size: 16, color: c.onSurfaceVariant),
                   const SizedBox(width: 8),
                   Text(
-                    'Personal operativo: $personal',
+                    '${cu.cantidadIntegrantes} integrantes',
                     style: TextStyle(
                       color: c.onSurfaceVariant,
                       fontSize: 13,
@@ -878,144 +933,39 @@ class _SupervisorBodyState extends State<_SupervisorBody>
       );
     }
 
-    int getCargoPriority(String? cargo) {
-      if (cargo == null) return 3;
-      final c = cargo.toUpperCase();
-      if (c.contains('OPERADOR')) return 0;
-      if (c.contains('CHOFER')) return 1;
-      return 2;
-    }
-
-    final distribucion = vm.gasfiteros
-        .where((t) => t.area == 'DISTRIBUCION')
-        .toList()
-      ..sort((a, b) {
-        final pA = getCargoPriority(a.cargo);
-        final pB = getCargoPriority(b.cargo);
-        if (pA != pB) return pA.compareTo(pB);
-        return (a.nombre ?? '').compareTo(b.nombre ?? '');
-      });
-
-    final mantenimiento = vm.gasfiteros
-        .where((t) => t.area == 'MANTENIMIENTO')
-        .toList()
-      ..sort((a, b) {
-        final pA = getCargoPriority(a.cargo);
-        final pB = getCargoPriority(b.cargo);
-        if (pA != pB) return pA.compareTo(pB);
-        return (a.nombre ?? '').compareTo(b.nombre ?? '');
-      });
-
-    return DefaultTabController(
-      length: 2,
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Container(
-              height: 44,
-              decoration: BoxDecoration(
-                color: c.surface,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: c.border),
-              ),
-              child: TabBar(
-                indicatorSize: TabBarIndicatorSize.tab,
-                dividerColor: Colors.transparent,
-                indicator: BoxDecoration(
-                  color: c.primary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                labelColor: c.primary,
-                unselectedLabelColor: c.onSurfaceVariant,
-                labelStyle: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Outfit',
-                  fontSize: 14,
-                ),
-                unselectedLabelStyle: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontFamily: 'Outfit',
-                  fontSize: 14,
-                ),
-                tabs: const [
-                  Tab(text: 'Distribución'),
-                  Tab(text: 'Mantenimiento'),
-                ],
-              ),
-            ),
-          ),
-          Expanded(
-            child: TabBarView(
-              children: [
-                _buildPersonalList(context, distribucion, c, vm),
-                _buildPersonalList(context, mantenimiento, c, vm),
-              ],
-            ),
-          ),
-        ],
-      ),
+    return _buildPersonalList(
+      context,
+      vm.personalMantenimientoOrdenado,
+      c,
+      vm,
     );
   }
 
-  Widget _buildPersonalList(BuildContext context, List<Gasfitero> gasfiteros, AppColors c, SupervisorViewModel vm) {
+  Widget _buildPersonalList(BuildContext context, List<Gasfitero> gasfiteros,
+      AppColors c, SupervisorViewModel vm) {
     if (gasfiteros.isEmpty) {
       return Center(
         child: Text(
           'No hay personal asignado',
-          style: TextStyle(color: c.onSurfaceVariant, fontWeight: FontWeight.w500),
+          style:
+              TextStyle(color: c.onSurfaceVariant, fontWeight: FontWeight.w500),
         ),
       );
     }
-    
-    final sortedList = List<Gasfitero>.from(gasfiteros);
-    sortedList.sort((a, b) {
-      final aAsignado = vm.cuadrillas.any((cu) => 
-        cu.lider?.id == a.id || cu.chofer?.id == a.id || cu.operador?.id == a.id || cu.apoyos.any((p) => p.id == a.id));
-      final bAsignado = vm.cuadrillas.any((cu) => 
-        cu.lider?.id == b.id || cu.chofer?.id == b.id || cu.operador?.id == b.id || cu.apoyos.any((p) => p.id == b.id));
-      
-      int getPriority(Gasfitero p, bool isAssigned) {
-        if (isAssigned) return 0;
-        final cargo = (p.cargo ?? '').toUpperCase();
-        if (cargo.contains('OPERADOR') || cargo.contains('CHOFER')) return 1;
-        return 2;
-      }
-
-      final pA = getPriority(a, aAsignado);
-      final pB = getPriority(b, bAsignado);
-
-      if (pA != pB) {
-        return pA.compareTo(pB);
-      }
-      return (a.nombre ?? '').compareTo(b.nombre ?? '');
-    });
 
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      itemCount: sortedList.length,
+      itemCount: gasfiteros.length,
       itemBuilder: (context, index) {
-        return _buildPersonalCard(context, c, sortedList[index], vm);
+        return _buildPersonalCard(context, c, gasfiteros[index], vm);
       },
     );
   }
 
-  Widget _buildPersonalCard(BuildContext context, AppColors c, Gasfitero t, SupervisorViewModel vm) {
-    String cargoTexto = t.cargo != null
-        ? t.cargo!
-            .replaceAll('_', ' ')
-            .split(' ')
-            .map((w) => '${w[0].toUpperCase()}${w.substring(1).toLowerCase()}')
-            .join(' ')
-        : 'Sin cargo asignado';
-
-    // Validación solicitada: Si es "Gasfitero Principal", verificar si realmente es líder de alguna cuadrilla
-    if (t.cargo == 'GASFITERO_PRINCIPAL') {
-      final esLider = vm.cuadrillas.any((cuadrilla) => cuadrilla.lider?.id == t.id);
-      if (!esLider) {
-        cargoTexto = 'Gasfitero';
-      }
-    }
+  Widget _buildPersonalCard(
+      BuildContext context, AppColors c, Gasfitero t, SupervisorViewModel vm) {
+    final cargoTexto = vm.cargoVisible(t);
+    final esPrincipal = vm.esGasfiteroPrincipal(t.id);
 
     String iniciales = '';
     if (t.nombre != null && t.nombre!.isNotEmpty) {
@@ -1029,17 +979,14 @@ class _SupervisorBodyState extends State<_SupervisorBody>
 
     String? nombreCuadrilla;
     String? codigoCuadrilla;
-    final cuadrillaAsignada = vm.cuadrillas.where((cu) {
-      if (cu.lider?.id == t.id) return true;
-      if (cu.chofer?.id == t.id) return true;
-      if (cu.operador?.id == t.id) return true;
-      if (cu.apoyos.any((a) => a.id == t.id)) return true;
-      return false;
-    }).firstOrNull;
-    
+    final cuadrillaAsignada = vm.cuadrillaDePersonal(t.id);
+
     if (cuadrillaAsignada != null) {
-      nombreCuadrilla = 'Cuadrilla ${cuadrillaAsignada.codigoGrupo ?? cuadrillaAsignada.id}';
-      codigoCuadrilla = cuadrillaAsignada.codigoGrupo ?? cuadrillaAsignada.id.toString();
+      nombreCuadrilla = cuadrillaAsignada.codigoGrupo?.trim().isNotEmpty == true
+          ? cuadrillaAsignada.codigoGrupo!.trim()
+          : cuadrillaAsignada.id.toString();
+      codigoCuadrilla =
+          cuadrillaAsignada.codigoGrupo ?? cuadrillaAsignada.id.toString();
     }
 
     return Card(
@@ -1055,7 +1002,6 @@ class _SupervisorBodyState extends State<_SupervisorBody>
             context,
             userName: t.nombre ?? 'Sin Nombre',
             role: cargoTexto,
-            dni: t.codigoEmpleado,
             cuadrilla: nombreCuadrilla,
           );
         },
@@ -1081,33 +1027,43 @@ class _SupervisorBodyState extends State<_SupervisorBody>
             fontSize: 15,
           ),
         ),
-        subtitle: Text(
-          cargoTexto,
-          style: TextStyle(
-            color: c.onSurfaceVariant,
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        trailing: codigoCuadrilla != null 
-          ? Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: c.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
+        subtitle: Row(
+          children: [
+            if (esPrincipal) ...[
+              Icon(Icons.star_rounded, size: 15, color: c.primary),
+              const SizedBox(width: 4),
+            ],
+            Expanded(
               child: Text(
-                codigoCuadrilla.toUpperCase().replaceAll('#', ''),
+                cargoTexto,
                 style: TextStyle(
-                  color: c.primary,
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Inter',
-                  letterSpacing: 0.5,
+                  color: esPrincipal ? c.primary : c.onSurfaceVariant,
+                  fontSize: 13,
+                  fontWeight: esPrincipal ? FontWeight.bold : FontWeight.w500,
                 ),
               ),
-            )
-          : null,
+            ),
+          ],
+        ),
+        trailing: codigoCuadrilla != null
+            ? Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: c.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  codigoCuadrilla.toUpperCase().replaceAll('#', ''),
+                  style: TextStyle(
+                    color: c.primary,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Inter',
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              )
+            : null,
       ),
     );
   }

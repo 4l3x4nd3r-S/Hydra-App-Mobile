@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../domain/enums/tipo_problema.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/status_chip.dart';
 
@@ -9,7 +10,7 @@ class OsListTileData {
   final String? tipoProblema;
   final String? descripcion;
   final String? direccion;
-  final String? cuadrilla;
+  final String? asignadoA;
   final String? estado;
   final bool isReadOnly;
   final VoidCallback? onTap;
@@ -21,7 +22,7 @@ class OsListTileData {
     this.tipoProblema,
     this.descripcion,
     this.direccion,
-    this.cuadrilla,
+    this.asignadoA,
     this.estado,
     this.isReadOnly = false,
     this.onTap,
@@ -64,13 +65,16 @@ class OsListTile extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
                             color: c.onSurfaceVariant.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
-                            data.numeroOrden != null ? 'Nº ${data.numeroOrden}' : 'Nº ${data.id}',
+                            data.numeroOrden != null
+                                ? 'N° ${data.numeroOrden}'
+                                : 'N° ${data.id}',
                             style: TextStyle(
                               color: c.onSurfaceVariant,
                               fontSize: 10,
@@ -78,15 +82,16 @@ class OsListTile extends StatelessWidget {
                             ),
                           ),
                         ),
-                        if (data.cuadrilla != null) ...[
+                        if (data.asignadoA != null) ...[
                           const SizedBox(height: 6),
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.engineering_outlined, size: 14, color: c.onSurface),
+                              Icon(Icons.engineering_outlined,
+                                  size: 14, color: c.onSurface),
                               const SizedBox(width: 4),
                               Text(
-                                data.cuadrilla!,
+                                data.asignadoA!,
                                 style: TextStyle(
                                   color: c.onSurface,
                                   fontSize: 12,
@@ -125,7 +130,8 @@ class OsListTile extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.location_on_outlined, size: 16, color: c.onSurfaceVariant),
+                  Icon(Icons.location_on_outlined,
+                      size: 16, color: c.onSurfaceVariant),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
@@ -148,13 +154,15 @@ class OsListTile extends StatelessWidget {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
                       color: c.primary.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      data.tipoProblema!.toUpperCase(),
+                      TipoProblema.etiquetaDescriptiva(data.tipoProblema)
+                          .toUpperCase(),
                       style: TextStyle(
                         color: c.primary,
                         fontSize: 10,
@@ -177,7 +185,8 @@ class OsListTile extends StatelessWidget {
                   Expanded(
                     child: Row(
                       children: [
-                        Icon(Icons.calendar_today_outlined, size: 14, color: c.onSurfaceVariant),
+                        Icon(Icons.calendar_today_outlined,
+                            size: 14, color: c.onSurfaceVariant),
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(
@@ -213,13 +222,16 @@ class OsListTile extends StatelessWidget {
       final dia = date.day.toString().padLeft(2, '0');
       final mes = date.month.toString().padLeft(2, '0');
       final anio = date.year.toString();
-      
+
       int hora = date.hour;
       final minuto = date.minute.toString().padLeft(2, '0');
       final ampm = hora >= 12 ? 'PM' : 'AM';
-      
-      if (hora == 0) hora = 12;
-      else if (hora > 12) hora -= 12;
+
+      if (hora == 0) {
+        hora = 12;
+      } else if (hora > 12) {
+        hora -= 12;
+      }
       final horaStr = hora.toString().padLeft(2, '0');
 
       return 'Programado: $dia/$mes/$anio - $horaStr:$minuto $ampm';

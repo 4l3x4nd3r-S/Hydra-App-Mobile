@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../domain/enums/tipo_problema.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/status_chip.dart';
 import 'reclamo_tile_data.dart';
@@ -15,7 +16,6 @@ class ReclamoListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return Card(
       color: c.surface,
       margin: const EdgeInsets.only(bottom: 8),
@@ -40,7 +40,7 @@ class ReclamoListTile extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          data.codigoSolicitud != null ? 'Solicitud N° ${data.codigoSolicitud}' : 'Solicitud N° ${data.id}',
+                          'Solicitud N° ${data.codigoSolicitud ?? '-----'}',
                           style: TextStyle(
                             color: c.onSurfaceVariant,
                             fontSize: 12,
@@ -63,7 +63,8 @@ class ReclamoListTile extends StatelessWidget {
                     children: [
                       if (data.formato != null) ...[
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
                             color: c.primary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(4),
@@ -107,7 +108,8 @@ class ReclamoListTile extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.location_on_outlined, size: 16, color: c.onSurfaceVariant),
+                  Icon(Icons.location_on_outlined,
+                      size: 16, color: c.onSurfaceVariant),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
@@ -130,13 +132,15 @@ class ReclamoListTile extends StatelessWidget {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
                       color: c.primary.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      data.tipoProblema!.toUpperCase(),
+                      TipoProblema.etiquetaDescriptiva(data.tipoProblema)
+                          .toUpperCase(),
                       style: TextStyle(
                         color: c.primary,
                         fontSize: 10,
@@ -160,7 +164,8 @@ class ReclamoListTile extends StatelessWidget {
                   Expanded(
                     child: Row(
                       children: [
-                        Icon(Icons.person_outline, size: 16, color: c.onSurfaceVariant),
+                        Icon(Icons.person_outline,
+                            size: 16, color: c.onSurfaceVariant),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
@@ -215,7 +220,8 @@ class ReclamoListTile extends StatelessWidget {
       if (estado == 'PENDIENTE') return 'Hace $timeText';
       if (estado == 'ASIGNADO') return 'Asignado hace $timeText';
       if (estado == 'CERRADO') {
-        final date = '${fecha.day.toString().padLeft(2, '0')}/${fecha.month.toString().padLeft(2, '0')}';
+        final date =
+            '${fecha.day.toString().padLeft(2, '0')}/${fecha.month.toString().padLeft(2, '0')}';
         return 'Resuelto el $date';
       }
       return 'Hace $timeText';

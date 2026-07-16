@@ -52,46 +52,21 @@ class _NuevaCuadrillaModal extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            _buildLabel('Nombre de la Cuadrilla', c),
-            const SizedBox(height: 6),
-            TextField(
-              controller: vm.nombreController,
-              style: TextStyle(color: c.onSurface),
-              decoration: InputDecoration(
-                hintText: 'Ej: Grupo 1, Cuadrilla Alfa',
-                hintStyle: TextStyle(
-                  color: c.onSurfaceVariant.withValues(alpha: 0.5),
-                ),
-                filled: true,
-                fillColor: c.background,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: c.border),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: c.primary),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            _buildLabel('Especialidad / Área', c),
+            _buildLabel('Especialidad', c),
             const SizedBox(height: 6),
             Row(
-              children: EspecialidadOption.all.map(
-                (opcion) => Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      right: opcion == EspecialidadOption.distribucion ? 8.0 : 0,
+              children: EspecialidadOption.all
+                  .map(
+                    (opcion) => Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          right: opcion == EspecialidadOption.agua ? 8.0 : 0,
+                        ),
+                        child: _buildEspecialidadChip(vm, opcion, c),
+                      ),
                     ),
-                    child: _buildEspecialidadChip(vm, opcion, c),
-                  ),
-                ),
-              ).toList(),
+                  )
+                  .toList(),
             ),
             const SizedBox(height: 20),
             if (vm.loadingGasfiteros)
@@ -108,7 +83,7 @@ class _NuevaCuadrillaModal extends StatelessWidget {
                 c: c,
                 icon: Icons.star_rounded,
                 label: 'Gasfitero Principal',
-                color: const Color(0xFF0A2472),
+                color: c.primary,
                 persona: vm.lider,
                 onSelect: (t) => vm.setLider(t),
                 required: true,
@@ -123,9 +98,9 @@ class _NuevaCuadrillaModal extends StatelessWidget {
                 label: 'Gasfiteros de Apoyo',
                 color: const Color(0xFF64748B),
                 selected: vm.apoyos,
-                onToggle: (t) => vm.toggleApoyo(t),
               ),
-              if (vm.especialidad.value == 'Agua' && vm.operadoresDisponibles.isNotEmpty) ...[
+              if (vm.especialidad.value == 'Agua' &&
+                  vm.operadoresDisponibles.isNotEmpty) ...[
                 const SizedBox(height: 14),
                 _buildPersonSelector(
                   context,
@@ -141,7 +116,8 @@ class _NuevaCuadrillaModal extends StatelessWidget {
                   list: vm.operadoresDisponibles,
                 ),
               ],
-              if (vm.especialidad.value == 'Desagüe' && vm.choferesDisponibles.isNotEmpty) ...[
+              if (vm.especialidad.value == 'Desagüe' &&
+                  vm.choferesDisponibles.isNotEmpty) ...[
                 const SizedBox(height: 14),
                 _buildPersonSelector(
                   context,
@@ -185,18 +161,18 @@ class _NuevaCuadrillaModal extends StatelessWidget {
                       }
                     : null,
                 child: vm.submitting
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 22,
                         height: 22,
                         child: CircularProgressIndicator(
-                          color: Colors.white,
+                          color: c.onPrimary,
                           strokeWidth: 2.4,
                         ),
                       )
-                    : const Text(
+                    : Text(
                         'CREAR CUADRILLA',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: c.onPrimary,
                           fontWeight: FontWeight.bold,
                           fontSize: 15,
                           fontFamily: 'Outfit',
@@ -312,10 +288,15 @@ class _NuevaCuadrillaModal extends StatelessWidget {
         const SizedBox(height: 6),
         InkWell(
           borderRadius: BorderRadius.circular(10),
-          onTap: () => _showSelector(ctx, vm, c, label, (t) {
-            onSelect(t);
-            Navigator.pop(ctx);
-          }, list),
+          onTap: () => _showSelector(
+            ctx,
+            vm,
+            c,
+            label,
+            persona,
+            onSelect,
+            list,
+          ),
           child: Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -333,8 +314,15 @@ class _NuevaCuadrillaModal extends StatelessWidget {
                     children: [
                       CircleAvatar(
                         backgroundColor: color.withValues(alpha: 0.15),
-                        radius: 16,
-                        child: Icon(Icons.person, color: color, size: 16),
+                        radius: 18,
+                        child: Text(
+                          _initials(persona.nombre),
+                          style: TextStyle(
+                            color: color,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
@@ -352,32 +340,32 @@ class _NuevaCuadrillaModal extends StatelessWidget {
                                 fontSize: 13,
                               ),
                             ),
-                            if (persona.codigoEmpleado != null)
-                              Text(
-                                persona.codigoEmpleado!,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: c.onSurfaceVariant,
-                                  fontSize: 11,
-                                ),
+                            Text(
+                              'Toca para cambiar',
+                              style: TextStyle(
+                                color: c.onSurfaceVariant,
+                                fontSize: 10,
                               ),
+                            ),
                           ],
                         ),
                       ),
-                      Icon(Icons.chevron_right_rounded, color: c.onSurfaceVariant, size: 20),
+                      Icon(Icons.edit_rounded, color: color, size: 18),
                     ],
                   )
                 : Row(
                     children: [
-                      Icon(Icons.person_add_rounded, color: c.onSurfaceVariant, size: 18),
+                      Icon(Icons.person_add_rounded,
+                          color: c.onSurfaceVariant, size: 18),
                       const SizedBox(width: 8),
                       Text(
                         'Seleccionar...',
-                        style: TextStyle(color: c.onSurfaceVariant, fontSize: 13),
+                        style:
+                            TextStyle(color: c.onSurfaceVariant, fontSize: 13),
                       ),
                       const Spacer(),
-                      Icon(Icons.chevron_right_rounded, color: c.onSurfaceVariant, size: 20),
+                      Icon(Icons.chevron_right_rounded,
+                          color: c.onSurfaceVariant, size: 20),
                     ],
                   ),
           ),
@@ -394,7 +382,6 @@ class _NuevaCuadrillaModal extends StatelessWidget {
     required String label,
     required Color color,
     required List<Gasfitero> selected,
-    required void Function(Gasfitero) onToggle,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -420,240 +407,711 @@ class _NuevaCuadrillaModal extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 6),
-        if (selected.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 6),
-            child: Wrap(
-              spacing: 6,
-              runSpacing: 4,
-              children: selected
-                  .map((t) => Chip(
-                        backgroundColor: color.withValues(alpha: 0.1),
-                        side: BorderSide(color: color.withValues(alpha: 0.3)),
-                        label: Text(
-                          t.nombre ?? '',
-                          style: TextStyle(fontSize: 11, color: color),
-                        ),
-                        deleteIcon: Icon(Icons.close_rounded, size: 16, color: color),
-                        onDeleted: () => onToggle(t),
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        visualDensity: VisualDensity.compact,
-                      ))
-                  .toList(),
-            ),
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: c.background,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: c.border),
           ),
-        InkWell(
-          borderRadius: BorderRadius.circular(10),
-          onTap: () => _showMultiSelector(ctx, vm, c, onToggle),
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: BoxDecoration(
-              color: c.background,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: c.border),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.person_add_rounded, color: c.onSurfaceVariant, size: 18),
-                const SizedBox(width: 8),
-                Text(
-                  selected.isEmpty ? 'Agregar apoyos (+)' : 'Gestionar apoyos',
-                  style: TextStyle(color: c.onSurfaceVariant, fontSize: 13),
-                ),
-                const Spacer(),
-                if (selected.isNotEmpty)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: color,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text(
-                      '${selected.length}',
-                      style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+          child: Column(
+            children: [
+              if (selected.isNotEmpty)
+                ...selected.map(
+                  (persona) => Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 8, 6, 8),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 15,
+                          backgroundColor: color.withValues(alpha: 0.14),
+                          child: Text(
+                            _initials(persona.nombre),
+                            style: TextStyle(
+                              color: color,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 9),
+                        Expanded(
+                          child: Text(
+                            persona.nombre ?? 'Sin nombre',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: c.onSurface,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          tooltip: 'Quitar apoyo',
+                          visualDensity: VisualDensity.compact,
+                          icon: Icon(
+                            Icons.close_rounded,
+                            color: c.onSurfaceVariant,
+                            size: 18,
+                          ),
+                          onPressed: () => vm.toggleApoyo(persona),
+                        ),
+                      ],
                     ),
                   ),
-                const SizedBox(width: 4),
-                Icon(Icons.chevron_right_rounded, color: c.onSurfaceVariant, size: 20),
-              ],
-            ),
+                ),
+              if (selected.isNotEmpty) Divider(height: 1, color: c.border),
+              InkWell(
+                borderRadius: BorderRadius.circular(10),
+                onTap: () => _showMultiSelector(ctx, vm, c),
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                  child: Row(
+                    children: [
+                      Icon(
+                        selected.isEmpty
+                            ? Icons.group_add_rounded
+                            : Icons.edit_rounded,
+                        color: c.primary,
+                        size: 19,
+                      ),
+                      const SizedBox(width: 9),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              selected.isEmpty
+                                  ? 'Seleccionar gasfiteros'
+                                  : 'Editar selección',
+                              style: TextStyle(
+                                color: c.onSurface,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            if (selected.isEmpty)
+                              Text(
+                                'Elige uno o más integrantes de apoyo',
+                                style: TextStyle(
+                                  color: c.onSurfaceVariant,
+                                  fontSize: 11,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      if (selected.isNotEmpty)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 7,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: c.primary.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '${selected.length}',
+                            style: TextStyle(
+                              color: c.primary,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      const SizedBox(width: 4),
+                      Icon(
+                        Icons.chevron_right_rounded,
+                        color: c.onSurfaceVariant,
+                        size: 20,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ],
     );
   }
 
-  void _showSelector(
+  String _initials(String? name) {
+    final parts = (name ?? '')
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((part) => part.isNotEmpty)
+        .take(2);
+    final initials = parts.map((part) => part[0]).join().toUpperCase();
+    return initials.isEmpty ? '—' : initials;
+  }
+
+  Future<void> _showSelector(
     BuildContext ctx,
     NuevaCuadrillaViewModel vm,
     AppColors c,
     String title,
-    void Function(Gasfitero) onSelect,
+    Gasfitero? current,
+    void Function(Gasfitero?) onSelect,
     List<Gasfitero> gasfiteros,
-  ) {
-    showModalBottomSheet(
-      context: ctx,
-      isScrollControlled: true,
-      backgroundColor: c.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(ctx).size.height * 0.75,
-      ),
-      builder: (subCtx) => ChangeNotifierProvider.value(
-        value: vm,
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Seleccionar $title',
-                style: TextStyle(
-                  fontFamily: 'Outfit',
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: c.onSurface,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Área: ${vm.especialidad.label}',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: c.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Flexible(
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (gasfiteros.isEmpty)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 20),
-                          child: Text(
-                            'No hay gasfiteros disponibles',
-                            style: TextStyle(color: c.onSurfaceVariant),
-                          ),
-                        ),
-                      ...gasfiteros.map((t) => ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor: c.primary.withValues(alpha: 0.15),
-                              child: Icon(Icons.person, color: c.primary),
-                            ),
-                            title: Text(
-                              t.nombre ?? '-',
-                              style: TextStyle(color: c.onSurface, fontWeight: FontWeight.bold),
-                            ),
-                            subtitle: Text(
-                              t.codigoEmpleado ?? '',
-                              style: TextStyle(color: c.onSurfaceVariant, fontSize: 12),
-                            ),
-                            onTap: () => onSelect(t),
-                          )),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  ) async {
+    final searchController = TextEditingController();
+    final candidates = <Gasfitero>[
+      if (current != null) current,
+      ...gasfiteros.where((persona) => persona.id != current?.id),
+    ]..sort((a, b) => (a.nombre ?? '')
+        .toLowerCase()
+        .compareTo((b.nombre ?? '').toLowerCase()));
+    int? selectedId = current?.id;
 
-  void _showMultiSelector(
-    BuildContext ctx,
-    NuevaCuadrillaViewModel vm,
-    AppColors c,
-    void Function(Gasfitero) onToggle,
-  ) {
-    final gasfiteros = vm.gasfiterosDisponiblesParaApoyos;
-    showModalBottomSheet(
+    await showModalBottomSheet<void>(
       context: ctx,
       isScrollControlled: true,
       backgroundColor: c.surface,
+      useSafeArea: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(ctx).size.height * 0.75,
+        maxHeight: MediaQuery.of(ctx).size.height * 0.82,
       ),
-      builder: (subCtx) => ChangeNotifierProvider.value(
-        value: vm,
-        child: Consumer<NuevaCuadrillaViewModel>(
-          builder: (consumerCtx, consumerVm, _) => Padding(
-            padding: const EdgeInsets.all(20),
+      builder: (subCtx) => StatefulBuilder(
+        builder: (modalContext, setModalState) {
+          final query = searchController.text.trim().toLowerCase();
+          final filtered = query.isEmpty
+              ? candidates
+              : candidates
+                  .where(
+                    (persona) =>
+                        (persona.nombre ?? '').toLowerCase().contains(query),
+                  )
+                  .toList();
+
+          return Padding(
+            padding: EdgeInsets.fromLTRB(
+              20,
+              10,
+              20,
+              16 + MediaQuery.of(modalContext).viewInsets.bottom,
+            ),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Seleccionar Apoyos',
-                  style: TextStyle(
-                    fontFamily: 'Outfit',
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: c.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Área: ${vm.especialidad.label}',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: c.onSurfaceVariant,
+                Container(
+                  width: 38,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: c.border,
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
                 const SizedBox(height: 16),
-                Flexible(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (gasfiteros.isEmpty)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 20),
-                            child: Text(
-                              'No hay mas gasfiteros disponibles',
-                              style: TextStyle(color: c.onSurfaceVariant),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Seleccionar $title',
+                            style: TextStyle(
+                              fontFamily: 'Outfit',
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: c.onSurface,
                             ),
                           ),
-                        ...gasfiteros.map((t) {
-                          final estaSeleccionado =
-                              consumerVm.apoyos.any((e) => e.id == t.id);
-                          return CheckboxListTile(
-                            activeColor: c.primary,
-                            value: estaSeleccionado,
-                            onChanged: (_) => onToggle(t),
-                            title: Text(
-                              t.nombre ?? '-',
-                              style: TextStyle(
-                                  color: c.onSurface, fontWeight: FontWeight.bold),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Solo puedes seleccionar una persona · ${vm.especialidad.label}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: c.onSurfaceVariant,
                             ),
-                            subtitle: Text(
-                              t.codigoEmpleado ?? '',
-                              style:
-                                  TextStyle(color: c.onSurfaceVariant, fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: 'Cerrar',
+                      onPressed: () => Navigator.pop(modalContext),
+                      icon: Icon(
+                        Icons.close_rounded,
+                        color: c.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                TextField(
+                  controller: searchController,
+                  onChanged: (_) => setModalState(() {}),
+                  style: TextStyle(color: c.onSurface, fontSize: 14),
+                  decoration: InputDecoration(
+                    hintText: 'Buscar por nombre',
+                    hintStyle: TextStyle(color: c.onSurfaceVariant),
+                    prefixIcon: Icon(
+                      Icons.search_rounded,
+                      color: c.onSurfaceVariant,
+                    ),
+                    suffixIcon: query.isEmpty
+                        ? null
+                        : IconButton(
+                            tooltip: 'Limpiar búsqueda',
+                            onPressed: () {
+                              searchController.clear();
+                              setModalState(() {});
+                            },
+                            icon: Icon(
+                              Icons.close_rounded,
+                              color: c.onSurfaceVariant,
                             ),
-                          );
-                        }),
-                      ],
+                          ),
+                    filled: true,
+                    fillColor: c.background,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: c.border),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: c.border),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: c.primary, width: 1.5),
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
+                Expanded(
+                  child: filtered.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                query.isEmpty
+                                    ? Icons.person_off_outlined
+                                    : Icons.search_off_rounded,
+                                color: c.onSurfaceVariant,
+                                size: 36,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                query.isEmpty
+                                    ? 'No hay gasfiteros disponibles'
+                                    : 'No se encontraron resultados',
+                                style: TextStyle(color: c.onSurfaceVariant),
+                              ),
+                            ],
+                          ),
+                        )
+                      : ListView.separated(
+                          itemCount: filtered.length,
+                          separatorBuilder: (_, __) =>
+                              Divider(height: 1, color: c.border),
+                          itemBuilder: (context, index) {
+                            final persona = filtered[index];
+                            final isSelected = selectedId == persona.id;
+                            return InkWell(
+                              onTap: () => setModalState(() {
+                                selectedId = persona.id;
+                              }),
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 9),
+                                child: Row(
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 20,
+                                      backgroundColor:
+                                          c.primary.withValues(alpha: 0.12),
+                                      child: Text(
+                                        _initials(persona.nombre),
+                                        style: TextStyle(
+                                          color: c.primary,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        persona.nombre ?? 'Sin nombre',
+                                        style: TextStyle(
+                                          color: c.onSurface,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                    AnimatedContainer(
+                                      duration:
+                                          const Duration(milliseconds: 160),
+                                      width: 22,
+                                      height: 22,
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: isSelected
+                                              ? c.primary
+                                              : c.onSurfaceVariant,
+                                          width: isSelected ? 2 : 1.5,
+                                        ),
+                                      ),
+                                      child: isSelected
+                                          ? DecoratedBox(
+                                              decoration: BoxDecoration(
+                                                color: c.primary,
+                                                shape: BoxShape.circle,
+                                              ),
+                                            )
+                                          : null,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(modalContext),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: c.onSurface,
+                          side: BorderSide(color: c.border),
+                          minimumSize: const Size.fromHeight(48),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text('Cancelar'),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      flex: 2,
+                      child: ElevatedButton(
+                        onPressed: selectedId == null
+                            ? null
+                            : () {
+                                final selected = candidates.firstWhere(
+                                  (persona) => persona.id == selectedId,
+                                );
+                                onSelect(selected);
+                                Navigator.pop(modalContext);
+                              },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: c.primary,
+                          foregroundColor: c.onPrimary,
+                          disabledBackgroundColor:
+                              c.primary.withValues(alpha: 0.35),
+                          minimumSize: const Size.fromHeight(48),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          'Confirmar selección',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
+
+    searchController.dispose();
+  }
+
+  Future<void> _showMultiSelector(
+    BuildContext ctx,
+    NuevaCuadrillaViewModel vm,
+    AppColors c,
+  ) async {
+    final searchController = TextEditingController();
+    final gasfiteros = [...vm.gasfiterosDisponiblesParaApoyos]..sort((a, b) =>
+        (a.nombre ?? '')
+            .toLowerCase()
+            .compareTo((b.nombre ?? '').toLowerCase()));
+    final selectedIds = vm.apoyos.map((persona) => persona.id).toSet();
+
+    await showModalBottomSheet<void>(
+      context: ctx,
+      isScrollControlled: true,
+      backgroundColor: c.surface,
+      useSafeArea: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(ctx).size.height * 0.82,
+      ),
+      builder: (subCtx) => StatefulBuilder(
+        builder: (modalContext, setModalState) {
+          final query = searchController.text.trim().toLowerCase();
+          final filtered = query.isEmpty
+              ? gasfiteros
+              : gasfiteros
+                  .where(
+                    (persona) =>
+                        (persona.nombre ?? '').toLowerCase().contains(query),
+                  )
+                  .toList();
+
+          return Padding(
+            padding: EdgeInsets.fromLTRB(
+              20,
+              10,
+              20,
+              16 + MediaQuery.of(modalContext).viewInsets.bottom,
+            ),
+            child: Column(
+              children: [
+                Container(
+                  width: 38,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: c.border,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Gasfiteros de apoyo',
+                            style: TextStyle(
+                              fontFamily: 'Outfit',
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: c.onSurface,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            selectedIds.isEmpty
+                                ? 'Selecciona uno o más integrantes'
+                                : '${selectedIds.length} seleccionado${selectedIds.length == 1 ? '' : 's'}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: c.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: 'Cerrar',
+                      onPressed: () => Navigator.pop(modalContext),
+                      icon: Icon(
+                        Icons.close_rounded,
+                        color: c.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                TextField(
+                  controller: searchController,
+                  onChanged: (_) => setModalState(() {}),
+                  style: TextStyle(color: c.onSurface, fontSize: 14),
+                  decoration: InputDecoration(
+                    hintText: 'Buscar por nombre',
+                    hintStyle: TextStyle(color: c.onSurfaceVariant),
+                    prefixIcon: Icon(
+                      Icons.search_rounded,
+                      color: c.onSurfaceVariant,
+                    ),
+                    suffixIcon: query.isEmpty
+                        ? null
+                        : IconButton(
+                            tooltip: 'Limpiar búsqueda',
+                            onPressed: () {
+                              searchController.clear();
+                              setModalState(() {});
+                            },
+                            icon: Icon(
+                              Icons.close_rounded,
+                              color: c.onSurfaceVariant,
+                            ),
+                          ),
+                    filled: true,
+                    fillColor: c.background,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: c.border),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: c.border),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: c.primary, width: 1.5),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Expanded(
+                  child: filtered.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                query.isEmpty
+                                    ? Icons.group_off_outlined
+                                    : Icons.search_off_rounded,
+                                color: c.onSurfaceVariant,
+                                size: 36,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                query.isEmpty
+                                    ? 'No hay gasfiteros disponibles'
+                                    : 'No se encontraron resultados',
+                                style: TextStyle(color: c.onSurfaceVariant),
+                              ),
+                            ],
+                          ),
+                        )
+                      : ListView.separated(
+                          itemCount: filtered.length,
+                          separatorBuilder: (_, __) =>
+                              Divider(height: 1, color: c.border),
+                          itemBuilder: (context, index) {
+                            final persona = filtered[index];
+                            final isSelected = selectedIds.contains(persona.id);
+                            return InkWell(
+                              onTap: () => setModalState(() {
+                                if (isSelected) {
+                                  selectedIds.remove(persona.id);
+                                } else {
+                                  selectedIds.add(persona.id);
+                                }
+                              }),
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 9),
+                                child: Row(
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 20,
+                                      backgroundColor:
+                                          c.primary.withValues(alpha: 0.12),
+                                      child: Text(
+                                        _initials(persona.nombre),
+                                        style: TextStyle(
+                                          color: c.primary,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        persona.nombre ?? 'Sin nombre',
+                                        style: TextStyle(
+                                          color: c.onSurface,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                    Checkbox(
+                                      value: isSelected,
+                                      activeColor: c.primary,
+                                      onChanged: (_) => setModalState(() {
+                                        if (isSelected) {
+                                          selectedIds.remove(persona.id);
+                                        } else {
+                                          selectedIds.add(persona.id);
+                                        }
+                                      }),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(modalContext),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: c.onSurface,
+                          side: BorderSide(color: c.border),
+                          minimumSize: const Size.fromHeight(48),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text('Cancelar'),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      flex: 2,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          vm.setApoyos(
+                            gasfiteros.where(
+                              (persona) => selectedIds.contains(persona.id),
+                            ),
+                          );
+                          Navigator.pop(modalContext);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: c.primary,
+                          foregroundColor: c.onPrimary,
+                          minimumSize: const Size.fromHeight(48),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Text(
+                          selectedIds.isEmpty
+                              ? 'Confirmar'
+                              : 'Confirmar (${selectedIds.length})',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+
+    searchController.dispose();
   }
 }

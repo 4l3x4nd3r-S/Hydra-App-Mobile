@@ -4,6 +4,13 @@ import '../../../../domain/use_cases/save_os_report_use_case.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 
+enum LocationError {
+  serviceDisabled,
+  permissionDenied,
+  permissionDeniedForever,
+  unknown,
+}
+
 class OsExecutionViewModel extends ChangeNotifier {
   final Os os;
   final SaveOsReportUseCase _saveOsReportUseCase;
@@ -11,77 +18,145 @@ class OsExecutionViewModel extends ChangeNotifier {
   final TextEditingController insumosController = TextEditingController();
   final TextEditingController observacionesController = TextEditingController();
   final TextEditingController evidenciasController = TextEditingController();
-  
-  final TextEditingController trabajoEjecutadoController = TextEditingController();
-  final TextEditingController problemasSolucionesController = TextEditingController();
-  final TextEditingController comentariosInstruccionesController = TextEditingController();
+
+  final TextEditingController trabajoEjecutadoController =
+      TextEditingController();
+  final TextEditingController problemasSolucionesController =
+      TextEditingController();
+  final TextEditingController comentariosInstruccionesController =
+      TextEditingController();
 
   final ImagePicker _picker = ImagePicker();
-  
+
   double? latitud;
   double? longitud;
   bool isLocating = false;
 
-  List<String> fotosProblema = [];
-  List<String> fotosSolucion = [];
+  final List<String> _fotosProblema = [];
+  List<String> get fotosProblema => List.unmodifiable(_fotosProblema);
+
+  final List<String> _fotosSolucion = [];
+  List<String> get fotosSolucion => List.unmodifiable(_fotosSolucion);
 
   DateTime? fechaInicio;
   DateTime? fechaFin;
 
   String? _errorMsg;
+  LocationError? _lastLocationError;
 
   String? get errorMsg => _errorMsg;
+  LocationError? get lastLocationError => _lastLocationError;
 
   OsExecutionViewModel({
     required this.os,
     required SaveOsReportUseCase saveOsReportUseCase,
   }) : _saveOsReportUseCase = saveOsReportUseCase {
-    if (os.fechaEjecucionInicio != null && os.fechaEjecucionInicio!.isNotEmpty) {
+    if (os.fechaEjecucionInicio != null &&
+        os.fechaEjecucionInicio!.isNotEmpty) {
       fechaInicio = DateTime.tryParse(os.fechaEjecucionInicio!)?.toLocal();
     }
     fechaFin = DateTime.now();
   }
 
-  void updateFechaInicio(DateTime date) {
+  bool updateFechaInicio(DateTime date) {
+    if (_isBeforeCurrentMinute(date)) {
+      _errorMsg = 'La fecha y hora de inicio no pueden estar en el pasado';
+      notifyListeners();
+      return false;
+    }
+
     fechaInicio = date;
+    if (fechaFin == null || !fechaFin!.isAfter(date)) {
+      fechaFin = date.add(const Duration(minutes: 1));
+    }
+    _errorMsg = null;
     notifyListeners();
+    return true;
   }
 
-  void updateFechaFin(DateTime date) {
+  bool updateFechaFin(DateTime date) {
+    if (_isBeforeCurrentMinute(date)) {
+      _errorMsg =
+          'La fecha y hora de finalización no pueden estar en el pasado';
+      notifyListeners();
+      return false;
+    }
+    if (fechaInicio != null && !date.isAfter(fechaInicio!)) {
+      _errorMsg =
+          'La finalización debe ser posterior a la fecha y hora de inicio';
+      notifyListeners();
+      return false;
+    }
+
     fechaFin = date;
+    _errorMsg = null;
     notifyListeners();
+    return true;
+  }
+
+  bool _isBeforeCurrentMinute(DateTime date) {
+    final now = DateTime.now();
+    final currentMinute = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      now.hour,
+      now.minute,
+    );
+    return date.isBefore(currentMinute);
+  }
+
+  Future<void> openLocationSettings() async {
+    await Geolocator.openLocationSettings();
+  }
+
+  Future<void> openAppSettings() async {
+    await Geolocator.openAppSettings();
   }
 
   Future<void> recordLocation() async {
     isLocating = true;
     _errorMsg = null;
+    _lastLocationError = null;
     notifyListeners();
 
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        throw Exception('Los servicios de ubicacion estan deshabilitados.');
+        _lastLocationError = LocationError.serviceDisabled;
+        throw Exception(
+            'El GPS esta desactivado. Activalo para grabar tu ubicacion.');
       }
 
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
-          throw Exception('Los permisos de ubicacion fueron denegados.');
+          _lastLocationError = LocationError.permissionDenied;
+          throw Exception(
+              'Necesitamos permiso de ubicacion para grabar tu ubicacion.');
         }
       }
-      
+
       if (permission == LocationPermission.deniedForever) {
-        throw Exception('Los permisos de ubicacion estan denegados permanentemente.');
+        _lastLocationError = LocationError.permissionDeniedForever;
+        throw Exception(
+            'El permiso de ubicacion esta bloqueado. Activalo en ajustes.');
       }
 
       Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
-      
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
+      );
+
       latitud = position.latitude;
       longitud = position.longitude;
     } catch (e) {
-      _errorMsg = 'Error al obtener la ubicación';
+      _errorMsg = e is Exception
+          ? e.toString().replaceFirst('Exception: ', '')
+          : 'Error al obtener la ubicacion';
+      _lastLocationError ??= LocationError.unknown;
     } finally {
       isLocating = false;
       notifyListeners();
@@ -92,7 +167,8 @@ class OsExecutionViewModel extends ChangeNotifier {
     try {
       final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
       if (photo != null) {
-        fotosProblema.add(photo.path);
+        _fotosProblema.add(photo.path);
+        _errorMsg = null;
         notifyListeners();
       }
     } catch (e) {
@@ -105,7 +181,8 @@ class OsExecutionViewModel extends ChangeNotifier {
     try {
       final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
       if (photo != null) {
-        fotosSolucion.add(photo.path);
+        _fotosSolucion.add(photo.path);
+        _errorMsg = null;
         notifyListeners();
       }
     } catch (e) {
@@ -114,9 +191,34 @@ class OsExecutionViewModel extends ChangeNotifier {
     }
   }
 
+  void removeFotoProblema(int index) {
+    if (index < 0 || index >= _fotosProblema.length) return;
+    _fotosProblema.removeAt(index);
+    notifyListeners();
+  }
+
+  void removeFotoSolucion(int index) {
+    if (index < 0 || index >= _fotosSolucion.length) return;
+    _fotosSolucion.removeAt(index);
+    notifyListeners();
+  }
+
   Future<bool> submit() async {
     if (observacionesController.text.trim().isEmpty) {
       _errorMsg = 'Debe ingresar observaciones del trabajo realizado';
+      notifyListeners();
+      return false;
+    }
+
+    if (fechaInicio == null) {
+      _errorMsg = 'Debe registrar la fecha y hora de inicio';
+      notifyListeners();
+      return false;
+    }
+
+    if (fechaFin == null || !fechaFin!.isAfter(fechaInicio!)) {
+      _errorMsg =
+          'La finalización debe ser posterior a la fecha y hora de inicio';
       notifyListeners();
       return false;
     }
@@ -130,11 +232,14 @@ class OsExecutionViewModel extends ChangeNotifier {
         trabajoEjecutado: trabajoEjecutadoController.text.trim(),
         problemas: problemasSolucionesController.text.trim(),
         soluciones: problemasSolucionesController.text.trim(),
-        comentariosInstrucciones: comentariosInstruccionesController.text.trim(),
+        comentariosInstrucciones:
+            comentariosInstruccionesController.text.trim(),
         latitud: latitud,
         longitud: longitud,
-        fotosProblemaUrls: fotosProblema.isNotEmpty ? fotosProblema.join(',') : null,
-        fotosSolucionUrls: fotosSolucion.isNotEmpty ? fotosSolucion.join(',') : null,
+        fotosProblemaUrls:
+            _fotosProblema.isNotEmpty ? _fotosProblema.join(',') : null,
+        fotosSolucionUrls:
+            _fotosSolucion.isNotEmpty ? _fotosSolucion.join(',') : null,
         fechaEjecucionInicio: fechaInicio?.toUtc().toIso8601String(),
         fechaEjecucionFin: fechaFin?.toUtc().toIso8601String(),
       );

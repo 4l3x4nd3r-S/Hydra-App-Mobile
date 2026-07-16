@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hydra/domain/models/cuadrilla.dart';
+import 'package:hydra/domain/models/gasfitero.dart';
 import 'package:hydra/domain/models/os.dart';
 import 'package:hydra/domain/models/reclamo.dart';
 import 'package:hydra/data/repositories/supervisor_repository.dart';
@@ -31,7 +33,7 @@ class FakeCreateOsFromReclamoUseCase extends CreateOsFromReclamoUseCase {
     }
     return Os(
       id: 1,
-      numeroOrden: 'OS-20260703-0001',
+      numeroOrden: '0000001',
       reclamoId: reclamoId,
       cuadrillaId: cuadrillaId,
       estadoOrden: 'ASIGNADO',
@@ -44,8 +46,8 @@ void main() {
   late ReclamoDetalleViewModel vm;
   final testReclamo = Reclamo(
     id: 10,
-    formato: 'F-001',
-    codigoSolicitud: 'CS-001',
+    formato: 'Anexo 6',
+    codigoSolicitud: '00010',
     estado: 'PENDIENTE',
     descripcion: 'Fuga visible',
     direccion: 'Av. Peru 123',
@@ -155,5 +157,41 @@ void main() {
 
     expect(ok, false);
     expect(vm.ultimoError, contains('expirada'));
+  });
+
+  test('Anexo 6 filtra únicamente cuadrillas de Desagüe', () {
+    final cuadrillas = [
+      Cuadrilla(
+        id: 1,
+        especialidad: 'Agua',
+        lider: const Gasfitero(id: 1, nombre: 'Líder Agua'),
+      ),
+      Cuadrilla(
+        id: 2,
+        especialidad: 'Desagüe',
+        lider: const Gasfitero(id: 2, nombre: 'Líder Desagüe'),
+      ),
+    ];
+
+    expect(vm.especialidadRequerida, 'Desagüe');
+    expect(vm.filtrarCuadrillasCompatibles(cuadrillas).map((c) => c.id), [2]);
+  });
+
+  test('Formato 1 filtra únicamente cuadrillas de Agua', () {
+    final vmFormato1 = ReclamoDetalleViewModel(
+      reclamo: testReclamo.copyWith(formato: 'Formato 1'),
+      createOsUseCase: fakeUseCase,
+    );
+    addTearDown(vmFormato1.dispose);
+    final cuadrillas = [
+      const Cuadrilla(id: 1, especialidad: 'Agua'),
+      const Cuadrilla(id: 2, especialidad: 'Desagüe'),
+    ];
+
+    expect(vmFormato1.especialidadRequerida, 'Agua');
+    expect(
+      vmFormato1.filtrarCuadrillasCompatibles(cuadrillas).map((c) => c.id),
+      [1],
+    );
   });
 }

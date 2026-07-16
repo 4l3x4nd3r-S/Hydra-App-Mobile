@@ -3,6 +3,7 @@ import 'sync_queue_storage_service.dart';
 
 class SessionStorageService {
   static const String _tokenKey = 'jwt_token';
+  static const String _refreshTokenKey = 'jwt_refresh_token';
   static const String _nameKey = 'user_name';
   static const String _roleKey = 'user_role';
   static const String _userIdKey = 'user_id';
@@ -28,6 +29,26 @@ class SessionStorageService {
       'session_store',
       where: 'key = ?',
       whereArgs: [_tokenKey],
+    );
+    if (maps.isEmpty) return null;
+    return maps.first['value'] as String;
+  }
+
+  Future<void> saveRefreshToken(String token) async {
+    final db = await _storage.database;
+    await db.insert(
+      'session_store',
+      {'key': _refreshTokenKey, 'value': token},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<String?> getRefreshToken() async {
+    final db = await _storage.database;
+    final maps = await db.query(
+      'session_store',
+      where: 'key = ?',
+      whereArgs: [_refreshTokenKey],
     );
     if (maps.isEmpty) return null;
     return maps.first['value'] as String;
@@ -118,9 +139,16 @@ class SessionStorageService {
   Future<void> clearSession() async {
     final db = await _storage.database;
     await db.delete('session_store', where: 'key = ?', whereArgs: [_tokenKey]);
+    await db.delete(
+      'session_store',
+      where: 'key = ?',
+      whereArgs: [_refreshTokenKey],
+    );
     await db.delete('session_store', where: 'key = ?', whereArgs: [_nameKey]);
     await db.delete('session_store', where: 'key = ?', whereArgs: [_roleKey]);
     await db.delete('session_store', where: 'key = ?', whereArgs: [_userIdKey]);
+    await db.delete('session_store', where: 'key = ?', whereArgs: [_codeKey]);
+    await _storage.clearAssignedOrdersCache();
   }
 
   Future<bool> hasSession() async {

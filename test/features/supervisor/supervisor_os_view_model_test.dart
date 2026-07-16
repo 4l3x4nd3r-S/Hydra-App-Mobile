@@ -52,9 +52,10 @@ void main() {
     );
   });
 
-  test('cargarTodo en caso feliz: isLoading=false, errorMessage=null', () async {
+  test('cargarTodo en caso feliz: isLoading=false, errorMessage=null',
+      () async {
     fakeSupervisorRepo.osList = [
-      Os(id: 1, numeroOrden: 'OS-001', estadoOrden: 'ASIGNADO')
+      Os(id: 1, numeroOrden: '0000001', estadoOrden: 'ASIGNADO')
     ];
 
     await vm.cargarTodo();
@@ -62,10 +63,11 @@ void main() {
     expect(vm.isLoading, false);
     expect(vm.errorMessage, isNull);
     expect(vm.osActivas.length, 1);
-    expect(vm.osActivas[0].numeroOrden, 'OS-001');
+    expect(vm.osActivas[0].numeroOrden, '0000001');
   });
 
-  test('cargarTodo con DioException 500: isLoading=false, errorMessage poblado', () async {
+  test('cargarTodo con DioException 500: isLoading=false, errorMessage poblado',
+      () async {
     fakeSupervisorRepo.exceptionToThrow = DioException(
       requestOptions: RequestOptions(path: '/supervisor/ordenes-servicio'),
       response: Response(
@@ -81,7 +83,9 @@ void main() {
     expect(vm.osActivas, isEmpty);
   });
 
-  test('cargarTodo con excepcion generica: isLoading=false, errorMessage generico', () async {
+  test(
+      'cargarTodo con excepcion generica: isLoading=false, errorMessage generico',
+      () async {
     fakeSupervisorRepo.exceptionToThrow = Exception('Red no disponible');
 
     await vm.cargarTodo();

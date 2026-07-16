@@ -68,6 +68,8 @@ mixin _$OsDto {
   ReclamoDto? get reclamo => throw _privateConstructorUsedError;
   @JsonKey(name: 'cuadrilla')
   CuadrillaDto? get cuadrilla => throw _privateConstructorUsedError;
+  @JsonKey(name: 'responsable')
+  ResponsableDto? get responsable => throw _privateConstructorUsedError;
 
   /// Serializes this OsDto to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -108,10 +110,12 @@ abstract class $OsDtoCopyWith<$Res> {
       @JsonKey(name: 'fotos_problema_urls') List<String> fotosProblemaUrls,
       @JsonKey(name: 'fotos_solucion_urls') List<String> fotosSolucionUrls,
       @JsonKey(name: 'reclamo') ReclamoDto? reclamo,
-      @JsonKey(name: 'cuadrilla') CuadrillaDto? cuadrilla});
+      @JsonKey(name: 'cuadrilla') CuadrillaDto? cuadrilla,
+      @JsonKey(name: 'responsable') ResponsableDto? responsable});
 
   $ReclamoDtoCopyWith<$Res>? get reclamo;
   $CuadrillaDtoCopyWith<$Res>? get cuadrilla;
+  $ResponsableDtoCopyWith<$Res>? get responsable;
 }
 
 /// @nodoc
@@ -153,6 +157,7 @@ class _$OsDtoCopyWithImpl<$Res, $Val extends OsDto>
     Object? fotosSolucionUrls = null,
     Object? reclamo = freezed,
     Object? cuadrilla = freezed,
+    Object? responsable = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -251,6 +256,10 @@ class _$OsDtoCopyWithImpl<$Res, $Val extends OsDto>
           ? _value.cuadrilla
           : cuadrilla // ignore: cast_nullable_to_non_nullable
               as CuadrillaDto?,
+      responsable: freezed == responsable
+          ? _value.responsable
+          : responsable // ignore: cast_nullable_to_non_nullable
+              as ResponsableDto?,
     ) as $Val);
   }
 
@@ -279,6 +288,20 @@ class _$OsDtoCopyWithImpl<$Res, $Val extends OsDto>
 
     return $CuadrillaDtoCopyWith<$Res>(_value.cuadrilla!, (value) {
       return _then(_value.copyWith(cuadrilla: value) as $Val);
+    });
+  }
+
+  /// Create a copy of OsDto
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $ResponsableDtoCopyWith<$Res>? get responsable {
+    if (_value.responsable == null) {
+      return null;
+    }
+
+    return $ResponsableDtoCopyWith<$Res>(_value.responsable!, (value) {
+      return _then(_value.copyWith(responsable: value) as $Val);
     });
   }
 }
@@ -315,12 +338,15 @@ abstract class _$$OsDtoImplCopyWith<$Res> implements $OsDtoCopyWith<$Res> {
       @JsonKey(name: 'fotos_problema_urls') List<String> fotosProblemaUrls,
       @JsonKey(name: 'fotos_solucion_urls') List<String> fotosSolucionUrls,
       @JsonKey(name: 'reclamo') ReclamoDto? reclamo,
-      @JsonKey(name: 'cuadrilla') CuadrillaDto? cuadrilla});
+      @JsonKey(name: 'cuadrilla') CuadrillaDto? cuadrilla,
+      @JsonKey(name: 'responsable') ResponsableDto? responsable});
 
   @override
   $ReclamoDtoCopyWith<$Res>? get reclamo;
   @override
   $CuadrillaDtoCopyWith<$Res>? get cuadrilla;
+  @override
+  $ResponsableDtoCopyWith<$Res>? get responsable;
 }
 
 /// @nodoc
@@ -360,6 +386,7 @@ class __$$OsDtoImplCopyWithImpl<$Res>
     Object? fotosSolucionUrls = null,
     Object? reclamo = freezed,
     Object? cuadrilla = freezed,
+    Object? responsable = freezed,
   }) {
     return _then(_$OsDtoImpl(
       id: null == id
@@ -458,6 +485,10 @@ class __$$OsDtoImplCopyWithImpl<$Res>
           ? _value.cuadrilla
           : cuadrilla // ignore: cast_nullable_to_non_nullable
               as CuadrillaDto?,
+      responsable: freezed == responsable
+          ? _value.responsable
+          : responsable // ignore: cast_nullable_to_non_nullable
+              as ResponsableDto?,
     ));
   }
 }
@@ -491,7 +522,8 @@ class _$OsDtoImpl implements _OsDto {
       @JsonKey(name: 'fotos_solucion_urls')
       final List<String> fotosSolucionUrls = const [],
       @JsonKey(name: 'reclamo') this.reclamo,
-      @JsonKey(name: 'cuadrilla') this.cuadrilla})
+      @JsonKey(name: 'cuadrilla') this.cuadrilla,
+      @JsonKey(name: 'responsable') this.responsable})
       : _fotosProblemaUrls = fotosProblemaUrls,
         _fotosSolucionUrls = fotosSolucionUrls;
 
@@ -584,10 +616,13 @@ class _$OsDtoImpl implements _OsDto {
   @override
   @JsonKey(name: 'cuadrilla')
   final CuadrillaDto? cuadrilla;
+  @override
+  @JsonKey(name: 'responsable')
+  final ResponsableDto? responsable;
 
   @override
   String toString() {
-    return 'OsDto(id: $id, numeroOrden: $numeroOrden, reclamoId: $reclamoId, supervisorId: $supervisorId, cuadrillaId: $cuadrillaId, sectorId: $sectorId, fechaProgramacion: $fechaProgramacion, fechaEjecucionInicio: $fechaEjecucionInicio, fechaEjecucionFin: $fechaEjecucionFin, estadoOrden: $estadoOrden, insumosUtilizados: $insumosUtilizados, observacionesGasfitero: $observacionesGasfitero, rutaCarpetaEvidencias: $rutaCarpetaEvidencias, createdAt: $createdAt, trabajoEjecutado: $trabajoEjecutado, problemas: $problemas, soluciones: $soluciones, comentariosInstrucciones: $comentariosInstrucciones, latitud: $latitud, longitud: $longitud, fotosProblemaUrls: $fotosProblemaUrls, fotosSolucionUrls: $fotosSolucionUrls, reclamo: $reclamo, cuadrilla: $cuadrilla)';
+    return 'OsDto(id: $id, numeroOrden: $numeroOrden, reclamoId: $reclamoId, supervisorId: $supervisorId, cuadrillaId: $cuadrillaId, sectorId: $sectorId, fechaProgramacion: $fechaProgramacion, fechaEjecucionInicio: $fechaEjecucionInicio, fechaEjecucionFin: $fechaEjecucionFin, estadoOrden: $estadoOrden, insumosUtilizados: $insumosUtilizados, observacionesGasfitero: $observacionesGasfitero, rutaCarpetaEvidencias: $rutaCarpetaEvidencias, createdAt: $createdAt, trabajoEjecutado: $trabajoEjecutado, problemas: $problemas, soluciones: $soluciones, comentariosInstrucciones: $comentariosInstrucciones, latitud: $latitud, longitud: $longitud, fotosProblemaUrls: $fotosProblemaUrls, fotosSolucionUrls: $fotosSolucionUrls, reclamo: $reclamo, cuadrilla: $cuadrilla, responsable: $responsable)';
   }
 
   @override
@@ -640,7 +675,9 @@ class _$OsDtoImpl implements _OsDto {
                 .equals(other._fotosSolucionUrls, _fotosSolucionUrls) &&
             (identical(other.reclamo, reclamo) || other.reclamo == reclamo) &&
             (identical(other.cuadrilla, cuadrilla) ||
-                other.cuadrilla == cuadrilla));
+                other.cuadrilla == cuadrilla) &&
+            (identical(other.responsable, responsable) ||
+                other.responsable == responsable));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -670,7 +707,8 @@ class _$OsDtoImpl implements _OsDto {
         const DeepCollectionEquality().hash(_fotosProblemaUrls),
         const DeepCollectionEquality().hash(_fotosSolucionUrls),
         reclamo,
-        cuadrilla
+        cuadrilla,
+        responsable
       ]);
 
   /// Create a copy of OsDto
@@ -691,36 +729,38 @@ class _$OsDtoImpl implements _OsDto {
 
 abstract class _OsDto implements OsDto {
   const factory _OsDto(
-      {@JsonKey(name: 'id') required final int id,
-      @JsonKey(name: 'numero_orden') final String? numeroOrden,
-      @JsonKey(name: 'reclamo_id') final int? reclamoId,
-      @JsonKey(name: 'supervisor_id') final int? supervisorId,
-      @JsonKey(name: 'cuadrilla_id') final int? cuadrillaId,
-      @JsonKey(name: 'sector_id') final int? sectorId,
-      @JsonKey(name: 'fecha_programacion') final String? fechaProgramacion,
-      @JsonKey(name: 'fecha_ejecucion_inicio')
-      final String? fechaEjecucionInicio,
-      @JsonKey(name: 'fecha_ejecucion_fin') final String? fechaEjecucionFin,
-      @JsonKey(name: 'estado_orden') final String? estadoOrden,
-      @JsonKey(name: 'insumos_utilizados') final String? insumosUtilizados,
-      @JsonKey(name: 'observaciones_gasfitero')
-      final String? observacionesGasfitero,
-      @JsonKey(name: 'ruta_carpeta_evidencias')
-      final String? rutaCarpetaEvidencias,
-      @JsonKey(name: 'created_at') final String? createdAt,
-      @JsonKey(name: 'trabajo_ejecutado') final String? trabajoEjecutado,
-      @JsonKey(name: 'problemas') final String? problemas,
-      @JsonKey(name: 'soluciones') final String? soluciones,
-      @JsonKey(name: 'comentarios_instrucciones')
-      final String? comentariosInstrucciones,
-      @JsonKey(name: 'latitud') final double? latitud,
-      @JsonKey(name: 'longitud') final double? longitud,
-      @JsonKey(name: 'fotos_problema_urls')
-      final List<String> fotosProblemaUrls,
-      @JsonKey(name: 'fotos_solucion_urls')
-      final List<String> fotosSolucionUrls,
-      @JsonKey(name: 'reclamo') final ReclamoDto? reclamo,
-      @JsonKey(name: 'cuadrilla') final CuadrillaDto? cuadrilla}) = _$OsDtoImpl;
+          {@JsonKey(name: 'id') required final int id,
+          @JsonKey(name: 'numero_orden') final String? numeroOrden,
+          @JsonKey(name: 'reclamo_id') final int? reclamoId,
+          @JsonKey(name: 'supervisor_id') final int? supervisorId,
+          @JsonKey(name: 'cuadrilla_id') final int? cuadrillaId,
+          @JsonKey(name: 'sector_id') final int? sectorId,
+          @JsonKey(name: 'fecha_programacion') final String? fechaProgramacion,
+          @JsonKey(name: 'fecha_ejecucion_inicio')
+          final String? fechaEjecucionInicio,
+          @JsonKey(name: 'fecha_ejecucion_fin') final String? fechaEjecucionFin,
+          @JsonKey(name: 'estado_orden') final String? estadoOrden,
+          @JsonKey(name: 'insumos_utilizados') final String? insumosUtilizados,
+          @JsonKey(name: 'observaciones_gasfitero')
+          final String? observacionesGasfitero,
+          @JsonKey(name: 'ruta_carpeta_evidencias')
+          final String? rutaCarpetaEvidencias,
+          @JsonKey(name: 'created_at') final String? createdAt,
+          @JsonKey(name: 'trabajo_ejecutado') final String? trabajoEjecutado,
+          @JsonKey(name: 'problemas') final String? problemas,
+          @JsonKey(name: 'soluciones') final String? soluciones,
+          @JsonKey(name: 'comentarios_instrucciones')
+          final String? comentariosInstrucciones,
+          @JsonKey(name: 'latitud') final double? latitud,
+          @JsonKey(name: 'longitud') final double? longitud,
+          @JsonKey(name: 'fotos_problema_urls')
+          final List<String> fotosProblemaUrls,
+          @JsonKey(name: 'fotos_solucion_urls')
+          final List<String> fotosSolucionUrls,
+          @JsonKey(name: 'reclamo') final ReclamoDto? reclamo,
+          @JsonKey(name: 'cuadrilla') final CuadrillaDto? cuadrilla,
+          @JsonKey(name: 'responsable') final ResponsableDto? responsable}) =
+      _$OsDtoImpl;
 
   factory _OsDto.fromJson(Map<String, dynamic> json) = _$OsDtoImpl.fromJson;
 
@@ -796,6 +836,9 @@ abstract class _OsDto implements OsDto {
   @override
   @JsonKey(name: 'cuadrilla')
   CuadrillaDto? get cuadrilla;
+  @override
+  @JsonKey(name: 'responsable')
+  ResponsableDto? get responsable;
 
   /// Create a copy of OsDto
   /// with the given fields replaced by the non-null parameter values.

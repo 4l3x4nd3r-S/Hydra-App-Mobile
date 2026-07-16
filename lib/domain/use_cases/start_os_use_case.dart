@@ -1,4 +1,5 @@
 import '../../data/repositories/os_repository.dart';
+import '../models/os_start_result.dart';
 
 class StartOsUseCase {
   final OsRepository _osRepository;
@@ -6,7 +7,7 @@ class StartOsUseCase {
   StartOsUseCase({required OsRepository osRepository})
       : _osRepository = osRepository;
 
-  Future<void> call(int ordenId) async {
-    await _osRepository.startOrder(ordenId);
+  Future<OsStartResult> call(int ordenId) async {
+    return _osRepository.startOrder(ordenId);
   }
 }

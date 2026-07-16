@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:dio/dio.dart';
 import '../models/os_dto.dart';
 import '../models/cuadrilla_dto.dart';
 import '../models/gasfitero_dto.dart';
+import '../models/responsable_dto.dart';
 import '../services/os_api_service.dart';
 import '../services/sync_queue_storage_service.dart';
 import '../../domain/models/os.dart';
@@ -10,6 +12,7 @@ import '../../domain/models/cuadrilla.dart';
 import '../../domain/models/gasfitero.dart';
 import '../../domain/models/reclamo.dart';
 import '../../domain/models/pending_sync_report.dart';
+import '../../domain/models/os_start_result.dart';
 
 import '../models/reclamo_dto.dart';
 
@@ -22,6 +25,11 @@ class OsRepository {
 
   Stream<void> get syncStream => _syncController.stream;
 
+  Completer<void>? _activeSync;
+  String? _lastSyncErrorMessage;
+
+  String? get lastSyncErrorMessage => _lastSyncErrorMessage;
+
   OsRepository({
     required OsApiService osApiService,
     required SyncQueueStorageService syncQueueStorage,
@@ -29,29 +37,68 @@ class OsRepository {
         _syncQueueStorage = syncQueueStorage;
 
   Future<List<Os>> getAssignedOrders() async {
-    final response = await _osApiService.getOrdenes();
-    if (response.statusCode == 200 && response.data is List) {
-      final list = (response.data as List)
-          .map((json) => OsDto.fromJson(json as Map<String, dynamic>))
-          .map(_toDomain)
-          .toList();
-      return list;
+    try {
+      final response = await _osApiService.getOrdenes();
+      if (response.statusCode == 200 && response.data is List) {
+        final rawOrders = (response.data as List)
+            .map((json) => Map<String, dynamic>.from(json as Map))
+            .toList();
+        final pendingStarts = await _syncQueueStorage.getPendingOrderStarts();
+        final startsByOrder = {
+          for (final start in pendingStarts)
+            start['os_id'] as int: start['started_at'] as String,
+        };
+        for (final order in rawOrders) {
+          final startedAt = startsByOrder[order['id']];
+          final serverStatus = order['estado_orden']?.toString().toUpperCase();
+          if (startedAt != null && serverStatus == 'ASIGNADO') {
+            order['estado_orden'] = 'EN_PROCESO';
+            order['fecha_ejecucion_inicio'] = startedAt;
+          }
+        }
+        await _syncQueueStorage.replaceAssignedOrdersCache(rawOrders);
+        return rawOrders.map(OsDto.fromJson).map(_toDomain).toList();
+      }
+    } catch (_) {
+      // Sin conexión: se utiliza la última bandeja guardada localmente.
     }
-    return [];
+
+    final cachedOrders = await _syncQueueStorage.getAssignedOrdersCache();
+    return cachedOrders.map(OsDto.fromJson).map(_toDomain).toList();
   }
 
-  Future<void> startOrder(int ordenId) async {
-    await _osApiService.iniciarOrden(ordenId);
+  Future<OsStartResult> startOrder(int ordenId) async {
+    final startedAt = DateTime.now().toUtc().toIso8601String();
+    try {
+      final response = await _osApiService.iniciarOrden(ordenId);
+      if (response.data is Map) {
+        await _syncQueueStorage.upsertAssignedOrderCache(
+          Map<String, dynamic>.from(response.data as Map),
+        );
+      }
+      await _syncQueueStorage.markOrderStartSynced(ordenId);
+      return OsStartResult(startedAt: startedAt, queuedOffline: false);
+    } on DioException catch (error) {
+      if (error.response != null) rethrow;
+
+      await _syncQueueStorage.savePendingOrderStart(
+        osId: ordenId,
+        startedAt: startedAt,
+      );
+      await _syncQueueStorage.markCachedOrderStarted(
+        osId: ordenId,
+        startedAt: startedAt,
+      );
+      _syncController.add(null);
+      return OsStartResult(startedAt: startedAt, queuedOffline: true);
+    }
   }
 
   Future<String?> uploadImage(String filePath) async {
-    try {
-      final response = await _osApiService.uploadImage(filePath);
-      if (response.statusCode == 200) {
-        return response.data['url'] as String;
-      }
-    } catch (e) {
-      // Ignore
+    final response = await _osApiService.uploadImage(filePath);
+    final statusCode = response.statusCode;
+    if (statusCode != null && statusCode >= 200 && statusCode < 300) {
+      return response.data['url'] as String;
     }
     return null;
   }
@@ -92,72 +139,179 @@ class OsRepository {
   }
 
   Future<List<PendingSyncReport>> getPendingReports() async {
-    final results = await _syncQueueStorage.getAll();
+    final results = await _syncQueueStorage.getPending();
     return results.map((r) => _pendingFromMap(r)).toList();
   }
 
   Future<void> triggerSync() async {
-    final pending = await _syncQueueStorage.getPending();
-    if (pending.isEmpty) return;
-
-    for (final report in pending) {
-      try {
-        final osId = report['os_id'] as int;
-        List<String>? fotosProblema;
-        if (report['fotos_problema_urls'] != null && report['fotos_problema_urls'].toString().isNotEmpty) {
-          fotosProblema = (report['fotos_problema_urls'] as String).split(',');
-          for (int i = 0; i < fotosProblema.length; i++) {
-            if (!fotosProblema[i].startsWith('/uploads') && !fotosProblema[i].startsWith('http')) {
-              final newUrl = await uploadImage(fotosProblema[i]);
-              if (newUrl != null) fotosProblema[i] = newUrl;
-            }
-          }
-        }
-
-        List<String>? fotosSolucion;
-        if (report['fotos_solucion_urls'] != null && report['fotos_solucion_urls'].toString().isNotEmpty) {
-          fotosSolucion = (report['fotos_solucion_urls'] as String).split(',');
-          for (int i = 0; i < fotosSolucion.length; i++) {
-            if (!fotosSolucion[i].startsWith('/uploads') && !fotosSolucion[i].startsWith('http')) {
-              final newUrl = await uploadImage(fotosSolucion[i]);
-              if (newUrl != null) fotosSolucion[i] = newUrl;
-            }
-          }
-        }
-
-        final response = await _osApiService.finalizarOrden(
-          osId,
-          {
-            'insumos_utilizados': report['insumos_utilizados'],
-            'observaciones_gasfitero': report['observaciones_gasfitero'],
-            'ruta_carpeta_evidencias': report['ruta_carpeta_evidencias'],
-            'trabajo_ejecutado': report['trabajo_ejecutado'],
-            'problemas': report['problemas'],
-            'soluciones': report['soluciones'],
-            'comentarios_instrucciones': report['comentarios_instrucciones'],
-            'latitud': report['latitud'],
-            'longitud': report['longitud'],
-            'fotos_problema_urls': fotosProblema,
-            'fotos_solucion_urls': fotosSolucion,
-            'fecha_ejecucion_inicio': report['fecha_ejecucion_inicio'],
-            'fecha_ejecucion_fin': report['fecha_ejecucion_fin'],
-          },
-        );
-
-        if (response.statusCode == 200) {
-          await _syncQueueStorage.markSynced(osId);
-          _syncController.add(null);
-        }
-      } catch (_) {}
+    final currentSync = _activeSync;
+    if (currentSync != null) {
+      await currentSync.future;
+      return;
     }
+
+    final syncCompleter = Completer<void>();
+    _activeSync = syncCompleter;
+    _lastSyncErrorMessage = null;
+
+    try {
+      await _reconcileServerState();
+      await _syncPendingOrderStarts();
+      final pending = await _syncQueueStorage.getPending();
+      for (final report in pending) {
+        try {
+          final osId = report['os_id'] as int;
+          final fotosProblema = await _uploadPendingPhotos(
+            osId: osId,
+            rawPaths: report['fotos_problema_urls'] as String?,
+            areProblemPhotos: true,
+          );
+          final fotosSolucion = await _uploadPendingPhotos(
+            osId: osId,
+            rawPaths: report['fotos_solucion_urls'] as String?,
+            areProblemPhotos: false,
+          );
+
+          final response = await _osApiService.finalizarOrden(
+            osId,
+            {
+              'insumos_utilizados': report['insumos_utilizados'],
+              'observaciones_gasfitero': report['observaciones_gasfitero'],
+              'ruta_carpeta_evidencias': report['ruta_carpeta_evidencias'],
+              'trabajo_ejecutado': report['trabajo_ejecutado'],
+              'problemas': report['problemas'],
+              'soluciones': report['soluciones'],
+              'comentarios_instrucciones': report['comentarios_instrucciones'],
+              'latitud': report['latitud'],
+              'longitud': report['longitud'],
+              'fotos_problema_urls': fotosProblema,
+              'fotos_solucion_urls': fotosSolucion,
+              'fecha_ejecucion_inicio': report['fecha_ejecucion_inicio'],
+              'fecha_ejecucion_fin': report['fecha_ejecucion_fin'],
+            },
+          );
+
+          final statusCode = response.statusCode;
+          if (statusCode != null && statusCode >= 200 && statusCode < 300) {
+            if (response.data is Map) {
+              await _syncQueueStorage.upsertAssignedOrderCache(
+                Map<String, dynamic>.from(response.data as Map),
+              );
+            }
+            await _syncQueueStorage.markSynced(osId);
+            await _syncQueueStorage.markOrderStartSynced(osId);
+          }
+        } catch (error) {
+          _lastSyncErrorMessage = _describeSyncError(error);
+          // La fila permanece PENDING_SYNC para el siguiente intento.
+        }
+      }
+    } finally {
+      _syncController.add(null);
+      syncCompleter.complete();
+      _activeSync = null;
+    }
+  }
+
+  Future<void> _reconcileServerState() async {
+    try {
+      final pendingReports = await _syncQueueStorage.getPending();
+      final pendingStarts = await _syncQueueStorage.getPendingOrderStarts();
+      final localOrderIds = <int>{
+        ...pendingReports.map((row) => row['os_id'] as int),
+        ...pendingStarts.map((row) => row['os_id'] as int),
+      };
+      if (localOrderIds.isEmpty) return;
+
+      for (final osId in localOrderIds) {
+        final response = await _osApiService.getOrden(osId);
+        if (response.statusCode != 200 || response.data is! Map) continue;
+        final order = Map<String, dynamic>.from(response.data as Map);
+
+        final serverStatus = order['estado_orden']?.toString().toUpperCase();
+        if (serverStatus == 'EN_PROCESO' || serverStatus == 'COMPLETADO') {
+          await _syncQueueStorage.markOrderStartSynced(osId);
+        }
+        if (serverStatus == 'COMPLETADO') {
+          await _syncQueueStorage.markSynced(osId);
+        }
+        await _syncQueueStorage.upsertAssignedOrderCache(order);
+      }
+    } catch (_) {
+      // Sin conexión o sin sesión renovable: la cola permanece intacta.
+    }
+  }
+
+  Future<void> _syncPendingOrderStarts() async {
+    final pendingStarts = await _syncQueueStorage.getPendingOrderStarts();
+    for (final start in pendingStarts) {
+      final osId = start['os_id'] as int;
+      try {
+        final response = await _osApiService.iniciarOrden(osId);
+        final statusCode = response.statusCode;
+        if (statusCode != null && statusCode >= 200 && statusCode < 300) {
+          if (response.data is Map) {
+            await _syncQueueStorage.upsertAssignedOrderCache(
+              Map<String, dynamic>.from(response.data as Map),
+            );
+          }
+          await _syncQueueStorage.markOrderStartSynced(osId);
+        }
+      } catch (_) {
+        // El inicio permanece pendiente y se reintentará antes del reporte.
+      }
+    }
+  }
+
+  Future<List<String>?> _uploadPendingPhotos({
+    required int osId,
+    required String? rawPaths,
+    required bool areProblemPhotos,
+  }) async {
+    if (rawPaths == null || rawPaths.trim().isEmpty) return null;
+
+    final photos = rawPaths.split(',');
+    for (var i = 0; i < photos.length; i++) {
+      final path = photos[i];
+      if (path.startsWith('/uploads') || path.startsWith('http')) continue;
+      final uploadedUrl = await uploadImage(path);
+      if (uploadedUrl == null) {
+        throw StateError('No se pudo subir una fotografía pendiente.');
+      }
+      photos[i] = uploadedUrl;
+      final updatedPaths = photos.join(',');
+      if (areProblemPhotos) {
+        await _syncQueueStorage.updatePendingProblemPhotos(osId, updatedPaths);
+      } else {
+        await _syncQueueStorage.updatePendingSolutionPhotos(osId, updatedPaths);
+      }
+    }
+    return photos;
+  }
+
+  String _describeSyncError(Object error) {
+    if (error is DioException) {
+      if (error.type == DioExceptionType.sendTimeout ||
+          error.type == DioExceptionType.receiveTimeout ||
+          error.type == DioExceptionType.connectionTimeout) {
+        return 'El servidor tardó demasiado al recibir las evidencias. Vuelva a intentarlo; el progreso guardado no se perderá.';
+      }
+      final statusCode = error.response?.statusCode;
+      if (statusCode != null) {
+        return 'El servidor rechazó la sincronización (código $statusCode). Inténtelo nuevamente.';
+      }
+      return 'No se pudo conectar con el servidor. Verifique que HYDRA tenga acceso a internet.';
+    }
+    if (error is StateError) {
+      return error.message;
+    }
+    return 'No se pudo sincronizar la O.S. El reporte permanece seguro en el dispositivo.';
   }
 
   StreamSubscription<List<ConnectivityResult>>? _connectivitySub;
 
   void startAutoSync() {
-    _connectivitySub = Connectivity()
-        .onConnectivityChanged
-        .listen((results) {
+    _connectivitySub = Connectivity().onConnectivityChanged.listen((results) {
       if (results.any((r) => r != ConnectivityResult.none)) {
         triggerSync();
       }
@@ -194,7 +348,20 @@ class OsRepository {
       fotosProblemaUrls: dto.fotosProblemaUrls,
       fotosSolucionUrls: dto.fotosSolucionUrls,
       reclamo: dto.reclamo != null ? _reclamoToDomain(dto.reclamo!) : null,
-      cuadrilla: dto.cuadrilla != null ? _cuadrillaToDomain(dto.cuadrilla!) : null,
+      cuadrilla:
+          dto.cuadrilla != null ? _cuadrillaToDomain(dto.cuadrilla!) : null,
+      responsable: dto.responsable != null
+          ? _responsableToDomain(dto.responsable!)
+          : null,
+    );
+  }
+
+  Gasfitero _responsableToDomain(ResponsableDto dto) {
+    return Gasfitero(
+      id: dto.id,
+      nombre: dto.nombre,
+      codigoEmpleado: dto.codigoEmpleado,
+      cargo: dto.cargo,
     );
   }
 

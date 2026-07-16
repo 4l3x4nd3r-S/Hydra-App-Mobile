@@ -41,6 +41,10 @@ _$OsDtoImpl _$$OsDtoImplFromJson(Map<String, dynamic> json) => _$OsDtoImpl(
       cuadrilla: json['cuadrilla'] == null
           ? null
           : CuadrillaDto.fromJson(json['cuadrilla'] as Map<String, dynamic>),
+      responsable: json['responsable'] == null
+          ? null
+          : ResponsableDto.fromJson(
+              json['responsable'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$$OsDtoImplToJson(_$OsDtoImpl instance) =>
@@ -69,4 +73,5 @@ Map<String, dynamic> _$$OsDtoImplToJson(_$OsDtoImpl instance) =>
       'fotos_solucion_urls': instance.fotosSolucionUrls,
       'reclamo': instance.reclamo,
       'cuadrilla': instance.cuadrilla,
+      'responsable': instance.responsable,
     };

@@ -1,9 +1,8 @@
-import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hydra/domain/models/reclamo.dart';
 import 'package:hydra/domain/models/cuadrilla.dart';
-import 'package:hydra/domain/models/tecnico.dart';
+import 'package:hydra/domain/models/gasfitero.dart';
 import 'package:hydra/data/repositories/auth_repository.dart';
 import 'package:hydra/data/repositories/supervisor_repository.dart';
 import 'package:hydra/ui/features/supervisor/view_models/supervisor_view_model.dart';
@@ -13,11 +12,19 @@ class _FakeAuthRepository implements AuthRepository {
   Future<String?> getUserName() async => 'Supervisor Test';
 
   @override
+  Future<String?> getUserRole() async => 'SUPERVISOR';
+
+  @override
+  Future<String?> getUserCode() async => 'SUP001';
+
+  @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 class _FakeSupervisorRepository implements SupervisorRepository {
   List<Reclamo> reclamos = [];
+  List<Cuadrilla> cuadrillas = [];
+  List<Gasfitero> personal = [];
   Exception? reclamosException;
 
   @override
@@ -27,10 +34,13 @@ class _FakeSupervisorRepository implements SupervisorRepository {
   }
 
   @override
-  Future<List<Cuadrilla>> getCuadrillas() async => [];
+  Future<List<Cuadrilla>> getCuadrillas() async => cuadrillas;
 
   @override
-  Future<List<Tecnico>> getTecnicos({String? area}) async => [];
+  Future<List<Gasfitero>> getgasfiteros() async => personal;
+
+  @override
+  Future<List<Gasfitero>> getgasfiterosDisponibles() async => [];
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -48,6 +58,73 @@ void main() {
     );
   });
 
+  tearDown(() => vm.dispose());
+
+  group('Roles visibles del personal', () {
+    test('identifica al gasfitero principal por el liderazgo de la cuadrilla',
+        () async {
+      const lider = Gasfitero(
+        id: 10,
+        nombre: 'Líder real',
+        cargo: 'GASFITERO',
+        area: 'MANTENIMIENTO',
+      );
+      const principalSinCuadrilla = Gasfitero(
+        id: 11,
+        nombre: 'Cargo desactualizado',
+        cargo: 'GASFITERO_PRINCIPAL',
+        area: 'MANTENIMIENTO',
+      );
+      fakeRepo.personal = [lider, principalSinCuadrilla];
+      fakeRepo.cuadrillas = const [
+        Cuadrilla(id: 1, codigoGrupo: 'Grupo 1', lider: lider),
+      ];
+
+      await vm.cargarTodo();
+
+      expect(vm.esGasfiteroPrincipal(lider.id), isTrue);
+      expect(vm.cargoVisible(lider), 'Gasfitero Principal');
+      expect(vm.esGasfiteroPrincipal(principalSinCuadrilla.id), isFalse);
+      expect(vm.cargoVisible(principalSinCuadrilla), 'Gasfitero');
+    });
+
+    test('el chofer siempre aparece al final del listado de personal',
+        () async {
+      const choferPrimeraCuadrilla = Gasfitero(
+        id: 20,
+        nombre: 'Aarón Chofer',
+        cargo: 'CHOFER_CAMIONETA',
+        area: 'MANTENIMIENTO',
+      );
+      const gasfiteroSegundaCuadrilla = Gasfitero(
+        id: 21,
+        nombre: 'Yordy Gasfitero',
+        cargo: 'GASFITERO',
+        area: 'MANTENIMIENTO',
+      );
+      fakeRepo.personal = [choferPrimeraCuadrilla, gasfiteroSegundaCuadrilla];
+      fakeRepo.cuadrillas = const [
+        Cuadrilla(
+          id: 1,
+          codigoGrupo: 'Cuadrilla 001',
+          chofer: choferPrimeraCuadrilla,
+        ),
+        Cuadrilla(
+          id: 2,
+          codigoGrupo: 'Cuadrilla 002',
+          apoyos: [gasfiteroSegundaCuadrilla],
+        ),
+      ];
+
+      await vm.cargarTodo();
+
+      expect(
+        vm.personalMantenimientoOrdenado.map((persona) => persona.id),
+        [21, 20],
+      );
+    });
+  });
+
   group('Getters de filtrado de reclamos', () {
     test('reclamosPendientes filtra por estado PENDIENTE', () async {
       fakeRepo.reclamos = [
@@ -63,7 +140,8 @@ void main() {
       expect(pendientes.map((r) => r.id), [1, 3]);
     });
 
-    test('reclamosAsignados incluye ASIGNADO, EN PROCESO y EN_PROCESO', () async {
+    test('reclamosAsignados incluye ASIGNADO, EN PROCESO y EN_PROCESO',
+        () async {
       fakeRepo.reclamos = [
         Reclamo(id: 1, estado: 'PENDIENTE'),
         Reclamo(id: 2, estado: 'ASIGNADO'),
@@ -111,7 +189,8 @@ void main() {
   });
 
   group('Manejo de errores al cargar reclamos', () {
-    test('DioException 500: loadingReclamos=false, errorMessage poblado', () async {
+    test('DioException 500: loadingReclamos=false, errorMessage poblado',
+        () async {
       fakeRepo.reclamosException = DioException(
         requestOptions: RequestOptions(path: '/reclamos'),
         response: Response(

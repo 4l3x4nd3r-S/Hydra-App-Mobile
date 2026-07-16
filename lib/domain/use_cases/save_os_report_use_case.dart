@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../../data/repositories/os_repository.dart';
 
 class SaveOsReportUseCase {
@@ -38,6 +40,8 @@ class SaveOsReportUseCase {
       fechaEjecucionInicio: fechaEjecucionInicio,
       fechaEjecucionFin: fechaEjecucionFin,
     );
-    await _osRepository.triggerSync();
+    // El guardado local es la confirmación principal para el trabajador.
+    // La red nunca debe mantener bloqueado el formulario en campo.
+    unawaited(_osRepository.triggerSync());
   }
 }

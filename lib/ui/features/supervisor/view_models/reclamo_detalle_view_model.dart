@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import '../../../../domain/models/cuadrilla.dart';
 import '../../../../domain/models/reclamo.dart';
 import '../../../../domain/use_cases/create_os_from_reclamo_use_case.dart';
 
@@ -13,10 +14,31 @@ class ReclamoDetalleViewModel extends ChangeNotifier {
   String? _ultimoError;
   String? get ultimoError => _ultimoError;
 
+  String? get especialidadRequerida => switch (reclamo.formato) {
+        'Anexo 6' => 'Desagüe',
+        'Formato 1' => 'Agua',
+        _ => null,
+      };
+
   ReclamoDetalleViewModel({
     required this.reclamo,
     required CreateOsFromReclamoUseCase createOsUseCase,
   }) : _createOsUseCase = createOsUseCase;
+
+  List<Cuadrilla> filtrarCuadrillasCompatibles(
+    Iterable<Cuadrilla> cuadrillas,
+  ) {
+    final especialidad = especialidadRequerida;
+    if (especialidad == null) return const [];
+
+    return cuadrillas
+        .where(
+          (cuadrilla) =>
+              cuadrilla.especialidad?.trim().toLowerCase() ==
+              especialidad.toLowerCase(),
+        )
+        .toList(growable: false);
+  }
 
   Future<bool> crearOsFromReclamo(int cuadrillaId) async {
     _creandoOs = true;

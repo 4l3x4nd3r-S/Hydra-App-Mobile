@@ -6,6 +6,7 @@ class ProfileModal extends StatelessWidget {
   final String role;
   final String? dni;
   final String? cuadrilla;
+  final String area;
 
   const ProfileModal({
     super.key,
@@ -13,13 +14,16 @@ class ProfileModal extends StatelessWidget {
     required this.role,
     this.dni,
     this.cuadrilla,
+    this.area = 'Mantenimiento',
   });
 
-  static void show(BuildContext context, {
-    required String userName, 
+  static void show(
+    BuildContext context, {
+    required String userName,
     required String role,
     String? dni,
     String? cuadrilla,
+    String area = 'Mantenimiento',
   }) {
     showDialog(
       context: context,
@@ -28,6 +32,7 @@ class ProfileModal extends StatelessWidget {
         role: role,
         dni: dni,
         cuadrilla: cuadrilla,
+        area: area,
       ),
     );
   }
@@ -36,24 +41,23 @@ class ProfileModal extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = Theme.of(context).extension<AppColors>()!;
     final isSupervisor = role.toUpperCase() == 'SUPERVISOR';
-    
+
     return Dialog(
       backgroundColor: Colors.transparent,
       insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       child: Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: c.surface,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: c.border, width: 1),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-            )
-          ]
-        ),
+            color: c.surface,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: c.border, width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              )
+            ]),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -100,17 +104,26 @@ class ProfileModal extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 32),
-            
+
             // Info Fields
-            _buildInfoRow(context, Icons.badge_outlined, 'Nombres y Apellidos', userName.isNotEmpty ? userName : '-'),
+            _buildInfoRow(context, Icons.badge_outlined, 'Nombres y Apellidos',
+                userName.isNotEmpty ? userName : '-'),
             const SizedBox(height: 12),
-            _buildInfoRow(context, Icons.credit_card_rounded, 'CÓDIGO', dni ?? 'No registrado'),
-            const SizedBox(height: 12),
-            _buildInfoRow(context, Icons.work_outline_rounded, 'Rol Asignado', role),
-            
+            if (dni != null && dni!.trim().isNotEmpty) ...[
+              _buildInfoRow(context, Icons.credit_card_rounded, 'CÓDIGO', dni!),
+              const SizedBox(height: 12),
+            ],
+            _buildInfoRow(
+              context,
+              Icons.business_outlined,
+              'Área',
+              area,
+            ),
+
             if (!isSupervisor) ...[
               const SizedBox(height: 12),
-              _buildInfoRow(context, Icons.group_work_outlined, 'Cuadrilla', cuadrilla ?? 'Sin cuadrilla asignada'),
+              _buildInfoRow(context, Icons.group_work_outlined, 'Cuadrilla',
+                  _cuadrillaValue(cuadrilla)),
             ],
 
             const SizedBox(height: 32),
@@ -121,9 +134,12 @@ class ProfileModal extends StatelessWidget {
                 onPressed: () => Navigator.of(context).pop(),
                 style: FilledButton.styleFrom(
                   backgroundColor: c.primary,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
                 ),
-                child: const Text('Cerrar', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                child: const Text('Cerrar',
+                    style:
+                        TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               ),
             ),
           ],
@@ -132,7 +148,16 @@ class ProfileModal extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(BuildContext context, IconData icon, String label, String value) {
+  String _cuadrillaValue(String? value) {
+    final normalized = (value ?? '').trim().replaceFirst(
+          RegExp(r'^(cuadrilla\s*)+', caseSensitive: false),
+          '',
+        );
+    return normalized.isEmpty ? 'Sin asignar' : normalized;
+  }
+
+  Widget _buildInfoRow(
+      BuildContext context, IconData icon, String label, String value) {
     final c = Theme.of(context).extension<AppColors>()!;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
