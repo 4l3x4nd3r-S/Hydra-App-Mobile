@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../../../domain/use_cases/crear_reclamo_use_case.dart';
+import '../../../../data/repositories/catalog_repository.dart';
 import '../../../core/theme/app_colors.dart';
 import '../view_models/nuevo_reclamo_view_model.dart';
 
@@ -13,6 +14,7 @@ class NuevoReclamoView extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (_) => NuevoReclamoViewModel(
         crearReclamoUseCase: context.read<CrearReclamoUseCase>(),
+        catalogRepository: context.read<CatalogRepository>(),
       ),
       child: const _NuevoReclamoBody(),
     );
@@ -40,6 +42,16 @@ class _NuevoReclamoBodyState extends State<_NuevoReclamoBody> {
   Widget build(BuildContext context) {
     final c = Theme.of(context).extension<AppColors>()!;
     final vm = context.watch<NuevoReclamoViewModel>();
+
+    if (vm.loadingCatalogs) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    if (vm.catalogError != null) {
+      return Scaffold(
+        appBar: AppBar(),
+        body: Center(child: Text(vm.catalogError!)),
+      );
+    }
 
     return Scaffold(
       backgroundColor: c.background,
@@ -82,8 +94,8 @@ class _NuevoReclamoBodyState extends State<_NuevoReclamoBody> {
               const SizedBox(height: 16),
               _buildTextField(
                 c: c,
-                controller: vm.numeroMedidorController,
-                label: 'N\u00b0 de Medidor',
+                controller: vm.numeroSuministroController,
+                label: 'N\u00b0 de Suministro',
                 hint: 'Ej: 1041998',
                 keyboardType: TextInputType.number,
                 inputFormatters: [
@@ -91,8 +103,8 @@ class _NuevoReclamoBodyState extends State<_NuevoReclamoBody> {
                   LengthLimitingTextInputFormatter(7),
                 ],
                 maxLength: 7,
-                error: vm.fieldErrors['numero_medidor'],
-                onChanged: (_) => vm.clearFieldError('numero_medidor'),
+                error: vm.fieldErrors['numero_suministro'],
+                onChanged: (_) => vm.clearFieldError('numero_suministro'),
               ),
               const SizedBox(height: 16),
               _buildTextField(
@@ -141,7 +153,7 @@ class _NuevoReclamoBodyState extends State<_NuevoReclamoBody> {
                 c: c,
                 label: 'Formato',
                 value: vm.formato,
-                options: NuevoReclamoViewModel.formatos,
+                options: vm.formatos,
                 onChanged: vm.setFormato,
               ),
               const SizedBox(height: 16),
@@ -164,7 +176,7 @@ class _NuevoReclamoBodyState extends State<_NuevoReclamoBody> {
                 c: c,
                 label: 'Canal de Entrada',
                 value: vm.canalEntrada,
-                options: NuevoReclamoViewModel.canales,
+                options: vm.canales,
                 onChanged: vm.setCanalEntrada,
               ),
               const SizedBox(height: 16),

@@ -16,7 +16,8 @@ class OsDetailField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final displayValue = (value != null && value!.isNotEmpty) ? value! : 'Sin informacion';
+    final displayValue =
+        (value != null && value!.isNotEmpty) ? value! : 'Sin informacion';
     return DetailRow(
       label: label,
       value: displayValue,

@@ -17,8 +17,7 @@ class ThemeViewModel extends ChangeNotifier {
   }
 
   Future<void> toggle() async {
-    _mode =
-        _mode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+    _mode = _mode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
     await _themeRepository.saveThemeMode(_mode);
     notifyListeners();
   }

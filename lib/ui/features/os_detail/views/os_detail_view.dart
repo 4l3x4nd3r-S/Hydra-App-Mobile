@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../../data/services/app_environment.dart';
 import 'package:provider/provider.dart';
-import '../../../../domain/enums/tipo_problema.dart';
 import '../../../../domain/models/os.dart';
 import '../../../core/theme/app_colors.dart';
 import '../view_models/os_detail_view_model.dart';
@@ -233,7 +233,9 @@ class _OsDetailBody extends StatelessWidget {
     debugPrint('_buildReclamoSection - r?.direccion: ${r?.direccion}');
     debugPrint('_buildReclamoSection - r?.telefono: ${r?.telefono}');
     debugPrint('_buildReclamoSection - r?.email: ${r?.email}');
-    debugPrint('_buildReclamoSection - r?.numeroMedidor: ${r?.numeroMedidor}');
+    debugPrint(
+      '_buildReclamoSection - r?.numeroSuministro: ${r?.numeroSuministro}',
+    );
     debugPrint('_buildReclamoSection - r?.fechaRegistro: ${r?.fechaRegistro}');
     return OsDetailSection(
       title: 'Inf. de Reclamo',
@@ -243,9 +245,9 @@ class _OsDetailBody extends StatelessWidget {
         MapEntry('Formato', r?.formato ?? ''),
         MapEntry(
           'Tipo',
-          TipoProblema.etiquetaDescriptiva(r?.tipoProblema),
+          r?.tipoProblema ?? '',
         ),
-        MapEntry('Medidor', r?.numeroMedidor ?? ''),
+        MapEntry('Suministro', r?.numeroSuministro ?? ''),
         MapEntry('Telefono', r?.telefono ?? ''),
         MapEntry('Solicitante', r?.nombreSolicitante ?? ''),
         MapEntry('Email', r?.email ?? ''),
@@ -290,9 +292,6 @@ class _OsDetailBody extends StatelessWidget {
       }
       if (cuadrilla.chofer != null) {
         fields.add(MapEntry('Chofer', cuadrilla.chofer!.nombre ?? '-'));
-      }
-      if (cuadrilla.operador != null) {
-        fields.add(MapEntry('Operador', cuadrilla.operador!.nombre ?? '-'));
       }
     }
     if (fields.isEmpty) {
@@ -404,8 +403,7 @@ class _OsDetailBody extends StatelessWidget {
                 ),
                 children: [
                   TileLayer(
-                    urlTemplate:
-                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    urlTemplate: AppEnvironment.mapTileUrl,
                     userAgentPackageName: 'com.emapat.hydra',
                   ),
                   MarkerLayer(

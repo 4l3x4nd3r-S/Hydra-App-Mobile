@@ -61,66 +61,71 @@ void main() {
   tearDown(() => vm.dispose());
 
   group('Roles visibles del personal', () {
-    test('identifica al gasfitero principal por el liderazgo de la cuadrilla',
+    test('conserva las funciones y cuadrillas entregadas por el backend',
         () async {
-      const lider = Gasfitero(
+      const principal = Gasfitero(
         id: 10,
-        nombre: 'Líder real',
+        nombre: 'Principal',
+        dni: '71234567',
+        celular: '912345678',
         cargo: 'GASFITERO',
         area: 'MANTENIMIENTO',
+        rolEnCuadrilla: 'LIDER',
+        funcionVisible: 'Gasfitero principal',
+        esPrincipal: true,
+        cuadrillaId: 1,
+        codigoCuadrilla: 'Cuadrilla 001',
       );
-      const principalSinCuadrilla = Gasfitero(
+      const apoyo = Gasfitero(
         id: 11,
-        nombre: 'Cargo desactualizado',
+        nombre: 'Apoyo',
+        cargo: 'GASFITERO',
+        area: 'MANTENIMIENTO',
+        rolEnCuadrilla: 'APOYO',
+        funcionVisible: 'Gasfitero de apoyo',
+        cuadrillaId: 1,
+        codigoCuadrilla: 'Cuadrilla 001',
+      );
+      const sinCuadrilla = Gasfitero(
+        id: 12,
+        nombre: 'Disponible',
         cargo: 'GASFITERO_PRINCIPAL',
         area: 'MANTENIMIENTO',
+        funcionVisible: 'Gasfitero',
       );
-      fakeRepo.personal = [lider, principalSinCuadrilla];
-      fakeRepo.cuadrillas = const [
-        Cuadrilla(id: 1, codigoGrupo: 'Grupo 1', lider: lider),
-      ];
+      fakeRepo.personal = [principal, apoyo, sinCuadrilla];
 
       await vm.cargarTodo();
 
-      expect(vm.esGasfiteroPrincipal(lider.id), isTrue);
-      expect(vm.cargoVisible(lider), 'Gasfitero Principal');
-      expect(vm.esGasfiteroPrincipal(principalSinCuadrilla.id), isFalse);
-      expect(vm.cargoVisible(principalSinCuadrilla), 'Gasfitero');
+      final personal = vm.personalMantenimientoOrdenado;
+      expect(personal[0].funcionVisible, 'Gasfitero principal');
+      expect(personal[0].dni, '71234567');
+      expect(personal[0].celular, '912345678');
+      expect(personal[0].esPrincipal, isTrue);
+      expect(personal[1].funcionVisible, 'Gasfitero de apoyo');
+      expect(personal[1].codigoCuadrilla, 'Cuadrilla 001');
+      expect(personal[2].funcionVisible, 'Gasfitero');
+      expect(personal[2].cuadrillaId, isNull);
     });
 
-    test('el chofer siempre aparece al final del listado de personal',
-        () async {
-      const choferPrimeraCuadrilla = Gasfitero(
+    test('respeta el orden de personal definido por el backend', () async {
+      const primero = Gasfitero(
         id: 20,
-        nombre: 'Aarón Chofer',
-        cargo: 'CHOFER_CAMIONETA',
-        area: 'MANTENIMIENTO',
+        nombre: 'Primero',
+        funcionVisible: 'Gasfitero de apoyo',
       );
-      const gasfiteroSegundaCuadrilla = Gasfitero(
+      const segundo = Gasfitero(
         id: 21,
-        nombre: 'Yordy Gasfitero',
-        cargo: 'GASFITERO',
-        area: 'MANTENIMIENTO',
+        nombre: 'Segundo',
+        funcionVisible: 'Gasfitero',
       );
-      fakeRepo.personal = [choferPrimeraCuadrilla, gasfiteroSegundaCuadrilla];
-      fakeRepo.cuadrillas = const [
-        Cuadrilla(
-          id: 1,
-          codigoGrupo: 'Cuadrilla 001',
-          chofer: choferPrimeraCuadrilla,
-        ),
-        Cuadrilla(
-          id: 2,
-          codigoGrupo: 'Cuadrilla 002',
-          apoyos: [gasfiteroSegundaCuadrilla],
-        ),
-      ];
+      fakeRepo.personal = [primero, segundo];
 
       await vm.cargarTodo();
 
       expect(
         vm.personalMantenimientoOrdenado.map((persona) => persona.id),
-        [21, 20],
+        [20, 21],
       );
     });
   });

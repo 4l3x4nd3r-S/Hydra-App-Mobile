@@ -11,8 +11,7 @@ class SessionViewModel extends ChangeNotifier {
   SessionInfo? get session => _session;
   bool get isLoading => _isLoading;
 
-  SessionViewModel(
-      {required ValidateSessionUseCase validateSessionUseCase})
+  SessionViewModel({required ValidateSessionUseCase validateSessionUseCase})
       : _validateSessionUseCase = validateSessionUseCase;
 
   Future<void> validate() async {

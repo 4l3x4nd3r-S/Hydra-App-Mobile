@@ -110,7 +110,7 @@ class _OsInboxBody extends StatelessWidget {
                       context,
                       userName: vm.userName,
                       role: vm.userRole,
-                      dni: vm.userCode,
+                      codigo: vm.userCode,
                     );
                     break;
                   case 'theme':

@@ -26,11 +26,16 @@ class OsDto with _$OsDto {
     @JsonKey(name: 'trabajo_ejecutado') String? trabajoEjecutado,
     @JsonKey(name: 'problemas') String? problemas,
     @JsonKey(name: 'soluciones') String? soluciones,
-    @JsonKey(name: 'comentarios_instrucciones') String? comentariosInstrucciones,
+    @JsonKey(name: 'comentarios_instrucciones')
+    String? comentariosInstrucciones,
     @JsonKey(name: 'latitud') double? latitud,
     @JsonKey(name: 'longitud') double? longitud,
-    @JsonKey(name: 'fotos_problema_urls') @Default([]) List<String> fotosProblemaUrls,
-    @JsonKey(name: 'fotos_solucion_urls') @Default([]) List<String> fotosSolucionUrls,
+    @JsonKey(name: 'fotos_problema_urls')
+    @Default([])
+    List<String> fotosProblemaUrls,
+    @JsonKey(name: 'fotos_solucion_urls')
+    @Default([])
+    List<String> fotosSolucionUrls,
     @JsonKey(name: 'reclamo') ReclamoDto? reclamo,
     @JsonKey(name: 'cuadrilla') CuadrillaDto? cuadrilla,
     @JsonKey(name: 'responsable') ResponsableDto? responsable,

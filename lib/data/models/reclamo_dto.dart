@@ -16,7 +16,7 @@ class ReclamoDto with _$ReclamoDto {
     @JsonKey(name: 'descripcion') String? descripcion,
     @JsonKey(name: 'nombre_solicitante') String? nombreSolicitante,
     @JsonKey(name: 'direccion') String? direccion,
-    @JsonKey(name: 'numero_medidor') String? numeroMedidor,
+    @JsonKey(name: 'numero_suministro') String? numeroSuministro,
     @JsonKey(name: 'telefono') String? telefono,
     @JsonKey(name: 'email') String? email,
   }) = _ReclamoDto;

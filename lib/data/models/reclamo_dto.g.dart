@@ -18,7 +18,7 @@ _$ReclamoDtoImpl _$$ReclamoDtoImplFromJson(Map<String, dynamic> json) =>
       descripcion: json['descripcion'] as String?,
       nombreSolicitante: json['nombre_solicitante'] as String?,
       direccion: json['direccion'] as String?,
-      numeroMedidor: json['numero_medidor'] as String?,
+      numeroSuministro: json['numero_suministro'] as String?,
       telefono: json['telefono'] as String?,
       email: json['email'] as String?,
     );
@@ -35,7 +35,7 @@ Map<String, dynamic> _$$ReclamoDtoImplToJson(_$ReclamoDtoImpl instance) =>
       'descripcion': instance.descripcion,
       'nombre_solicitante': instance.nombreSolicitante,
       'direccion': instance.direccion,
-      'numero_medidor': instance.numeroMedidor,
+      'numero_suministro': instance.numeroSuministro,
       'telefono': instance.telefono,
       'email': instance.email,
     };

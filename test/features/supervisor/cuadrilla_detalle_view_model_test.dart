@@ -8,21 +8,25 @@ const _lider = Gasfitero(
   id: 1,
   nombre: 'Raul Coral Murrieta',
   cargo: 'GASFITERO PRINCIPAL',
+  puedeSerGasfitero: true,
 );
 const _apoyo = Gasfitero(
   id: 2,
   nombre: 'Juan David Quispe Guerra',
   cargo: 'GASFITERO',
+  puedeSerGasfitero: true,
 );
 const _disponibleUno = Gasfitero(
   id: 3,
   nombre: 'Juan Pablo Rodriguez Chapiama',
   cargo: 'GASFITERO',
+  puedeSerGasfitero: true,
 );
 const _disponibleDos = Gasfitero(
   id: 4,
   nombre: 'Yordy Dancuart Guerra',
   cargo: 'GASFITERO',
+  puedeSerGasfitero: true,
 );
 
 class _FakeSupervisorRepository implements SupervisorRepository {
@@ -60,7 +64,6 @@ class _FakeSupervisorRepository implements SupervisorRepository {
     required int liderId,
     required List<int> apoyosIds,
     int? choferId,
-    int? operadorId,
   }) async {
     updateCalls++;
     receivedLeaderId = liderId;

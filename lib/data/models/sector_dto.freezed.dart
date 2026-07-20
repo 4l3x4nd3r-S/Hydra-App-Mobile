@@ -26,6 +26,8 @@ mixin _$SectorDto {
   String? get nombre => throw _privateConstructorUsedError;
   @JsonKey(name: 'reservorio_asociado')
   String? get reservorioAsociado => throw _privateConstructorUsedError;
+  @JsonKey(name: 'geometria_geojson')
+  String? get geometriaGeojson => throw _privateConstructorUsedError;
 
   /// Serializes this SectorDto to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -45,7 +47,8 @@ abstract class $SectorDtoCopyWith<$Res> {
   $Res call(
       {@JsonKey(name: 'id') int id,
       @JsonKey(name: 'nombre') String? nombre,
-      @JsonKey(name: 'reservorio_asociado') String? reservorioAsociado});
+      @JsonKey(name: 'reservorio_asociado') String? reservorioAsociado,
+      @JsonKey(name: 'geometria_geojson') String? geometriaGeojson});
 }
 
 /// @nodoc
@@ -66,6 +69,7 @@ class _$SectorDtoCopyWithImpl<$Res, $Val extends SectorDto>
     Object? id = null,
     Object? nombre = freezed,
     Object? reservorioAsociado = freezed,
+    Object? geometriaGeojson = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -79,6 +83,10 @@ class _$SectorDtoCopyWithImpl<$Res, $Val extends SectorDto>
       reservorioAsociado: freezed == reservorioAsociado
           ? _value.reservorioAsociado
           : reservorioAsociado // ignore: cast_nullable_to_non_nullable
+              as String?,
+      geometriaGeojson: freezed == geometriaGeojson
+          ? _value.geometriaGeojson
+          : geometriaGeojson // ignore: cast_nullable_to_non_nullable
               as String?,
     ) as $Val);
   }
@@ -95,7 +103,8 @@ abstract class _$$SectorDtoImplCopyWith<$Res>
   $Res call(
       {@JsonKey(name: 'id') int id,
       @JsonKey(name: 'nombre') String? nombre,
-      @JsonKey(name: 'reservorio_asociado') String? reservorioAsociado});
+      @JsonKey(name: 'reservorio_asociado') String? reservorioAsociado,
+      @JsonKey(name: 'geometria_geojson') String? geometriaGeojson});
 }
 
 /// @nodoc
@@ -114,6 +123,7 @@ class __$$SectorDtoImplCopyWithImpl<$Res>
     Object? id = null,
     Object? nombre = freezed,
     Object? reservorioAsociado = freezed,
+    Object? geometriaGeojson = freezed,
   }) {
     return _then(_$SectorDtoImpl(
       id: null == id
@@ -128,6 +138,10 @@ class __$$SectorDtoImplCopyWithImpl<$Res>
           ? _value.reservorioAsociado
           : reservorioAsociado // ignore: cast_nullable_to_non_nullable
               as String?,
+      geometriaGeojson: freezed == geometriaGeojson
+          ? _value.geometriaGeojson
+          : geometriaGeojson // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -138,7 +152,8 @@ class _$SectorDtoImpl implements _SectorDto {
   const _$SectorDtoImpl(
       {@JsonKey(name: 'id') required this.id,
       @JsonKey(name: 'nombre') this.nombre,
-      @JsonKey(name: 'reservorio_asociado') this.reservorioAsociado});
+      @JsonKey(name: 'reservorio_asociado') this.reservorioAsociado,
+      @JsonKey(name: 'geometria_geojson') this.geometriaGeojson});
 
   factory _$SectorDtoImpl.fromJson(Map<String, dynamic> json) =>
       _$$SectorDtoImplFromJson(json);
@@ -152,10 +167,13 @@ class _$SectorDtoImpl implements _SectorDto {
   @override
   @JsonKey(name: 'reservorio_asociado')
   final String? reservorioAsociado;
+  @override
+  @JsonKey(name: 'geometria_geojson')
+  final String? geometriaGeojson;
 
   @override
   String toString() {
-    return 'SectorDto(id: $id, nombre: $nombre, reservorioAsociado: $reservorioAsociado)';
+    return 'SectorDto(id: $id, nombre: $nombre, reservorioAsociado: $reservorioAsociado, geometriaGeojson: $geometriaGeojson)';
   }
 
   @override
@@ -166,12 +184,15 @@ class _$SectorDtoImpl implements _SectorDto {
             (identical(other.id, id) || other.id == id) &&
             (identical(other.nombre, nombre) || other.nombre == nombre) &&
             (identical(other.reservorioAsociado, reservorioAsociado) ||
-                other.reservorioAsociado == reservorioAsociado));
+                other.reservorioAsociado == reservorioAsociado) &&
+            (identical(other.geometriaGeojson, geometriaGeojson) ||
+                other.geometriaGeojson == geometriaGeojson));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, nombre, reservorioAsociado);
+  int get hashCode => Object.hash(
+      runtimeType, id, nombre, reservorioAsociado, geometriaGeojson);
 
   /// Create a copy of SectorDto
   /// with the given fields replaced by the non-null parameter values.
@@ -193,8 +214,9 @@ abstract class _SectorDto implements SectorDto {
   const factory _SectorDto(
       {@JsonKey(name: 'id') required final int id,
       @JsonKey(name: 'nombre') final String? nombre,
-      @JsonKey(name: 'reservorio_asociado')
-      final String? reservorioAsociado}) = _$SectorDtoImpl;
+      @JsonKey(name: 'reservorio_asociado') final String? reservorioAsociado,
+      @JsonKey(name: 'geometria_geojson')
+      final String? geometriaGeojson}) = _$SectorDtoImpl;
 
   factory _SectorDto.fromJson(Map<String, dynamic> json) =
       _$SectorDtoImpl.fromJson;
@@ -208,6 +230,9 @@ abstract class _SectorDto implements SectorDto {
   @override
   @JsonKey(name: 'reservorio_asociado')
   String? get reservorioAsociado;
+  @override
+  @JsonKey(name: 'geometria_geojson')
+  String? get geometriaGeojson;
 
   /// Create a copy of SectorDto
   /// with the given fields replaced by the non-null parameter values.

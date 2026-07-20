@@ -281,7 +281,7 @@ class OsDetailSection extends StatelessWidget {
       'formato',
       'telefono',
       'teléfono',
-      'medidor',
+      'suministro',
     };
     if (halfWidthFields.contains(key)) return 6;
     return 12;
@@ -367,13 +367,12 @@ class OsDetailSection extends StatelessWidget {
     if (key.contains('direccion')) return Icons.location_on_outlined;
     if (key.contains('telefono')) return Icons.phone_outlined;
     if (key.contains('email')) return Icons.mail_outline_rounded;
-    if (key.contains('medidor')) return Icons.speed_rounded;
+    if (key.contains('suministro')) return Icons.speed_rounded;
     if (_isDateField(label)) return Icons.calendar_today_outlined;
     if (key.contains('cuadrilla')) return Icons.groups_outlined;
     if (key.contains('líder')) return Icons.star_outline_rounded;
     if (key.contains('apoyo')) return Icons.person_outline_rounded;
     if (key.contains('chofer')) return Icons.local_shipping_outlined;
-    if (key.contains('operador')) return Icons.settings_outlined;
     if (key.contains('trabajo')) return Icons.handyman_outlined;
     if (key.contains('problema')) return Icons.warning_amber_rounded;
     if (key.contains('solucion')) return Icons.check_circle_outline_rounded;

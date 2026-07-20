@@ -12,8 +12,7 @@ class PuntoPresionListViewModel extends ChangeNotifier {
   List<PuntoPresion> get puntos => _puntos;
   bool get loading => _loading;
 
-  PuntoPresionListViewModel(
-      {required CatastroRepository catastroRepository})
+  PuntoPresionListViewModel({required CatastroRepository catastroRepository})
       : _catastroRepository = catastroRepository {
     load();
   }
@@ -21,14 +20,12 @@ class PuntoPresionListViewModel extends ChangeNotifier {
   Future<void> load() async {
     _loading = true;
     notifyListeners();
-    _puntos =
-        await _catastroRepository.getPuntosPresion();
+    _puntos = await _catastroRepository.getPuntosPresion();
     _loading = false;
     notifyListeners();
   }
 
   Future<RegistroPresion?> getUltimoRegistro(int puntoId) {
-    return _catastroRepository
-        .getUltimoRegistroPresion(puntoId);
+    return _catastroRepository.getUltimoRegistroPresion(puntoId);
   }
 }

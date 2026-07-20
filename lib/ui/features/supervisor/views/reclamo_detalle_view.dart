@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../../domain/enums/tipo_problema.dart';
+import '../../../../data/repositories/catalog_repository.dart';
 import '../../../../domain/models/reclamo.dart';
 import '../../../../domain/models/cuadrilla.dart';
 import '../../../../domain/use_cases/create_os_from_reclamo_use_case.dart';
@@ -23,6 +23,7 @@ class ReclamoDetalleView extends StatelessWidget {
       create: (_) => ReclamoDetalleViewModel(
         reclamo: reclamo,
         createOsUseCase: context.read<CreateOsFromReclamoUseCase>(),
+        catalogRepository: context.read<CatalogRepository>(),
       ),
       child: _ReclamoDetalleBody(cuadrillas: cuadrillas),
     );
@@ -102,7 +103,7 @@ class _ReclamoDetalleBodyState extends State<_ReclamoDetalleBody> {
                 _DetailItem(
                   icon: Icons.build_outlined,
                   label: 'Tipo de problema',
-                  value: TipoProblema.etiquetaDescriptiva(r.tipoProblema),
+                  value: r.tipoProblema ?? '',
                   span: 12,
                 ),
                 _DetailItem(
@@ -135,8 +136,8 @@ class _ReclamoDetalleBodyState extends State<_ReclamoDetalleBody> {
                 ),
                 _DetailItem(
                   icon: Icons.speed_rounded,
-                  label: 'N.° de medidor',
-                  value: r.numeroMedidor,
+                  label: 'N.° de suministro',
+                  value: r.numeroSuministro,
                   span: 6,
                 ),
                 _DetailItem(

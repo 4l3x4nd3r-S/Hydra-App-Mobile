@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import '../../../../domain/models/reclamo.dart';
 import '../../../../domain/use_cases/crear_reclamo_use_case.dart';
+import '../../../../data/repositories/catalog_repository.dart';
+import '../../../../domain/models/catalog_option.dart';
 
 import 'package:dio/dio.dart';
 
 class NuevoReclamoViewModel extends ChangeNotifier {
   final CrearReclamoUseCase _crearReclamoUseCase;
+  final CatalogRepository _catalogRepository;
 
   final TextEditingController codigoController = TextEditingController();
   final TextEditingController descripcionController = TextEditingController();
@@ -13,12 +16,13 @@ class NuevoReclamoViewModel extends ChangeNotifier {
   final TextEditingController direccionController = TextEditingController();
   final TextEditingController telefonoController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
-  final TextEditingController numeroMedidorController = TextEditingController();
+  final TextEditingController numeroSuministroController =
+      TextEditingController();
 
-  String _formato = 'Anexo 6';
-  String _canalEntrada = 'Presencial';
-  String _tipoProblema = 'OP-1';
-  final String _estado = 'PENDIENTE';
+  String _formato = '';
+  String _canalEntrada = '';
+  String _tipoProblema = '';
+  String _estado = '';
 
   String get formato => _formato;
   String get canalEntrada => _canalEntrada;
@@ -35,122 +39,65 @@ class NuevoReclamoViewModel extends ChangeNotifier {
   bool get success => _success;
   String? get errorMsg => _errorMsg;
 
+  bool _loadingCatalogs = true;
+  bool get loadingCatalogs => _loadingCatalogs;
+  String? _catalogError;
+  String? get catalogError => _catalogError;
+  List<CatalogOption> _catalogOptions = const [];
+
   final Map<String, String?> fieldErrors = {};
 
-  static const _canales = [
-    'Presencial',
-    'Call Center',
-    'Llamada Directa',
-  ];
-  static const _tiposProblemaAnexo6 = [
-    'OP-1',
-    'OP-2',
-    'OP-3',
-    'OP-4',
-    'OP-5',
-    'OP-6',
-    'OP-7',
-  ];
-  static const _descripcionesProblemaAnexo6 = {
-    'OP-1': 'Obras inconclusas (vereda pendiente, calzada pendiente)',
-    'OP-2':
-        'Fugas en la red de agua potable e inundaciones (roturas de tuberías en redes matriz y secundaria, fuga de agua en vereda o en calzada)',
-    'OP-3': 'Desbordes en la red de alcantarillado (rotura de tubería)',
-    'OP-4':
-        'Atoro en conexión de alcantarillado e inundaciones (taponamiento de conexiones en una zona, taponamiento con desborde en la calle)',
-    'OP-5':
-        'Cortes del servicio (efectuar cortes del servicio no programados, no cumplir con horario de abastecimiento injustificadamente, no informar a los usuarios sobre los casos fortuitos o de fuerza mayor)',
-    'OP-6':
-        'Falta de accesorios de seguridad (mantener por mas de 24 horas abierto el buzon del sistema de alcantarillado, pozo abierto, falta de tapa de registro, falta de tapa de medidor, falta de conexión de agua, ausencia de vallas de señalización y cintas de seguridad donde sea necesario por ejecución)',
-    'OP-7': 'Seguridad: Emanaciones del sistema de alcantarillado',
-  };
-  static const _tiposProblemaFormato1 = [
-    'B1',
-    'B5',
-    'B8',
-    'B9',
-    'B10',
-    'B11',
-    'B13',
-    'B14',
-    'FALTA DE PRESIÓN DE AGUA',
-    'REPOSICIÓN DE CAJA DE MEDIDOR',
-    'REPOSICIÓN DE MEDIDOR POR HURTO',
-    'CAMBIO DE LLAVE DE PASO',
-    'REUBICACIÓN DE CONEXION',
-    'REPOSICIÓN DE MARCO Y TAPA DE AGUA',
-    'NIVELACIÓN DE CAJA DE REGISTRO DE AGUA',
-    'B6',
-    'B7',
-    'B12',
-    'REPOSICIÓN DE MARCO Y TAPA DE DESAGÜE',
-    'NIVELACIÓN DE CAJA DE REGISTRO DE DESAGÜE',
-    'REPOSICIÓN DE TUBERIA DE CONCRETO A PVC - DESAGÜE',
-    'A1',
-    'TRABAJOS COLATERAS',
-    'OTROS',
-  ];
-  static const _descripcionesProblemaFormato1 = {
-    'B1':
-        'Agua potable · FUGAS EN CONEXION DOMICILIARIA (fuga en el medidor o tubo de entrada a la casa)',
-    'B5':
-        'Agua potable · FUGAS EN RED MATRIZ (rotura de tubería principal de agua en la calle)',
-    'B8':
-        'Agua potable · FALTA DE AGUA (corte de suministro o desabastecimiento)',
-    'B9':
-        'Agua potable · LIMPIEZA LLAVE DE TOMA (mantenimiento de la llave principal)',
-    'B10':
-        'Agua potable · FUGA DE AGUA EN CAJA MEDIDOR (fuga visible en la caja de la vereda)',
-    'B11':
-        'Agua potable · MANTENIMIENTO DE MEDIDOR (limpieza o cambio de medidor)',
-    'B13':
-        'Agua potable · CALIDAD DE AGUA (agua turbia, con olor o sabor inusual)',
-    'B14':
-        'Agua potable · INSTALACION DE MEDIDOR (instalación de micromedición)',
-    'FALTA DE PRESIÓN DE AGUA':
-        'Agua potable · Presión insuficiente en el predio',
-    'REPOSICIÓN DE CAJA DE MEDIDOR':
-        'Agua potable · Caja de medidor rota o deteriorada',
-    'REPOSICIÓN DE MEDIDOR POR HURTO': 'Agua potable · Robo del medidor',
-    'CAMBIO DE LLAVE DE PASO': 'Agua potable · Válvula de control malograda',
-    'REUBICACIÓN DE CONEXION':
-        'Agua potable · Mover la toma de agua a otro punto',
-    'REPOSICIÓN DE MARCO Y TAPA DE AGUA':
-        'Agua potable · Cambio de la cubierta protectora',
-    'NIVELACIÓN DE CAJA DE REGISTRO DE AGUA':
-        'Agua potable · Ajustar la caja a la altura de la vereda',
-    'B6':
-        'Desagüe · ATORO EN CONEXION DOMICILIARIA (obstrucción en la salida de desagüe del predio)',
-    'B7':
-        'Desagüe · ATORO EN RED DE MATRIZ (obstrucción de la red principal de alcantarillado en la calle)',
-    'B12':
-        'Desagüe · BUZON SIN TAPA (peligro de buzón abierto en la vía pública)',
-    'REPOSICIÓN DE MARCO Y TAPA DE DESAGÜE':
-        'Desagüe · Tapa de registro domiciliario dañada',
-    'NIVELACIÓN DE CAJA DE REGISTRO DE DESAGÜE':
-        'Desagüe · Alinear la caja de registro de desagüe a la vereda',
-    'REPOSICIÓN DE TUBERIA DE CONCRETO A PVC - DESAGÜE':
-        'Desagüe · Modernización de redes viejas',
-    'A1':
-        'Otros · FILTRACION DE AGUA EXTERNAS HACIA EL PREDIO (humedad o filtraciones de la calle hacia la casa del usuario)',
-    'TRABAJOS COLATERAS':
-        'Otros · Daños incidentales a veredas o pistas tras reparaciones',
-    'OTROS': 'Otros · Reclamos generales sin categoría definida',
-  };
-  static const _formatos = ['Anexo 6', 'Formato 1'];
+  List<String> get canales => _codesFor('CANAL_RECLAMO');
+  List<String> get formatos => _codesFor('FORMATO_RECLAMO');
+  List<String> get tiposProblema => _catalogOptions
+      .where((option) =>
+          option.group == 'TIPO_PROBLEMA' && option.parentCode == _formato)
+      .map((option) => option.code)
+      .toList(growable: false);
+  Map<String, String> get descripcionesProblema => {
+        for (final option in _catalogOptions.where((option) =>
+            option.group == 'TIPO_PROBLEMA' && option.parentCode == _formato))
+          option.code: option.description ?? '',
+      };
 
-  static List<String> get canales => _canales;
-  static List<String> get formatos => _formatos;
+  NuevoReclamoViewModel({
+    required CrearReclamoUseCase crearReclamoUseCase,
+    required CatalogRepository catalogRepository,
+  })  : _crearReclamoUseCase = crearReclamoUseCase,
+        _catalogRepository = catalogRepository {
+    _loadCatalogs();
+  }
 
-  List<String> get tiposProblema =>
-      _formato == 'Formato 1' ? _tiposProblemaFormato1 : _tiposProblemaAnexo6;
+  List<String> _codesFor(String group) => _catalogOptions
+      .where((option) => option.group == group)
+      .map((option) => option.code)
+      .toList(growable: false);
 
-  Map<String, String> get descripcionesProblema => _formato == 'Formato 1'
-      ? _descripcionesProblemaFormato1
-      : _descripcionesProblemaAnexo6;
+  String _defaultFor(String group, List<CatalogOption> options) {
+    final groupOptions = options.where((option) => option.group == group);
+    if (groupOptions.isEmpty) return '';
+    return groupOptions
+        .firstWhere((option) => option.isDefault,
+            orElse: () => groupOptions.first)
+        .code;
+  }
 
-  NuevoReclamoViewModel({required CrearReclamoUseCase crearReclamoUseCase})
-      : _crearReclamoUseCase = crearReclamoUseCase;
+  Future<void> _loadCatalogs() async {
+    try {
+      final options = await _catalogRepository.getOptions();
+      _catalogOptions = options;
+      _formato = _defaultFor('FORMATO_RECLAMO', options);
+      _canalEntrada = _defaultFor('CANAL_RECLAMO', options);
+      _estado = _defaultFor('ESTADO_RECLAMO', options);
+      final types = tiposProblema;
+      _tipoProblema = types.isEmpty ? '' : types.first;
+    } catch (_) {
+      _catalogError = 'No se pudo cargar la configuración del formulario.';
+    } finally {
+      _loadingCatalogs = false;
+      notifyListeners();
+    }
+  }
 
   void setFormato(String v) {
     if (_formato == v) return;
@@ -191,7 +138,7 @@ class NuevoReclamoViewModel extends ChangeNotifier {
     final nombre = nombreController.text.trim();
     final telefono = telefonoController.text.trim();
     final email = emailController.text.trim();
-    final numeroMedidor = numeroMedidorController.text.trim();
+    final numeroSuministro = numeroSuministroController.text.trim();
     final direccion = direccionController.text.trim();
 
     if (codigo.isEmpty) {
@@ -228,12 +175,12 @@ class NuevoReclamoViewModel extends ChangeNotifier {
     } else if (direccion.length > 255) {
       fieldErrors['direccion'] = 'Máximo 255 caracteres';
     }
-    if (numeroMedidor.isEmpty) {
-      fieldErrors['numero_medidor'] = 'Requerido';
-    } else if (!RegExp(r'^\d{7}$').hasMatch(numeroMedidor)) {
-      fieldErrors['numero_medidor'] = 'Debe tener exactamente 7 dígitos';
-    } else if (numeroMedidor == '0000000') {
-      fieldErrors['numero_medidor'] = 'No puede ser 0000000';
+    if (numeroSuministro.isEmpty) {
+      fieldErrors['numero_suministro'] = 'Requerido';
+    } else if (!RegExp(r'^\d{7}$').hasMatch(numeroSuministro)) {
+      fieldErrors['numero_suministro'] = 'Debe tener exactamente 7 dígitos';
+    } else if (numeroSuministro == '0000000') {
+      fieldErrors['numero_suministro'] = 'No puede ser 0000000';
     }
 
     if (fieldErrors.isNotEmpty) {
@@ -256,7 +203,7 @@ class NuevoReclamoViewModel extends ChangeNotifier {
         nombreSolicitante: nombre,
         telefono: telefono.isEmpty ? null : telefono,
         email: email.isEmpty ? null : email,
-        numeroMedidor: numeroMedidor.isEmpty ? null : numeroMedidor,
+        numeroSuministro: numeroSuministro.isEmpty ? null : numeroSuministro,
         direccion: direccion.isEmpty ? null : direccion,
         fechaRegistro: _fechaRegistro.toIso8601String(),
       );
@@ -286,7 +233,7 @@ class NuevoReclamoViewModel extends ChangeNotifier {
     direccionController.dispose();
     telefonoController.dispose();
     emailController.dispose();
-    numeroMedidorController.dispose();
+    numeroSuministroController.dispose();
     super.dispose();
   }
 }

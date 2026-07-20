@@ -8,6 +8,8 @@ import 'package:hydra/domain/use_cases/create_os_from_reclamo_use_case.dart';
 import 'package:hydra/ui/core/theme/app_colors.dart';
 import 'package:hydra/ui/features/supervisor/views/reclamo_detalle_view.dart';
 import 'package:hydra/ui/features/supervisor/view_models/reclamo_detalle_view_model.dart';
+import 'package:hydra/data/repositories/catalog_repository.dart';
+import '../../helpers/fake_catalog_repository.dart';
 
 import 'reclamo_detalle_view_model_test.dart';
 
@@ -35,7 +37,7 @@ void main() {
     nombreSolicitante: 'Juan Perez',
     telefono: '987654321',
     email: 'juan@example.com',
-    numeroMedidor: '0000001',
+    numeroSuministro: '0000001',
     canalEntrada: 'Presencial',
     tipoProblema: 'OP-3',
     fechaRegistro: '2026-07-01T10:00:00',
@@ -52,14 +54,14 @@ void main() {
     Cuadrilla(
       id: 2,
       codigoGrupo: 'Grupo #2',
-      especialidad: 'Desagüe',
+      especialidad: 'Alcantarillado',
       lider: Gasfitero(id: 3, nombre: 'Lider Dos'),
       apoyos: [Gasfitero(id: 4, nombre: 'Apoyo Dos')],
     ),
     Cuadrilla(
       id: 3,
       codigoGrupo: 'Grupo individual',
-      especialidad: 'Desagüe',
+      especialidad: 'Alcantarillado',
       lider: Gasfitero(id: 5, nombre: 'Lider Solo'),
     ),
   ];
@@ -77,6 +79,7 @@ void main() {
       home: MultiProvider(
         providers: [
           Provider<CreateOsFromReclamoUseCase>.value(value: fakeUseCase),
+          Provider<CatalogRepository>.value(value: FakeCatalogRepository()),
           ChangeNotifierProvider<ReclamoDetalleViewModel>.value(value: vm),
         ],
         child: ReclamoDetalleView(
@@ -93,6 +96,7 @@ void main() {
       final vm = ReclamoDetalleViewModel(
         reclamo: testReclamo,
         createOsUseCase: fakeUseCase,
+        catalogRepository: FakeCatalogRepository(),
       );
       await tester.pumpWidget(createTestWidget(
         fakeUseCase: fakeUseCase,
@@ -110,6 +114,7 @@ void main() {
       final vm = ReclamoDetalleViewModel(
         reclamo: testReclamo,
         createOsUseCase: fakeUseCase,
+        catalogRepository: FakeCatalogRepository(),
       );
       await tester.pumpWidget(createTestWidget(
         fakeUseCase: fakeUseCase,
@@ -138,6 +143,7 @@ void main() {
       final vm = ReclamoDetalleViewModel(
         reclamo: testReclamo,
         createOsUseCase: fakeUseCase,
+        catalogRepository: FakeCatalogRepository(),
       );
       await tester.pumpWidget(createTestWidget(
         fakeUseCase: fakeUseCase,
@@ -169,6 +175,7 @@ void main() {
       final vm = ReclamoDetalleViewModel(
         reclamo: testReclamo,
         createOsUseCase: fakeUseCase,
+        catalogRepository: FakeCatalogRepository(),
       );
       await tester.pumpWidget(createTestWidget(
         fakeUseCase: fakeUseCase,
@@ -190,6 +197,7 @@ void main() {
       final vm = ReclamoDetalleViewModel(
         reclamo: reclamoAgua,
         createOsUseCase: fakeUseCase,
+        catalogRepository: FakeCatalogRepository(),
       );
       await tester.pumpWidget(createTestWidget(
         fakeUseCase: fakeUseCase,

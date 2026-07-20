@@ -14,7 +14,7 @@ class Reclamo with _$Reclamo {
     String? descripcion,
     String? nombreSolicitante,
     String? direccion,
-    String? numeroMedidor,
+    String? numeroSuministro,
     String? telefono,
     String? email,
     String? fechaRegistro,

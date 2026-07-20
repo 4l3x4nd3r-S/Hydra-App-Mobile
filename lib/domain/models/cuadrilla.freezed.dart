@@ -22,7 +22,6 @@ mixin _$Cuadrilla {
   Gasfitero? get lider => throw _privateConstructorUsedError;
   List<Gasfitero> get apoyos => throw _privateConstructorUsedError;
   Gasfitero? get chofer => throw _privateConstructorUsedError;
-  Gasfitero? get operador => throw _privateConstructorUsedError;
 
   /// Create a copy of Cuadrilla
   /// with the given fields replaced by the non-null parameter values.
@@ -42,12 +41,10 @@ abstract class $CuadrillaCopyWith<$Res> {
       String? especialidad,
       Gasfitero? lider,
       List<Gasfitero> apoyos,
-      Gasfitero? chofer,
-      Gasfitero? operador});
+      Gasfitero? chofer});
 
   $GasfiteroCopyWith<$Res>? get lider;
   $GasfiteroCopyWith<$Res>? get chofer;
-  $GasfiteroCopyWith<$Res>? get operador;
 }
 
 /// @nodoc
@@ -71,7 +68,6 @@ class _$CuadrillaCopyWithImpl<$Res, $Val extends Cuadrilla>
     Object? lider = freezed,
     Object? apoyos = null,
     Object? chofer = freezed,
-    Object? operador = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -97,10 +93,6 @@ class _$CuadrillaCopyWithImpl<$Res, $Val extends Cuadrilla>
       chofer: freezed == chofer
           ? _value.chofer
           : chofer // ignore: cast_nullable_to_non_nullable
-              as Gasfitero?,
-      operador: freezed == operador
-          ? _value.operador
-          : operador // ignore: cast_nullable_to_non_nullable
               as Gasfitero?,
     ) as $Val);
   }
@@ -132,20 +124,6 @@ class _$CuadrillaCopyWithImpl<$Res, $Val extends Cuadrilla>
       return _then(_value.copyWith(chofer: value) as $Val);
     });
   }
-
-  /// Create a copy of Cuadrilla
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $GasfiteroCopyWith<$Res>? get operador {
-    if (_value.operador == null) {
-      return null;
-    }
-
-    return $GasfiteroCopyWith<$Res>(_value.operador!, (value) {
-      return _then(_value.copyWith(operador: value) as $Val);
-    });
-  }
 }
 
 /// @nodoc
@@ -162,15 +140,12 @@ abstract class _$$CuadrillaImplCopyWith<$Res>
       String? especialidad,
       Gasfitero? lider,
       List<Gasfitero> apoyos,
-      Gasfitero? chofer,
-      Gasfitero? operador});
+      Gasfitero? chofer});
 
   @override
   $GasfiteroCopyWith<$Res>? get lider;
   @override
   $GasfiteroCopyWith<$Res>? get chofer;
-  @override
-  $GasfiteroCopyWith<$Res>? get operador;
 }
 
 /// @nodoc
@@ -192,7 +167,6 @@ class __$$CuadrillaImplCopyWithImpl<$Res>
     Object? lider = freezed,
     Object? apoyos = null,
     Object? chofer = freezed,
-    Object? operador = freezed,
   }) {
     return _then(_$CuadrillaImpl(
       id: null == id
@@ -219,10 +193,6 @@ class __$$CuadrillaImplCopyWithImpl<$Res>
           ? _value.chofer
           : chofer // ignore: cast_nullable_to_non_nullable
               as Gasfitero?,
-      operador: freezed == operador
-          ? _value.operador
-          : operador // ignore: cast_nullable_to_non_nullable
-              as Gasfitero?,
     ));
   }
 }
@@ -236,8 +206,7 @@ class _$CuadrillaImpl implements _Cuadrilla {
       this.especialidad,
       this.lider,
       final List<Gasfitero> apoyos = const [],
-      this.chofer,
-      this.operador})
+      this.chofer})
       : _apoyos = apoyos;
 
   @override
@@ -259,12 +228,10 @@ class _$CuadrillaImpl implements _Cuadrilla {
 
   @override
   final Gasfitero? chofer;
-  @override
-  final Gasfitero? operador;
 
   @override
   String toString() {
-    return 'Cuadrilla(id: $id, codigoGrupo: $codigoGrupo, especialidad: $especialidad, lider: $lider, apoyos: $apoyos, chofer: $chofer, operador: $operador)';
+    return 'Cuadrilla(id: $id, codigoGrupo: $codigoGrupo, especialidad: $especialidad, lider: $lider, apoyos: $apoyos, chofer: $chofer)';
   }
 
   @override
@@ -279,14 +246,12 @@ class _$CuadrillaImpl implements _Cuadrilla {
                 other.especialidad == especialidad) &&
             (identical(other.lider, lider) || other.lider == lider) &&
             const DeepCollectionEquality().equals(other._apoyos, _apoyos) &&
-            (identical(other.chofer, chofer) || other.chofer == chofer) &&
-            (identical(other.operador, operador) ||
-                other.operador == operador));
+            (identical(other.chofer, chofer) || other.chofer == chofer));
   }
 
   @override
   int get hashCode => Object.hash(runtimeType, id, codigoGrupo, especialidad,
-      lider, const DeepCollectionEquality().hash(_apoyos), chofer, operador);
+      lider, const DeepCollectionEquality().hash(_apoyos), chofer);
 
   /// Create a copy of Cuadrilla
   /// with the given fields replaced by the non-null parameter values.
@@ -304,8 +269,7 @@ abstract class _Cuadrilla implements Cuadrilla {
       final String? especialidad,
       final Gasfitero? lider,
       final List<Gasfitero> apoyos,
-      final Gasfitero? chofer,
-      final Gasfitero? operador}) = _$CuadrillaImpl;
+      final Gasfitero? chofer}) = _$CuadrillaImpl;
 
   @override
   int get id;
@@ -319,8 +283,6 @@ abstract class _Cuadrilla implements Cuadrilla {
   List<Gasfitero> get apoyos;
   @override
   Gasfitero? get chofer;
-  @override
-  Gasfitero? get operador;
 
   /// Create a copy of Cuadrilla
   /// with the given fields replaced by the non-null parameter values.

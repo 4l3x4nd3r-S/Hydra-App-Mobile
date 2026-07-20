@@ -11,7 +11,7 @@ class ReclamoTileData {
   final String? formato;
   final String? codigoSolicitud;
   final String? descripcion;
-  final String? numeroMedidor;
+  final String? numeroSuministro;
   final VoidCallback? onTap;
 
   const ReclamoTileData({
@@ -24,7 +24,7 @@ class ReclamoTileData {
     this.formato,
     this.codigoSolicitud,
     this.descripcion,
-    this.numeroMedidor,
+    this.numeroSuministro,
     this.onTap,
   });
 
@@ -39,7 +39,7 @@ class ReclamoTileData {
       formato: r.formato,
       codigoSolicitud: r.codigoSolicitud,
       descripcion: r.descripcion,
-      numeroMedidor: r.numeroMedidor,
+      numeroSuministro: r.numeroSuministro,
       onTap: onTap,
     );
   }

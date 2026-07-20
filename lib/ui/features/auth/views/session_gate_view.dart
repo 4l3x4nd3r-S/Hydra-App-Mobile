@@ -14,8 +14,7 @@ class SessionGateView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => SessionViewModel(
-        validateSessionUseCase:
-            context.read<ValidateSessionUseCase>(),
+        validateSessionUseCase: context.read<ValidateSessionUseCase>(),
       )..validate(),
       child: Consumer<SessionViewModel>(
         builder: (context, vm, _) {

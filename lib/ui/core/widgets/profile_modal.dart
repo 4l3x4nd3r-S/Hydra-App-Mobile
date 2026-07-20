@@ -4,33 +4,41 @@ import '../../core/theme/app_colors.dart';
 class ProfileModal extends StatelessWidget {
   final String userName;
   final String role;
+  final String? codigo;
   final String? dni;
+  final String? celular;
   final String? cuadrilla;
-  final String area;
+  final String? area;
 
   const ProfileModal({
     super.key,
     required this.userName,
     required this.role,
+    this.codigo,
     this.dni,
+    this.celular,
     this.cuadrilla,
-    this.area = 'Mantenimiento',
+    this.area,
   });
 
   static void show(
     BuildContext context, {
     required String userName,
     required String role,
+    String? codigo,
     String? dni,
+    String? celular,
     String? cuadrilla,
-    String area = 'Mantenimiento',
+    String? area,
   }) {
     showDialog(
       context: context,
       builder: (context) => ProfileModal(
         userName: userName,
         role: role,
+        codigo: codigo,
         dni: dni,
+        celular: celular,
         cuadrilla: cuadrilla,
         area: area,
       ),
@@ -58,91 +66,104 @@ class ProfileModal extends StatelessWidget {
                 offset: const Offset(0, 10),
               )
             ]),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Header with avatar
-            CircleAvatar(
-              radius: 46,
-              backgroundColor: c.primary.withValues(alpha: 0.1),
-              child: Text(
-                userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header with avatar
+              CircleAvatar(
+                radius: 46,
+                backgroundColor: c.primary.withValues(alpha: 0.1),
+                child: Text(
+                  userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
+                  style: TextStyle(
+                    color: c.primary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 40,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                userName.isNotEmpty ? userName : 'Usuario',
                 style: TextStyle(
-                  color: c.primary,
+                  fontFamily: 'Outfit',
+                  fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  fontSize: 40,
+                  color: c.onSurface,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 4),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: c.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  role.toUpperCase(),
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 12,
+                    color: c.primary,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.0,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              userName.isNotEmpty ? userName : 'Usuario',
-              style: TextStyle(
-                fontFamily: 'Outfit',
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: c.onSurface,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 4),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              decoration: BoxDecoration(
-                color: c.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                role.toUpperCase(),
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 12,
-                  color: c.primary,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1.0,
-                ),
-              ),
-            ),
-            const SizedBox(height: 32),
+              const SizedBox(height: 32),
 
-            // Info Fields
-            _buildInfoRow(context, Icons.badge_outlined, 'Nombres y Apellidos',
-                userName.isNotEmpty ? userName : '-'),
-            const SizedBox(height: 12),
-            if (dni != null && dni!.trim().isNotEmpty) ...[
-              _buildInfoRow(context, Icons.credit_card_rounded, 'CÓDIGO', dni!),
+              // Info Fields
+              _buildInfoRow(context, Icons.badge_outlined,
+                  'Nombres y Apellidos', userName.isNotEmpty ? userName : '-'),
               const SizedBox(height: 12),
-            ],
-            _buildInfoRow(
-              context,
-              Icons.business_outlined,
-              'Área',
-              area,
-            ),
-
-            if (!isSupervisor) ...[
-              const SizedBox(height: 12),
-              _buildInfoRow(context, Icons.group_work_outlined, 'Cuadrilla',
-                  _cuadrillaValue(cuadrilla)),
-            ],
-
-            const SizedBox(height: 32),
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: FilledButton(
-                onPressed: () => Navigator.of(context).pop(),
-                style: FilledButton.styleFrom(
-                  backgroundColor: c.primary,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16)),
+              if (codigo != null && codigo!.trim().isNotEmpty) ...[
+                _buildInfoRow(context, Icons.badge_outlined, 'Código', codigo!),
+                const SizedBox(height: 12),
+              ],
+              if (dni != null && dni!.trim().isNotEmpty) ...[
+                _buildInfoRow(context, Icons.credit_card_rounded, 'DNI', dni!),
+                const SizedBox(height: 12),
+              ],
+              if (celular != null && celular!.trim().isNotEmpty) ...[
+                _buildInfoRow(
+                    context, Icons.phone_outlined, 'Celular', celular!),
+                const SizedBox(height: 12),
+              ],
+              if (area != null && area!.trim().isNotEmpty)
+                _buildInfoRow(
+                  context,
+                  Icons.business_outlined,
+                  'Área',
+                  area!,
                 ),
-                child: const Text('Cerrar',
-                    style:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+
+              if (!isSupervisor) ...[
+                const SizedBox(height: 12),
+                _buildInfoRow(context, Icons.group_work_outlined, 'Cuadrilla',
+                    _cuadrillaValue(cuadrilla)),
+              ],
+
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: FilledButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: c.primary,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                  ),
+                  child: const Text('Cerrar',
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -21,9 +21,6 @@ _$CuadrillaDtoImpl _$$CuadrillaDtoImplFromJson(Map<String, dynamic> json) =>
       chofer: json['chofer'] == null
           ? null
           : GasfiteroDto.fromJson(json['chofer'] as Map<String, dynamic>),
-      operador: json['operador'] == null
-          ? null
-          : GasfiteroDto.fromJson(json['operador'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$$CuadrillaDtoImplToJson(_$CuadrillaDtoImpl instance) =>
@@ -34,5 +31,4 @@ Map<String, dynamic> _$$CuadrillaDtoImplToJson(_$CuadrillaDtoImpl instance) =>
       'lider': instance.lider,
       'apoyos': instance.apoyos,
       'chofer': instance.chofer,
-      'operador': instance.operador,
     };

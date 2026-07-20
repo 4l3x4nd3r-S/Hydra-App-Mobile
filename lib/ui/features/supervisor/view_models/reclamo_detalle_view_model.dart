@@ -3,10 +3,12 @@ import 'package:flutter/foundation.dart';
 import '../../../../domain/models/cuadrilla.dart';
 import '../../../../domain/models/reclamo.dart';
 import '../../../../domain/use_cases/create_os_from_reclamo_use_case.dart';
+import '../../../../data/repositories/catalog_repository.dart';
 
 class ReclamoDetalleViewModel extends ChangeNotifier {
   final Reclamo reclamo;
   final CreateOsFromReclamoUseCase _createOsUseCase;
+  final CatalogRepository _catalogRepository;
 
   bool _creandoOs = false;
   bool get creandoOs => _creandoOs;
@@ -14,16 +16,28 @@ class ReclamoDetalleViewModel extends ChangeNotifier {
   String? _ultimoError;
   String? get ultimoError => _ultimoError;
 
-  String? get especialidadRequerida => switch (reclamo.formato) {
-        'Anexo 6' => 'Desagüe',
-        'Formato 1' => 'Agua',
-        _ => null,
-      };
+  String? _especialidadRequerida;
+  String? get especialidadRequerida => _especialidadRequerida;
 
   ReclamoDetalleViewModel({
     required this.reclamo,
     required CreateOsFromReclamoUseCase createOsUseCase,
-  }) : _createOsUseCase = createOsUseCase;
+    required CatalogRepository catalogRepository,
+  })  : _createOsUseCase = createOsUseCase,
+        _catalogRepository = catalogRepository {
+    _loadRequiredSpecialty();
+  }
+
+  Future<void> _loadRequiredSpecialty() async {
+    final formats = await _catalogRepository.getGroup('FORMATO_RECLAMO');
+    for (final format in formats) {
+      if (format.code == reclamo.formato) {
+        _especialidadRequerida = format.relatedCode;
+        notifyListeners();
+        return;
+      }
+    }
+  }
 
   List<Cuadrilla> filtrarCuadrillasCompatibles(
     Iterable<Cuadrilla> cuadrillas,

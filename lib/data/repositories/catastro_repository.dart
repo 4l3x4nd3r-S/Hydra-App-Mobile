@@ -19,10 +19,8 @@ class CatastroRepository {
     final response = await _apiService.getElementosRed();
     if (response.statusCode == 200 && response.data is List) {
       return (response.data as List)
-          .map(
-              (json) => ElementoRedDto.fromJson(json as Map<String, dynamic>))
-          .where((e) =>
-              (e.tipo?.toUpperCase() ?? '') == 'DATALOGGER')
+          .map((json) => ElementoRedDto.fromJson(json as Map<String, dynamic>))
+          .where((e) => (e.tipo?.toUpperCase() ?? '') == 'DATALOGGER')
           .map(_dataloggerToDomain)
           .toList();
     }
@@ -33,10 +31,8 @@ class CatastroRepository {
     final response = await _apiService.getElementosRed();
     if (response.statusCode == 200 && response.data is List) {
       return (response.data as List)
-          .map(
-              (json) => ElementoRedDto.fromJson(json as Map<String, dynamic>))
-          .where(
-              (e) => (e.tipo?.toUpperCase() ?? '') == 'VALVULA')
+          .map((json) => ElementoRedDto.fromJson(json as Map<String, dynamic>))
+          .where((e) => (e.tipo?.toUpperCase() ?? '').startsWith('VALVULA'))
           .map(_valvulaToDomain)
           .toList();
     }
@@ -47,8 +43,7 @@ class CatastroRepository {
     final response = await _apiService.getSectores();
     if (response.statusCode == 200 && response.data is List) {
       return (response.data as List)
-          .map((json) =>
-              SectorDto.fromJson(json as Map<String, dynamic>))
+          .map((json) => SectorDto.fromJson(json as Map<String, dynamic>))
           .map(_sectorToDomain)
           .toList();
     }
@@ -59,8 +54,7 @@ class CatastroRepository {
     final response = await _apiService.getPuntosPresion();
     if (response.statusCode == 200 && response.data is List) {
       return (response.data as List)
-          .map((json) => PuntoPresionDto.fromJson(
-              json as Map<String, dynamic>))
+          .map((json) => PuntoPresionDto.fromJson(json as Map<String, dynamic>))
           .map(_puntoToDomain)
           .toList();
     }
@@ -68,11 +62,10 @@ class CatastroRepository {
   }
 
   Future<RegistroPresion?> getUltimoRegistroPresion(int puntoId) async {
-    final response =
-        await _apiService.getUltimoRegistroPresion(puntoId);
+    final response = await _apiService.getUltimoRegistroPresion(puntoId);
     if (response.statusCode == 200 && response.data != null) {
-      final dto = RegistroPresionDto.fromJson(
-          response.data as Map<String, dynamic>);
+      final dto =
+          RegistroPresionDto.fromJson(response.data as Map<String, dynamic>);
       return _registroToDomain(dto);
     }
     return null;
@@ -110,6 +103,7 @@ class CatastroRepository {
       id: dto.id,
       nombre: dto.nombre,
       reservorioAsociado: dto.reservorioAsociado,
+      geometriaGeojson: dto.geometriaGeojson,
     );
   }
 

@@ -23,8 +23,7 @@ class DetailRow extends StatelessWidget {
           SizedBox(
             width: 130,
             child: Text(label,
-                style: TextStyle(
-                    color: c.onSurfaceVariant, fontSize: 13)),
+                style: TextStyle(color: c.onSurfaceVariant, fontSize: 13)),
           ),
           Expanded(
             child: Text(value,

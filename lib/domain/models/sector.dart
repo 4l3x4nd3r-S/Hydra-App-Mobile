@@ -8,5 +8,6 @@ class Sector with _$Sector {
     required int id,
     String? nombre,
     String? reservorioAsociado,
+    String? geometriaGeojson,
   }) = _Sector;
 }

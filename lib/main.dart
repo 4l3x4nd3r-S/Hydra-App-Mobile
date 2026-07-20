@@ -5,14 +5,17 @@ import 'data/services/session_storage_service.dart';
 import 'data/services/theme_storage_service.dart';
 import 'data/services/api_client.dart';
 import 'data/services/api_endpoints.dart';
+import 'data/services/app_environment.dart';
 import 'data/services/auth_api_service.dart';
 import 'data/services/os_api_service.dart';
 import 'data/services/supervisor_api_service.dart';
 import 'data/services/catastro_api_service.dart';
+import 'data/services/catalog_api_service.dart';
 import 'data/repositories/auth_repository.dart';
 import 'data/repositories/os_repository.dart';
 import 'data/repositories/supervisor_repository.dart';
 import 'data/repositories/catastro_repository.dart';
+import 'data/repositories/catalog_repository.dart';
 import 'data/repositories/theme_repository.dart';
 import 'domain/use_cases/login_use_case.dart';
 import 'domain/use_cases/validate_session_use_case.dart';
@@ -26,6 +29,7 @@ import 'app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  AppEnvironment.validate();
 
   final syncQueueStorage = SyncQueueStorageService();
   final sessionStorage = SessionStorageService(storage: syncQueueStorage);
@@ -41,6 +45,7 @@ void main() async {
   final osApiService = OsApiService(apiClient: apiClient);
   final supervisorApiService = SupervisorApiService(apiClient: apiClient);
   final catastroApiService = CatastroApiService(apiClient: apiClient);
+  final catalogApiService = CatalogApiService(apiClient: apiClient);
 
   final authRepository = AuthRepository(
     authApiService: authApiService,
@@ -56,19 +61,18 @@ void main() async {
   final catastroRepository = CatastroRepository(
     apiService: catastroApiService,
   );
+  final catalogRepository = CatalogRepository(apiService: catalogApiService);
   final themeRepository = ThemeRepository(themeStorage: themeStorage);
 
   final loginUseCase = LoginUseCase(authRepository: authRepository);
   final validateSessionUseCase =
       ValidateSessionUseCase(authRepository: authRepository);
-  final saveOsReportUseCase =
-      SaveOsReportUseCase(osRepository: osRepository);
+  final saveOsReportUseCase = SaveOsReportUseCase(osRepository: osRepository);
   final startOsUseCase = StartOsUseCase(osRepository: osRepository);
   final syncPendingReportsUseCase =
       SyncPendingReportsUseCase(osRepository: osRepository);
   final createOsFromReclamoUseCase =
-      CreateOsFromReclamoUseCase(
-          supervisorRepository: supervisorRepository);
+      CreateOsFromReclamoUseCase(supervisorRepository: supervisorRepository);
   final crearReclamoUseCase =
       CrearReclamoUseCase(repository: supervisorRepository);
 
@@ -83,6 +87,7 @@ void main() async {
       osRepository: osRepository,
       supervisorRepository: supervisorRepository,
       catastroRepository: catastroRepository,
+      catalogRepository: catalogRepository,
       themeRepository: themeRepository,
       loginUseCase: loginUseCase,
       validateSessionUseCase: validateSessionUseCase,

@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
 import '../../../../data/repositories/supervisor_repository.dart';
+import '../../../../data/repositories/catalog_repository.dart';
 import '../../../../domain/models/gasfitero.dart';
 
 class EspecialidadOption {
   final String value;
   final String label;
   const EspecialidadOption(this.value, this.label);
-
-  static const agua = EspecialidadOption('Agua', 'Agua');
-  static const desague = EspecialidadOption('Desagüe', 'Desagüe');
-  static const List<EspecialidadOption> all = [agua, desague];
 }
 
 class NuevaCuadrillaViewModel extends ChangeNotifier {
   final SupervisorRepository _supervisorRepository;
+  final CatalogRepository _catalogRepository;
 
-  EspecialidadOption _especialidad = EspecialidadOption.agua;
-  EspecialidadOption get especialidad => _especialidad;
+  EspecialidadOption? _especialidad;
+  EspecialidadOption? get especialidad => _especialidad;
+  List<EspecialidadOption> _especialidades = const [];
+  List<EspecialidadOption> get especialidades =>
+      List.unmodifiable(_especialidades);
 
   List<Gasfitero> _gasfiteros = [];
   List<Gasfitero> get gasfiteros => _gasfiteros;
@@ -30,38 +31,60 @@ class NuevaCuadrillaViewModel extends ChangeNotifier {
   Gasfitero? _chofer;
   Gasfitero? get chofer => _chofer;
 
-  Gasfitero? _operador;
-  Gasfitero? get operador => _operador;
-
   bool _submitting = false;
   bool get submitting => _submitting;
 
   String? _errorMsg;
   String? get errorMsg => _errorMsg;
 
-  bool get canSubmit => _lider != null && cantidadIntegrantes >= 2;
+  bool get canSubmit =>
+      _especialidad != null && _lider != null && cantidadIntegrantes >= 2;
 
   int get cantidadIntegrantes => <int>{
         if (_lider != null) _lider!.id,
         ..._apoyos.map((integrante) => integrante.id),
         if (_chofer != null) _chofer!.id,
-        if (_operador != null) _operador!.id,
       }.length;
 
   bool _loadingGasfiteros = true;
   bool get loadingGasfiteros => _loadingGasfiteros;
 
-  NuevaCuadrillaViewModel({required SupervisorRepository supervisorRepository})
-      : _supervisorRepository = supervisorRepository {
-    _cargargasfiteros();
+  NuevaCuadrillaViewModel({
+    required SupervisorRepository supervisorRepository,
+    required CatalogRepository catalogRepository,
+  })  : _supervisorRepository = supervisorRepository,
+        _catalogRepository = catalogRepository {
+    _cargarDatos();
   }
 
-  Future<void> _cargargasfiteros() async {
+  Future<void> _cargarDatos() async {
     _loadingGasfiteros = true;
     notifyListeners();
-    _gasfiteros = await _supervisorRepository.getgasfiterosDisponibles();
-    _loadingGasfiteros = false;
-    notifyListeners();
+    try {
+      final personalFuture = _supervisorRepository.getgasfiterosDisponibles();
+      final catalogFuture =
+          _catalogRepository.getGroup('ESPECIALIDAD_CUADRILLA');
+      _gasfiteros = await personalFuture;
+      final catalogOptions = await catalogFuture;
+      _especialidades = catalogOptions
+          .map((option) => EspecialidadOption(option.code, option.label))
+          .toList(growable: false);
+      if (_especialidades.isNotEmpty) {
+        final defaultCode = catalogOptions
+            .firstWhere((option) => option.isDefault,
+                orElse: () => catalogOptions.first)
+            .code;
+        _especialidad = _especialidades.firstWhere(
+          (option) => option.value == defaultCode,
+          orElse: () => _especialidades.first,
+        );
+      }
+    } catch (_) {
+      _errorMsg = 'No se pudo cargar la configuración de cuadrillas';
+    } finally {
+      _loadingGasfiteros = false;
+      notifyListeners();
+    }
   }
 
   List<Gasfitero> get gasfiterosDisponiblesParaRol {
@@ -70,11 +93,8 @@ class NuevaCuadrillaViewModel extends ChangeNotifier {
     idsYaSeleccionados.addAll(_apoyos.map((t) => t.id));
 
     return _gasfiteros.where((t) {
-      if ((t.area ?? '').toUpperCase() != 'MANTENIMIENTO') return false;
       if (idsYaSeleccionados.contains(t.id)) return false;
-      final c = (t.cargo ?? '').toUpperCase();
-      if (c.contains('CHOFER') || c.contains('OPERADOR')) return false;
-      return true;
+      return t.puedeSerGasfitero;
     }).toList();
   }
 
@@ -83,36 +103,18 @@ class NuevaCuadrillaViewModel extends ChangeNotifier {
     if (_lider != null) idsEnOtrosRoles.add(_lider!.id);
 
     return _gasfiteros.where((t) {
-      if ((t.area ?? '').toUpperCase() != 'MANTENIMIENTO') return false;
       if (idsEnOtrosRoles.contains(t.id)) return false;
-      final c = (t.cargo ?? '').toUpperCase();
-      if (c.contains('CHOFER') || c.contains('OPERADOR')) return false;
-      return true;
+      return t.puedeSerGasfitero;
     }).toList();
   }
 
   List<Gasfitero> get choferesDisponibles {
-    return _gasfiteros.where((t) {
-      if ((t.area ?? '').toUpperCase() != 'MANTENIMIENTO') return false;
-      return (t.cargo ?? '').toUpperCase().contains('CHOFER');
-    }).toList();
-  }
-
-  List<Gasfitero> get operadoresDisponibles {
-    return _gasfiteros.where((t) {
-      if ((t.area ?? '').toUpperCase() != 'MANTENIMIENTO') return false;
-      return (t.cargo ?? '').toUpperCase().contains('OPERADOR');
-    }).toList();
+    return _gasfiteros.where((t) => t.puedeSerChofer).toList();
   }
 
   void setEspecialidad(EspecialidadOption opcion) {
-    if (_especialidad.value != opcion.value) {
+    if (_especialidad?.value != opcion.value) {
       _especialidad = opcion;
-      if (_especialidad == EspecialidadOption.agua) {
-        _chofer = null;
-      } else {
-        _operador = null;
-      }
       _errorMsg = null;
       notifyListeners();
     }
@@ -150,12 +152,6 @@ class NuevaCuadrillaViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setOperador(Gasfitero? t) {
-    _operador = t;
-    _errorMsg = null;
-    notifyListeners();
-  }
-
   bool validar() {
     if (_lider == null) {
       _errorMsg = 'Debe asignar un Gasfitero Principal';
@@ -180,11 +176,10 @@ class NuevaCuadrillaViewModel extends ChangeNotifier {
 
     try {
       await _supervisorRepository.createCuadrilla(
-        especialidad: _especialidad.value,
+        especialidad: _especialidad!.value,
         liderId: _lider!.id,
         apoyosIds: _apoyos.map((t) => t.id).toList(),
         choferId: _chofer?.id,
-        operadorId: _operador?.id,
       );
       _submitting = false;
       notifyListeners();

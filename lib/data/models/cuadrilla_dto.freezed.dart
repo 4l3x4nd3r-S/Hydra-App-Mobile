@@ -32,8 +32,6 @@ mixin _$CuadrillaDto {
   List<GasfiteroDto> get apoyos => throw _privateConstructorUsedError;
   @JsonKey(name: 'chofer')
   GasfiteroDto? get chofer => throw _privateConstructorUsedError;
-  @JsonKey(name: 'operador')
-  GasfiteroDto? get operador => throw _privateConstructorUsedError;
 
   /// Serializes this CuadrillaDto to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -57,12 +55,10 @@ abstract class $CuadrillaDtoCopyWith<$Res> {
       @JsonKey(name: 'especialidad') String? especialidad,
       @JsonKey(name: 'lider') GasfiteroDto? lider,
       @JsonKey(name: 'apoyos') List<GasfiteroDto> apoyos,
-      @JsonKey(name: 'chofer') GasfiteroDto? chofer,
-      @JsonKey(name: 'operador') GasfiteroDto? operador});
+      @JsonKey(name: 'chofer') GasfiteroDto? chofer});
 
   $GasfiteroDtoCopyWith<$Res>? get lider;
   $GasfiteroDtoCopyWith<$Res>? get chofer;
-  $GasfiteroDtoCopyWith<$Res>? get operador;
 }
 
 /// @nodoc
@@ -86,7 +82,6 @@ class _$CuadrillaDtoCopyWithImpl<$Res, $Val extends CuadrillaDto>
     Object? lider = freezed,
     Object? apoyos = null,
     Object? chofer = freezed,
-    Object? operador = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -112,10 +107,6 @@ class _$CuadrillaDtoCopyWithImpl<$Res, $Val extends CuadrillaDto>
       chofer: freezed == chofer
           ? _value.chofer
           : chofer // ignore: cast_nullable_to_non_nullable
-              as GasfiteroDto?,
-      operador: freezed == operador
-          ? _value.operador
-          : operador // ignore: cast_nullable_to_non_nullable
               as GasfiteroDto?,
     ) as $Val);
   }
@@ -147,20 +138,6 @@ class _$CuadrillaDtoCopyWithImpl<$Res, $Val extends CuadrillaDto>
       return _then(_value.copyWith(chofer: value) as $Val);
     });
   }
-
-  /// Create a copy of CuadrillaDto
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $GasfiteroDtoCopyWith<$Res>? get operador {
-    if (_value.operador == null) {
-      return null;
-    }
-
-    return $GasfiteroDtoCopyWith<$Res>(_value.operador!, (value) {
-      return _then(_value.copyWith(operador: value) as $Val);
-    });
-  }
 }
 
 /// @nodoc
@@ -177,15 +154,12 @@ abstract class _$$CuadrillaDtoImplCopyWith<$Res>
       @JsonKey(name: 'especialidad') String? especialidad,
       @JsonKey(name: 'lider') GasfiteroDto? lider,
       @JsonKey(name: 'apoyos') List<GasfiteroDto> apoyos,
-      @JsonKey(name: 'chofer') GasfiteroDto? chofer,
-      @JsonKey(name: 'operador') GasfiteroDto? operador});
+      @JsonKey(name: 'chofer') GasfiteroDto? chofer});
 
   @override
   $GasfiteroDtoCopyWith<$Res>? get lider;
   @override
   $GasfiteroDtoCopyWith<$Res>? get chofer;
-  @override
-  $GasfiteroDtoCopyWith<$Res>? get operador;
 }
 
 /// @nodoc
@@ -207,7 +181,6 @@ class __$$CuadrillaDtoImplCopyWithImpl<$Res>
     Object? lider = freezed,
     Object? apoyos = null,
     Object? chofer = freezed,
-    Object? operador = freezed,
   }) {
     return _then(_$CuadrillaDtoImpl(
       id: null == id
@@ -234,10 +207,6 @@ class __$$CuadrillaDtoImplCopyWithImpl<$Res>
           ? _value.chofer
           : chofer // ignore: cast_nullable_to_non_nullable
               as GasfiteroDto?,
-      operador: freezed == operador
-          ? _value.operador
-          : operador // ignore: cast_nullable_to_non_nullable
-              as GasfiteroDto?,
     ));
   }
 }
@@ -251,8 +220,7 @@ class _$CuadrillaDtoImpl implements _CuadrillaDto {
       @JsonKey(name: 'especialidad') this.especialidad,
       @JsonKey(name: 'lider') this.lider,
       @JsonKey(name: 'apoyos') final List<GasfiteroDto> apoyos = const [],
-      @JsonKey(name: 'chofer') this.chofer,
-      @JsonKey(name: 'operador') this.operador})
+      @JsonKey(name: 'chofer') this.chofer})
       : _apoyos = apoyos;
 
   factory _$CuadrillaDtoImpl.fromJson(Map<String, dynamic> json) =>
@@ -282,13 +250,10 @@ class _$CuadrillaDtoImpl implements _CuadrillaDto {
   @override
   @JsonKey(name: 'chofer')
   final GasfiteroDto? chofer;
-  @override
-  @JsonKey(name: 'operador')
-  final GasfiteroDto? operador;
 
   @override
   String toString() {
-    return 'CuadrillaDto(id: $id, codigoGrupo: $codigoGrupo, especialidad: $especialidad, lider: $lider, apoyos: $apoyos, chofer: $chofer, operador: $operador)';
+    return 'CuadrillaDto(id: $id, codigoGrupo: $codigoGrupo, especialidad: $especialidad, lider: $lider, apoyos: $apoyos, chofer: $chofer)';
   }
 
   @override
@@ -303,15 +268,13 @@ class _$CuadrillaDtoImpl implements _CuadrillaDto {
                 other.especialidad == especialidad) &&
             (identical(other.lider, lider) || other.lider == lider) &&
             const DeepCollectionEquality().equals(other._apoyos, _apoyos) &&
-            (identical(other.chofer, chofer) || other.chofer == chofer) &&
-            (identical(other.operador, operador) ||
-                other.operador == operador));
+            (identical(other.chofer, chofer) || other.chofer == chofer));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, id, codigoGrupo, especialidad,
-      lider, const DeepCollectionEquality().hash(_apoyos), chofer, operador);
+      lider, const DeepCollectionEquality().hash(_apoyos), chofer);
 
   /// Create a copy of CuadrillaDto
   /// with the given fields replaced by the non-null parameter values.
@@ -336,8 +299,7 @@ abstract class _CuadrillaDto implements CuadrillaDto {
           @JsonKey(name: 'especialidad') final String? especialidad,
           @JsonKey(name: 'lider') final GasfiteroDto? lider,
           @JsonKey(name: 'apoyos') final List<GasfiteroDto> apoyos,
-          @JsonKey(name: 'chofer') final GasfiteroDto? chofer,
-          @JsonKey(name: 'operador') final GasfiteroDto? operador}) =
+          @JsonKey(name: 'chofer') final GasfiteroDto? chofer}) =
       _$CuadrillaDtoImpl;
 
   factory _CuadrillaDto.fromJson(Map<String, dynamic> json) =
@@ -361,9 +323,6 @@ abstract class _CuadrillaDto implements CuadrillaDto {
   @override
   @JsonKey(name: 'chofer')
   GasfiteroDto? get chofer;
-  @override
-  @JsonKey(name: 'operador')
-  GasfiteroDto? get operador;
 
   /// Create a copy of CuadrillaDto
   /// with the given fields replaced by the non-null parameter values.

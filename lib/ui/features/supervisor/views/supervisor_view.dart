@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../../data/repositories/auth_repository.dart';
 import '../../../../data/repositories/os_repository.dart';
 import '../../../../data/repositories/supervisor_repository.dart';
+import '../../../../data/repositories/catastro_repository.dart';
 import '../../../../domain/models/cuadrilla.dart';
 import '../../../../domain/models/gasfitero.dart';
 import '../../../../domain/models/reclamo.dart';
@@ -329,7 +330,9 @@ class _SupervisorBodyState extends State<_SupervisorBody>
           _buildTabCuadrillas(),
           _buildTabPersonal(),
           ChangeNotifierProvider(
-            create: (_) => CatastroGisViewModel(),
+            create: (_) => CatastroGisViewModel(
+              catastroRepository: context.read<CatastroRepository>(),
+            ),
             child: const CatastroMapFullscreenView(),
           ),
         ],
@@ -624,13 +627,13 @@ class _SupervisorBodyState extends State<_SupervisorBody>
 
     final agua =
         vm.cuadrillas.where((cu) => (cu.especialidad ?? '') == 'Agua').toList();
-    final desague = vm.cuadrillas
-        .where((cu) => (cu.especialidad ?? '') == 'Desagüe')
+    final alcantarillado = vm.cuadrillas
+        .where((cu) => (cu.especialidad ?? '') == 'Alcantarillado')
         .toList();
     final sinClasificar = vm.cuadrillas
         .where((cu) =>
             (cu.especialidad ?? '') != 'Agua' &&
-            (cu.especialidad ?? '') != 'Desagüe')
+            (cu.especialidad ?? '') != 'Alcantarillado')
         .toList();
 
     if (vm.loadingCuadrillas) {
@@ -678,10 +681,10 @@ class _SupervisorBodyState extends State<_SupervisorBody>
             ...agua.map((cu) => _buildCuadrillaCard(cu)),
             const SizedBox(height: 20),
           ],
-          if (desague.isNotEmpty) ...[
-            _buildSectionLabel('Desagüe', desague.length, c),
+          if (alcantarillado.isNotEmpty) ...[
+            _buildSectionLabel('Alcantarillado', alcantarillado.length, c),
             const SizedBox(height: 8),
-            ...desague.map((cu) => _buildCuadrillaCard(cu)),
+            ...alcantarillado.map((cu) => _buildCuadrillaCard(cu)),
             const SizedBox(height: 20),
           ],
           if (sinClasificar.isNotEmpty) ...[
@@ -689,7 +692,7 @@ class _SupervisorBodyState extends State<_SupervisorBody>
             const SizedBox(height: 8),
             ...sinClasificar.map((cu) => _buildCuadrillaCard(cu)),
           ],
-          if (agua.isEmpty && desague.isEmpty) ...[
+          if (agua.isEmpty && alcantarillado.isEmpty) ...[
             const SizedBox(height: 24),
             Center(
               child: Text(
@@ -863,7 +866,7 @@ class _SupervisorBodyState extends State<_SupervisorBody>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'LÍDER DE CUADRILLA',
+                            cu.lider?.funcionVisible ?? '',
                             style: TextStyle(
                               color: c.onSurfaceVariant,
                               fontSize: 9,
@@ -937,12 +940,11 @@ class _SupervisorBodyState extends State<_SupervisorBody>
       context,
       vm.personalMantenimientoOrdenado,
       c,
-      vm,
     );
   }
 
-  Widget _buildPersonalList(BuildContext context, List<Gasfitero> gasfiteros,
-      AppColors c, SupervisorViewModel vm) {
+  Widget _buildPersonalList(
+      BuildContext context, List<Gasfitero> gasfiteros, AppColors c) {
     if (gasfiteros.isEmpty) {
       return Center(
         child: Text(
@@ -957,15 +959,14 @@ class _SupervisorBodyState extends State<_SupervisorBody>
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       itemCount: gasfiteros.length,
       itemBuilder: (context, index) {
-        return _buildPersonalCard(context, c, gasfiteros[index], vm);
+        return _buildPersonalCard(context, c, gasfiteros[index]);
       },
     );
   }
 
-  Widget _buildPersonalCard(
-      BuildContext context, AppColors c, Gasfitero t, SupervisorViewModel vm) {
-    final cargoTexto = vm.cargoVisible(t);
-    final esPrincipal = vm.esGasfiteroPrincipal(t.id);
+  Widget _buildPersonalCard(BuildContext context, AppColors c, Gasfitero t) {
+    final cargoTexto = t.funcionVisible ?? '';
+    final esPrincipal = t.esPrincipal;
 
     String iniciales = '';
     if (t.nombre != null && t.nombre!.isNotEmpty) {
@@ -977,17 +978,8 @@ class _SupervisorBodyState extends State<_SupervisorBody>
       }
     }
 
-    String? nombreCuadrilla;
-    String? codigoCuadrilla;
-    final cuadrillaAsignada = vm.cuadrillaDePersonal(t.id);
-
-    if (cuadrillaAsignada != null) {
-      nombreCuadrilla = cuadrillaAsignada.codigoGrupo?.trim().isNotEmpty == true
-          ? cuadrillaAsignada.codigoGrupo!.trim()
-          : cuadrillaAsignada.id.toString();
-      codigoCuadrilla =
-          cuadrillaAsignada.codigoGrupo ?? cuadrillaAsignada.id.toString();
-    }
+    final nombreCuadrilla = t.codigoCuadrilla;
+    final codigoCuadrilla = t.codigoCuadrilla;
 
     return Card(
       color: c.surface,
@@ -1002,6 +994,9 @@ class _SupervisorBodyState extends State<_SupervisorBody>
             context,
             userName: t.nombre ?? 'Sin Nombre',
             role: cargoTexto,
+            dni: t.dni,
+            celular: t.celular,
+            area: t.areaVisible,
             cuadrilla: nombreCuadrilla,
           );
         },

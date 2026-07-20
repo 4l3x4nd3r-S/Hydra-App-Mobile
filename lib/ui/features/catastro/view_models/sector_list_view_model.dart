@@ -11,8 +11,7 @@ class SectorListViewModel extends ChangeNotifier {
   List<Sector> get sectores => _sectores;
   bool get loading => _loading;
 
-  SectorListViewModel(
-      {required CatastroRepository catastroRepository})
+  SectorListViewModel({required CatastroRepository catastroRepository})
       : _catastroRepository = catastroRepository {
     load();
   }

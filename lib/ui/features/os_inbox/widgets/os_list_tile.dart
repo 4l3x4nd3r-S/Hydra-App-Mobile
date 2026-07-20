@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../../domain/enums/tipo_problema.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/status_chip.dart';
 
@@ -161,8 +160,7 @@ class OsListTile extends StatelessWidget {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      TipoProblema.etiquetaDescriptiva(data.tipoProblema)
-                          .toUpperCase(),
+                      (data.tipoProblema ?? '').toUpperCase(),
                       style: TextStyle(
                         color: c.primary,
                         fontSize: 10,

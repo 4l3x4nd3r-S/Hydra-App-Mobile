@@ -37,7 +37,7 @@ class _LoginBodyState extends State<_LoginBody> {
     final vm = context.read<LoginViewModel>();
     if (vm.loading) return;
     if (!_formKey.currentState!.validate()) return;
-    
+
     vm.clearError();
     final session = await vm.login();
     if (session != null && mounted) {
@@ -79,188 +79,184 @@ class _LoginBodyState extends State<_LoginBody> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: c.surface,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: c.onSurface.withValues(alpha: 0.15),
-                      width: 2,
-                    ),
-                  ),
-                  child: Icon(
-                    Icons.water_drop_rounded,
-                    color: c.onSurface,
-                    size: 60,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  'HYDRA',
-                  style: TextStyle(
-                    fontFamily: 'Outfit',
-                    fontSize: 36,
-                    fontWeight: FontWeight.bold,
-                    color: c.onSurface,
-                    letterSpacing: 4,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Sistema de Gestión de Órdenes de Servicio',
-                  style: TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 13,
-                    color: c.onSurfaceVariant,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: c.primary,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                    child: Text(
-                      'EMAPAT S.A.',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 11,
-                        color: c.onPrimary,
-                        letterSpacing: 1.5,
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: c.surface,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: c.onSurface.withValues(alpha: 0.15),
+                            width: 2,
+                          ),
+                        ),
+                        child: Icon(
+                          Icons.water_drop_rounded,
+                          color: c.onSurface,
+                          size: 60,
+                        ),
                       ),
-                    ),
-                ),
-                const SizedBox(height: 40),
-                TextFormField(
-                  controller: vm.codigoController,
-                  style: TextStyle(color: c.onSurface),
-                  textInputAction: TextInputAction.next,
-                  decoration: InputDecoration(
-                    labelText: 'Código de Empleado',
-                    labelStyle: TextStyle(color: c.onSurfaceVariant),
-                    prefixIcon: Icon(Icons.badge_outlined,
-                        color: c.onSurfaceVariant),
-                    filled: true,
-                    fillColor: c.surface,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: c.border),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide:
-                          BorderSide(color: c.primary, width: 1),
-                    ),
-                  ),
-                  validator: (val) => (val == null || val.isEmpty)
-                      ? 'Ingrese su codigo de empleado'
-                      : null,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: vm.passController,
-                  obscureText: vm.obscurePassword,
-                  style: TextStyle(color: c.onSurface),
-                  textInputAction: TextInputAction.done,
-                  onFieldSubmitted: (_) => _handleLogin(),
-                  decoration: InputDecoration(
-                    labelText: 'Contraseña',
-                    labelStyle: TextStyle(color: c.onSurfaceVariant),
-                    prefixIcon: Icon(Icons.lock_outline_rounded,
-                        color: c.onSurfaceVariant),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        vm.obscurePassword
-                            ? Icons.visibility_off_outlined
-                            : Icons.visibility_outlined,
-                        color: c.onSurfaceVariant,
+                      const SizedBox(height: 24),
+                      Text(
+                        'HYDRA',
+                        style: TextStyle(
+                          fontFamily: 'Outfit',
+                          fontSize: 36,
+                          fontWeight: FontWeight.bold,
+                          color: c.onSurface,
+                          letterSpacing: 4,
+                        ),
                       ),
-                      onPressed: () =>
-                          vm.togglePasswordVisibility(),
-                    ),
-                    filled: true,
-                    fillColor: c.surface,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: c.border),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide:
-                          BorderSide(color: c.primary, width: 1),
-                    ),
-                  ),
-                  validator: (val) => (val == null || val.isEmpty)
-                      ? 'Ingrese su contrasena'
-                      : null,
-                ),
-
-                const SizedBox(height: 32),
-                SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: c.primary,
-                      disabledBackgroundColor:
-                          c.primary.withValues(alpha: 0.5),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Sistema de Gestión de Órdenes de Servicio',
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 13,
+                          color: c.onSurfaceVariant,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
-                    ),
-                    onPressed: vm.loading ? null : _handleLogin,
-                    child: vm.loading
-                         ? SizedBox(
-                             width: 22,
-                             height: 22,
-                             child: CircularProgressIndicator(
-                               color: c.onPrimary,
-                               strokeWidth: 2.5,
-                             ),
-                           )
-                        : Text(
-                            'INGRESAR AL SISTEMA',
-                            style: TextStyle(
-                              color: c.onPrimary,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              fontFamily: 'Outfit',
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: c.primary,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          'EMAPAT S.A.',
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 11,
+                            color: c.onPrimary,
+                            letterSpacing: 1.5,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 40),
+                      TextFormField(
+                        controller: vm.codigoController,
+                        style: TextStyle(color: c.onSurface),
+                        textInputAction: TextInputAction.next,
+                        decoration: InputDecoration(
+                          labelText: 'Código de Empleado',
+                          labelStyle: TextStyle(color: c.onSurfaceVariant),
+                          prefixIcon: Icon(Icons.badge_outlined,
+                              color: c.onSurfaceVariant),
+                          filled: true,
+                          fillColor: c.surface,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: c.border),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: c.primary, width: 1),
+                          ),
+                        ),
+                        validator: (val) => (val == null || val.isEmpty)
+                            ? 'Ingrese su codigo de empleado'
+                            : null,
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: vm.passController,
+                        obscureText: vm.obscurePassword,
+                        style: TextStyle(color: c.onSurface),
+                        textInputAction: TextInputAction.done,
+                        onFieldSubmitted: (_) => _handleLogin(),
+                        decoration: InputDecoration(
+                          labelText: 'Contraseña',
+                          labelStyle: TextStyle(color: c.onSurfaceVariant),
+                          prefixIcon: Icon(Icons.lock_outline_rounded,
+                              color: c.onSurfaceVariant),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              vm.obscurePassword
+                                  ? Icons.visibility_off_outlined
+                                  : Icons.visibility_outlined,
+                              color: c.onSurfaceVariant,
+                            ),
+                            onPressed: () => vm.togglePasswordVisibility(),
+                          ),
+                          filled: true,
+                          fillColor: c.surface,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: c.border),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: c.primary, width: 1),
+                          ),
+                        ),
+                        validator: (val) => (val == null || val.isEmpty)
+                            ? 'Ingrese su contrasena'
+                            : null,
+                      ),
+                      const SizedBox(height: 32),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 52,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: c.primary,
+                            disabledBackgroundColor:
+                                c.primary.withValues(alpha: 0.5),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
                           ),
+                          onPressed: vm.loading ? null : _handleLogin,
+                          child: vm.loading
+                              ? SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
+                                    color: c.onPrimary,
+                                    strokeWidth: 2.5,
+                                  ),
+                                )
+                              : Text(
+                                  'INGRESAR AL SISTEMA',
+                                  style: TextStyle(
+                                    color: c.onPrimary,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    fontFamily: 'Outfit',
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                ],
               ),
             ),
-          ),
-        ),
-        Positioned(
-          top: 8,
-          right: 8,
-          child: IconButton(
-            icon: Icon(
-              themeVm.isLight
-                  ? Icons.dark_mode_rounded
-                  : Icons.light_mode_rounded,
-              color: c.onSurfaceVariant,
+            Positioned(
+              top: 8,
+              right: 8,
+              child: IconButton(
+                icon: Icon(
+                  themeVm.isLight
+                      ? Icons.dark_mode_rounded
+                      : Icons.light_mode_rounded,
+                  color: c.onSurfaceVariant,
+                ),
+                onPressed: () => themeVm.toggle(),
+              ),
             ),
-            onPressed: () => themeVm.toggle(),
-          ),
+          ],
         ),
-      ],
-    ),
-    ),
+      ),
     );
   }
 }

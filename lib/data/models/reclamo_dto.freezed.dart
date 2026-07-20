@@ -40,8 +40,8 @@ mixin _$ReclamoDto {
   String? get nombreSolicitante => throw _privateConstructorUsedError;
   @JsonKey(name: 'direccion')
   String? get direccion => throw _privateConstructorUsedError;
-  @JsonKey(name: 'numero_medidor')
-  String? get numeroMedidor => throw _privateConstructorUsedError;
+  @JsonKey(name: 'numero_suministro')
+  String? get numeroSuministro => throw _privateConstructorUsedError;
   @JsonKey(name: 'telefono')
   String? get telefono => throw _privateConstructorUsedError;
   @JsonKey(name: 'email')
@@ -74,7 +74,7 @@ abstract class $ReclamoDtoCopyWith<$Res> {
       @JsonKey(name: 'descripcion') String? descripcion,
       @JsonKey(name: 'nombre_solicitante') String? nombreSolicitante,
       @JsonKey(name: 'direccion') String? direccion,
-      @JsonKey(name: 'numero_medidor') String? numeroMedidor,
+      @JsonKey(name: 'numero_suministro') String? numeroSuministro,
       @JsonKey(name: 'telefono') String? telefono,
       @JsonKey(name: 'email') String? email});
 }
@@ -104,7 +104,7 @@ class _$ReclamoDtoCopyWithImpl<$Res, $Val extends ReclamoDto>
     Object? descripcion = freezed,
     Object? nombreSolicitante = freezed,
     Object? direccion = freezed,
-    Object? numeroMedidor = freezed,
+    Object? numeroSuministro = freezed,
     Object? telefono = freezed,
     Object? email = freezed,
   }) {
@@ -149,9 +149,9 @@ class _$ReclamoDtoCopyWithImpl<$Res, $Val extends ReclamoDto>
           ? _value.direccion
           : direccion // ignore: cast_nullable_to_non_nullable
               as String?,
-      numeroMedidor: freezed == numeroMedidor
-          ? _value.numeroMedidor
-          : numeroMedidor // ignore: cast_nullable_to_non_nullable
+      numeroSuministro: freezed == numeroSuministro
+          ? _value.numeroSuministro
+          : numeroSuministro // ignore: cast_nullable_to_non_nullable
               as String?,
       telefono: freezed == telefono
           ? _value.telefono
@@ -184,7 +184,7 @@ abstract class _$$ReclamoDtoImplCopyWith<$Res>
       @JsonKey(name: 'descripcion') String? descripcion,
       @JsonKey(name: 'nombre_solicitante') String? nombreSolicitante,
       @JsonKey(name: 'direccion') String? direccion,
-      @JsonKey(name: 'numero_medidor') String? numeroMedidor,
+      @JsonKey(name: 'numero_suministro') String? numeroSuministro,
       @JsonKey(name: 'telefono') String? telefono,
       @JsonKey(name: 'email') String? email});
 }
@@ -212,7 +212,7 @@ class __$$ReclamoDtoImplCopyWithImpl<$Res>
     Object? descripcion = freezed,
     Object? nombreSolicitante = freezed,
     Object? direccion = freezed,
-    Object? numeroMedidor = freezed,
+    Object? numeroSuministro = freezed,
     Object? telefono = freezed,
     Object? email = freezed,
   }) {
@@ -257,9 +257,9 @@ class __$$ReclamoDtoImplCopyWithImpl<$Res>
           ? _value.direccion
           : direccion // ignore: cast_nullable_to_non_nullable
               as String?,
-      numeroMedidor: freezed == numeroMedidor
-          ? _value.numeroMedidor
-          : numeroMedidor // ignore: cast_nullable_to_non_nullable
+      numeroSuministro: freezed == numeroSuministro
+          ? _value.numeroSuministro
+          : numeroSuministro // ignore: cast_nullable_to_non_nullable
               as String?,
       telefono: freezed == telefono
           ? _value.telefono
@@ -287,7 +287,7 @@ class _$ReclamoDtoImpl implements _ReclamoDto {
       @JsonKey(name: 'descripcion') this.descripcion,
       @JsonKey(name: 'nombre_solicitante') this.nombreSolicitante,
       @JsonKey(name: 'direccion') this.direccion,
-      @JsonKey(name: 'numero_medidor') this.numeroMedidor,
+      @JsonKey(name: 'numero_suministro') this.numeroSuministro,
       @JsonKey(name: 'telefono') this.telefono,
       @JsonKey(name: 'email') this.email});
 
@@ -325,8 +325,8 @@ class _$ReclamoDtoImpl implements _ReclamoDto {
   @JsonKey(name: 'direccion')
   final String? direccion;
   @override
-  @JsonKey(name: 'numero_medidor')
-  final String? numeroMedidor;
+  @JsonKey(name: 'numero_suministro')
+  final String? numeroSuministro;
   @override
   @JsonKey(name: 'telefono')
   final String? telefono;
@@ -336,7 +336,7 @@ class _$ReclamoDtoImpl implements _ReclamoDto {
 
   @override
   String toString() {
-    return 'ReclamoDto(id: $id, formato: $formato, codigoSolicitud: $codigoSolicitud, fechaRegistro: $fechaRegistro, canalEntrada: $canalEntrada, tipoProblema: $tipoProblema, estado: $estado, descripcion: $descripcion, nombreSolicitante: $nombreSolicitante, direccion: $direccion, numeroMedidor: $numeroMedidor, telefono: $telefono, email: $email)';
+    return 'ReclamoDto(id: $id, formato: $formato, codigoSolicitud: $codigoSolicitud, fechaRegistro: $fechaRegistro, canalEntrada: $canalEntrada, tipoProblema: $tipoProblema, estado: $estado, descripcion: $descripcion, nombreSolicitante: $nombreSolicitante, direccion: $direccion, numeroSuministro: $numeroSuministro, telefono: $telefono, email: $email)';
   }
 
   @override
@@ -361,8 +361,8 @@ class _$ReclamoDtoImpl implements _ReclamoDto {
                 other.nombreSolicitante == nombreSolicitante) &&
             (identical(other.direccion, direccion) ||
                 other.direccion == direccion) &&
-            (identical(other.numeroMedidor, numeroMedidor) ||
-                other.numeroMedidor == numeroMedidor) &&
+            (identical(other.numeroSuministro, numeroSuministro) ||
+                other.numeroSuministro == numeroSuministro) &&
             (identical(other.telefono, telefono) ||
                 other.telefono == telefono) &&
             (identical(other.email, email) || other.email == email));
@@ -382,7 +382,7 @@ class _$ReclamoDtoImpl implements _ReclamoDto {
       descripcion,
       nombreSolicitante,
       direccion,
-      numeroMedidor,
+      numeroSuministro,
       telefono,
       email);
 
@@ -414,7 +414,7 @@ abstract class _ReclamoDto implements ReclamoDto {
       @JsonKey(name: 'descripcion') final String? descripcion,
       @JsonKey(name: 'nombre_solicitante') final String? nombreSolicitante,
       @JsonKey(name: 'direccion') final String? direccion,
-      @JsonKey(name: 'numero_medidor') final String? numeroMedidor,
+      @JsonKey(name: 'numero_suministro') final String? numeroSuministro,
       @JsonKey(name: 'telefono') final String? telefono,
       @JsonKey(name: 'email') final String? email}) = _$ReclamoDtoImpl;
 
@@ -452,8 +452,8 @@ abstract class _ReclamoDto implements ReclamoDto {
   @JsonKey(name: 'direccion')
   String? get direccion;
   @override
-  @JsonKey(name: 'numero_medidor')
-  String? get numeroMedidor;
+  @JsonKey(name: 'numero_suministro')
+  String? get numeroSuministro;
   @override
   @JsonKey(name: 'telefono')
   String? get telefono;

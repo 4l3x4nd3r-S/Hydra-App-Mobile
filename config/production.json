@@ -1,0 +1,6 @@
+{
+  "API_BASE_URL": "https://hydra-backend-hx7p.onrender.com/api/v1",
+  "MAP_TILE_URL": "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+  "MAP_CENTER_LATITUDE": "-12.5933",
+  "MAP_CENTER_LONGITUDE": "-69.1883"
+}

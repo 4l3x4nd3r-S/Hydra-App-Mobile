@@ -7,6 +7,7 @@ import 'package:hydra/domain/models/reclamo.dart';
 import 'package:hydra/data/repositories/supervisor_repository.dart';
 import 'package:hydra/domain/use_cases/create_os_from_reclamo_use_case.dart';
 import 'package:hydra/ui/features/supervisor/view_models/reclamo_detalle_view_model.dart';
+import '../../helpers/fake_catalog_repository.dart';
 
 class _FakeSupervisorRepository implements SupervisorRepository {
   @override
@@ -53,12 +54,14 @@ void main() {
     direccion: 'Av. Peru 123',
   );
 
-  setUp(() {
+  setUp(() async {
     fakeUseCase = FakeCreateOsFromReclamoUseCase();
     vm = ReclamoDetalleViewModel(
       reclamo: testReclamo,
       createOsUseCase: fakeUseCase,
+      catalogRepository: FakeCatalogRepository(),
     );
+    await Future<void>.delayed(Duration.zero);
   });
 
   test('crearOsFromReclamo devuelve true y propaga parametros correctos',
@@ -159,7 +162,7 @@ void main() {
     expect(vm.ultimoError, contains('expirada'));
   });
 
-  test('Anexo 6 filtra únicamente cuadrillas de Desagüe', () {
+  test('Anexo 6 filtra únicamente cuadrillas de Alcantarillado', () {
     final cuadrillas = [
       Cuadrilla(
         id: 1,
@@ -168,24 +171,26 @@ void main() {
       ),
       Cuadrilla(
         id: 2,
-        especialidad: 'Desagüe',
-        lider: const Gasfitero(id: 2, nombre: 'Líder Desagüe'),
+        especialidad: 'Alcantarillado',
+        lider: const Gasfitero(id: 2, nombre: 'Líder Alcantarillado'),
       ),
     ];
 
-    expect(vm.especialidadRequerida, 'Desagüe');
+    expect(vm.especialidadRequerida, 'Alcantarillado');
     expect(vm.filtrarCuadrillasCompatibles(cuadrillas).map((c) => c.id), [2]);
   });
 
-  test('Formato 1 filtra únicamente cuadrillas de Agua', () {
+  test('Formato 1 filtra únicamente cuadrillas de Agua', () async {
     final vmFormato1 = ReclamoDetalleViewModel(
       reclamo: testReclamo.copyWith(formato: 'Formato 1'),
       createOsUseCase: fakeUseCase,
+      catalogRepository: FakeCatalogRepository(),
     );
+    await Future<void>.delayed(Duration.zero);
     addTearDown(vmFormato1.dispose);
     final cuadrillas = [
       const Cuadrilla(id: 1, especialidad: 'Agua'),
-      const Cuadrilla(id: 2, especialidad: 'Desagüe'),
+      const Cuadrilla(id: 2, especialidad: 'Alcantarillado'),
     ];
 
     expect(vmFormato1.especialidadRequerida, 'Agua');

@@ -24,9 +24,14 @@ class AuthRepository {
 
     final String token = data['access_token'] as String;
     final String? refreshToken = data['refresh_token'] as String?;
-    final userJson = data['user'] as Map<String, dynamic>? ?? {};
-    final String nombre = userJson['nombre'] as String? ?? 'Usuario';
-    final String rol = userJson['rol'] as String? ?? 'GASFITERO';
+    final userJson = data['user'] as Map<String, dynamic>?;
+    if (userJson == null ||
+        userJson['nombre'] is! String ||
+        userJson['rol'] is! String) {
+      throw StateError('El servidor devolvió una sesión incompleta.');
+    }
+    final String nombre = userJson['nombre'] as String;
+    final String rol = userJson['rol'] as String;
     final int? userId = userJson['id'] as int?;
 
     await _sessionStorage.saveToken(token);
@@ -49,9 +54,11 @@ class AuthRepository {
 
     try {
       final userJson = await _authApiService.me();
-      final rol = userJson['rol'] as String? ??
-          await _sessionStorage.getUserRole() ??
-          'GASFITERO';
+      final rol = userJson['rol'] as String?;
+      if (rol == null || rol.isEmpty) {
+        await _sessionStorage.clearSession();
+        return null;
+      }
       final nombre =
           userJson['nombre'] as String? ?? await _sessionStorage.getUserName();
       final userId = userJson['id'] as int?;
@@ -74,7 +81,11 @@ class AuthRepository {
         await _sessionStorage.clearSession();
         return null;
       }
-      final rol = await _sessionStorage.getUserRole() ?? 'GASFITERO';
+      final rol = await _sessionStorage.getUserRole();
+      if (rol == null || rol.isEmpty) {
+        await _sessionStorage.clearSession();
+        return null;
+      }
       return SessionInfo(valido: true, rol: rol, nombre: null);
     }
   }

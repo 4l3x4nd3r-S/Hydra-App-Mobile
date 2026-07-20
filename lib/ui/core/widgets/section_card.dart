@@ -52,7 +52,8 @@ class SectionCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
                   child: Row(
                     children: [
                       if (icon != null) ...[
@@ -87,7 +88,8 @@ class SectionCard extends StatelessWidget {
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
                           color: accent.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(10),

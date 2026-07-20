@@ -377,7 +377,7 @@ class OsRepository {
       descripcion: dto.descripcion,
       nombreSolicitante: dto.nombreSolicitante,
       direccion: dto.direccion,
-      numeroMedidor: dto.numeroMedidor,
+      numeroSuministro: dto.numeroSuministro,
       telefono: dto.telefono,
       email: dto.email,
     );
@@ -391,7 +391,6 @@ class OsRepository {
       lider: dto.lider != null ? _gasfiteroToDomain(dto.lider!) : null,
       apoyos: dto.apoyos.map(_gasfiteroToDomain).toList(),
       chofer: dto.chofer != null ? _gasfiteroToDomain(dto.chofer!) : null,
-      operador: dto.operador != null ? _gasfiteroToDomain(dto.operador!) : null,
     );
   }
 

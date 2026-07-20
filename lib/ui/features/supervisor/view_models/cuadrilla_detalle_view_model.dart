@@ -16,24 +16,11 @@ class CuadrillaDetalleViewModel extends ChangeNotifier {
   List<Gasfitero> get disponibles => _disponibles;
 
   List<Gasfitero> get gasfiterosDisponiblesParaRolesPrincipales {
-    return _disponibles.where((t) {
-      final cargo = (t.cargo ?? '').toUpperCase();
-      if (cargo.contains('CHOFER')) return false;
-      if (cargo.contains('OPERADOR')) return false;
-      return true;
-    }).toList();
+    return _disponibles.where((t) => t.puedeSerGasfitero).toList();
   }
 
   List<Gasfitero> get choferesDisponibles {
-    return _disponibles.where((t) {
-      return (t.cargo ?? '').toUpperCase().contains('CHOFER');
-    }).toList();
-  }
-
-  List<Gasfitero> get operadoresDisponibles {
-    return _disponibles.where((t) {
-      return (t.cargo ?? '').toUpperCase().contains('OPERADOR');
-    }).toList();
+    return _disponibles.where((t) => t.puedeSerChofer).toList();
   }
 
   List<Gasfitero> get candidatosApoyo {
@@ -41,8 +28,7 @@ class CuadrillaDetalleViewModel extends ChangeNotifier {
       [..._current.apoyos, ..._disponibles],
     ).where((persona) {
       return persona.id != _current.lider?.id &&
-          persona.id != _current.chofer?.id &&
-          persona.id != _current.operador?.id;
+          persona.id != _current.chofer?.id;
     }).toList();
   }
 
@@ -57,8 +43,7 @@ class CuadrillaDetalleViewModel extends ChangeNotifier {
   List<Gasfitero> _personalElegible(List<Gasfitero> personas) {
     final unicos = <int, Gasfitero>{};
     for (final persona in personas) {
-      final cargo = (persona.cargo ?? '').toUpperCase();
-      if (cargo.contains('CHOFER') || cargo.contains('OPERADOR')) continue;
+      if (!persona.puedeSerGasfitero) continue;
       unicos[persona.id] = persona;
     }
     final resultado = unicos.values.toList();
@@ -185,7 +170,6 @@ class CuadrillaDetalleViewModel extends ChangeNotifier {
       liderId,
       ...apoyosIds,
       if (_current.chofer != null) _current.chofer!.id,
-      if (_current.operador != null) _current.operador!.id,
     }.length;
     if (totalIntegrantes < 2) {
       _actionError = 'La cuadrilla debe conservar al menos 2 integrantes.';
@@ -202,7 +186,6 @@ class CuadrillaDetalleViewModel extends ChangeNotifier {
         liderId: liderId,
         apoyosIds: apoyosIds,
         choferId: _current.chofer?.id,
-        operadorId: _current.operador?.id,
       );
       await _cargarDisponibles();
       return true;

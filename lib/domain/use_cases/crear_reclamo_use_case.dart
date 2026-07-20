@@ -7,6 +7,5 @@ class CrearReclamoUseCase {
   CrearReclamoUseCase({required SupervisorRepository repository})
       : _repository = repository;
 
-  Future<Reclamo> call(Reclamo borrador) =>
-      _repository.crearReclamo(borrador);
+  Future<Reclamo> call(Reclamo borrador) => _repository.crearReclamo(borrador);
 }

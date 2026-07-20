@@ -11,6 +11,7 @@ _$SectorDtoImpl _$$SectorDtoImplFromJson(Map<String, dynamic> json) =>
       id: (json['id'] as num).toInt(),
       nombre: json['nombre'] as String?,
       reservorioAsociado: json['reservorio_asociado'] as String?,
+      geometriaGeojson: json['geometria_geojson'] as String?,
     );
 
 Map<String, dynamic> _$$SectorDtoImplToJson(_$SectorDtoImpl instance) =>
@@ -18,4 +19,5 @@ Map<String, dynamic> _$$SectorDtoImplToJson(_$SectorDtoImpl instance) =>
       'id': instance.id,
       'nombre': instance.nombre,
       'reservorio_asociado': instance.reservorioAsociado,
+      'geometria_geojson': instance.geometriaGeojson,
     };

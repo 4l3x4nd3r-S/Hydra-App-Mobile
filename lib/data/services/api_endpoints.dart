@@ -1,6 +1,7 @@
+import 'app_environment.dart';
+
 class ApiEndpoints {
-  static const String baseUrl =
-      'https://hydra-backend-hx7p.onrender.com/api/v1';
+  static const String baseUrl = AppEnvironment.apiBaseUrl;
   static const String login = '/auth/login';
   static const String refreshSession = '/auth/refresh';
   static const String ordenesServicio = '/ordenes-servicio';

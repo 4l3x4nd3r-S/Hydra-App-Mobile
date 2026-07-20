@@ -33,8 +33,7 @@ class LoginViewModel extends ChangeNotifier {
     final codigo = codigoController.text.trim();
     final password = passController.text.trim();
     if (codigo.isEmpty || password.isEmpty) {
-      _errorMsg =
-          'Ingrese codigo de empleado y contrasena';
+      _errorMsg = 'Ingrese codigo de empleado y contrasena';
       notifyListeners();
       return null;
     }
@@ -50,7 +49,9 @@ class LoginViewModel extends ChangeNotifier {
       );
       return session;
     } on DioException catch (e) {
-      if (e.response?.statusCode == 401 || e.response?.statusCode == 404 || e.response?.statusCode == 400) {
+      if (e.response?.statusCode == 401 ||
+          e.response?.statusCode == 404 ||
+          e.response?.statusCode == 400) {
         _errorMsg = 'Credenciales inválidas.';
       } else {
         _errorMsg = 'Error de conexión. Intente nuevamente.';

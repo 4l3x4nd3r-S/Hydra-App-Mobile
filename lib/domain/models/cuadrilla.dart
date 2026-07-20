@@ -12,7 +12,6 @@ class Cuadrilla with _$Cuadrilla {
     Gasfitero? lider,
     @Default([]) List<Gasfitero> apoyos,
     Gasfitero? chofer,
-    Gasfitero? operador,
   }) = _Cuadrilla;
 }
 
@@ -20,7 +19,6 @@ extension CuadrillaIntegrantes on Cuadrilla {
   int get cantidadIntegrantes => {
         if (lider != null) lider!.id,
         if (chofer != null) chofer!.id,
-        if (operador != null) operador!.id,
         ...apoyos.map((integrante) => integrante.id),
       }.length;
 

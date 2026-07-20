@@ -16,9 +16,8 @@ class MiniTag extends StatelessWidget {
         borderRadius: BorderRadius.circular(6),
         border: Border.all(color: c.border),
       ),
-      child: Text(text,
-          style: TextStyle(
-              color: c.onSurfaceVariant, fontSize: 10)),
+      child:
+          Text(text, style: TextStyle(color: c.onSurfaceVariant, fontSize: 10)),
     );
   }
 }

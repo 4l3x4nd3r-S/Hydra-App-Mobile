@@ -49,7 +49,8 @@ class AppColors extends ThemeExtension<AppColors> {
       border: Color.lerp(border, other.border, t)!,
       primary: Color.lerp(primary, other.primary, t)!,
       onSurface: Color.lerp(onSurface, other.onSurface, t)!,
-      onSurfaceVariant: Color.lerp(onSurfaceVariant, other.onSurfaceVariant, t)!,
+      onSurfaceVariant:
+          Color.lerp(onSurfaceVariant, other.onSurfaceVariant, t)!,
       onPrimary: Color.lerp(onPrimary, other.onPrimary, t)!,
     );
   }

@@ -13,7 +13,6 @@ class CuadrillaDto with _$CuadrillaDto {
     @JsonKey(name: 'lider') GasfiteroDto? lider,
     @JsonKey(name: 'apoyos') @Default([]) List<GasfiteroDto> apoyos,
     @JsonKey(name: 'chofer') GasfiteroDto? chofer,
-    @JsonKey(name: 'operador') GasfiteroDto? operador,
   }) = _CuadrillaDto;
 
   factory CuadrillaDto.fromJson(Map<String, dynamic> json) =>

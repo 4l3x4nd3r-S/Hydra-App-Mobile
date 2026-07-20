@@ -9,6 +9,7 @@ class SectorDto with _$SectorDto {
     @JsonKey(name: 'id') required int id,
     @JsonKey(name: 'nombre') String? nombre,
     @JsonKey(name: 'reservorio_asociado') String? reservorioAsociado,
+    @JsonKey(name: 'geometria_geojson') String? geometriaGeojson,
   }) = _SectorDto;
 
   factory SectorDto.fromJson(Map<String, dynamic> json) =>

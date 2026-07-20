@@ -30,13 +30,8 @@ class SupervisorViewModel extends ChangeNotifier {
   List<Cuadrilla> get cuadrillas => _cuadrillas;
   List<Gasfitero> get gasfiteros => _gasfiteros;
   List<Gasfitero> get gasfiterosDisponibles => _gasfiterosDisponibles;
-  List<Gasfitero> get personalMantenimientoOrdenado {
-    final personal = _gasfiteros
-        .where((persona) => persona.area == 'MANTENIMIENTO')
-        .toList();
-    personal.sort(_compararPersonal);
-    return List.unmodifiable(personal);
-  }
+  List<Gasfitero> get personalMantenimientoOrdenado =>
+      List.unmodifiable(_gasfiteros);
 
   bool get loadingReclamos => _loadingReclamos;
   bool get loadingCuadrillas => _loadingCuadrillas;
@@ -61,91 +56,6 @@ class SupervisorViewModel extends ChangeNotifier {
             e == 'COMPLETADO' ||
             e == 'CERRADO';
       }).toList();
-
-  Cuadrilla? cuadrillaDePersonal(int personalId) {
-    for (final cuadrilla in _cuadrillas) {
-      if (cuadrilla.lider?.id == personalId ||
-          cuadrilla.chofer?.id == personalId ||
-          cuadrilla.operador?.id == personalId ||
-          cuadrilla.apoyos.any((persona) => persona.id == personalId)) {
-        return cuadrilla;
-      }
-    }
-    return null;
-  }
-
-  bool esGasfiteroPrincipal(int personalId) =>
-      _cuadrillas.any((cuadrilla) => cuadrilla.lider?.id == personalId);
-
-  bool esChofer(Gasfitero persona) =>
-      (persona.cargo ?? '').toUpperCase().contains('CHOFER');
-
-  int _compararPersonal(Gasfitero a, Gasfitero b) {
-    final aEsChofer = esChofer(a);
-    final bEsChofer = esChofer(b);
-    if (aEsChofer != bEsChofer) return aEsChofer ? 1 : -1;
-
-    final cuadrillaA = cuadrillaDePersonal(a.id);
-    final cuadrillaB = cuadrillaDePersonal(b.id);
-
-    if (cuadrillaA == null && cuadrillaB != null) return 1;
-    if (cuadrillaA != null && cuadrillaB == null) return -1;
-
-    if (cuadrillaA != null && cuadrillaB != null) {
-      final codigoA = cuadrillaA.codigoGrupo?.trim() ?? '';
-      final codigoB = cuadrillaB.codigoGrupo?.trim() ?? '';
-      final numeroA = _numeroCuadrilla(codigoA);
-      final numeroB = _numeroCuadrilla(codigoB);
-
-      var comparacionCuadrilla = numeroA != null && numeroB != null
-          ? numeroA.compareTo(numeroB)
-          : codigoA.toLowerCase().compareTo(codigoB.toLowerCase());
-      if (comparacionCuadrilla == 0 && cuadrillaA.id != cuadrillaB.id) {
-        comparacionCuadrilla =
-            codigoA.toLowerCase().compareTo(codigoB.toLowerCase());
-      }
-      if (comparacionCuadrilla == 0 && cuadrillaA.id != cuadrillaB.id) {
-        comparacionCuadrilla = cuadrillaA.id.compareTo(cuadrillaB.id);
-      }
-      if (comparacionCuadrilla != 0) return comparacionCuadrilla;
-
-      final aEsPrincipal = esGasfiteroPrincipal(a.id);
-      final bEsPrincipal = esGasfiteroPrincipal(b.id);
-      if (aEsPrincipal != bEsPrincipal) return aEsPrincipal ? -1 : 1;
-    }
-
-    return (a.nombre ?? '')
-        .toLowerCase()
-        .compareTo((b.nombre ?? '').toLowerCase());
-  }
-
-  int? _numeroCuadrilla(String codigo) {
-    final coincidencias = RegExp(r'\d+').allMatches(codigo);
-    return int.tryParse(
-      coincidencias.isEmpty ? '' : coincidencias.last.group(0)!,
-    );
-  }
-
-  String cargoVisible(Gasfitero persona) {
-    if (esGasfiteroPrincipal(persona.id)) {
-      return 'Gasfitero Principal';
-    }
-
-    if (persona.cargo == null || persona.cargo!.isEmpty) {
-      return 'Sin cargo asignado';
-    }
-
-    if (persona.cargo == 'GASFITERO_PRINCIPAL') {
-      return 'Gasfitero';
-    }
-
-    return persona.cargo!
-        .replaceAll('_', ' ')
-        .split(' ')
-        .map((palabra) =>
-            '${palabra[0].toUpperCase()}${palabra.substring(1).toLowerCase()}')
-        .join(' ');
-  }
 
   String _normEstado(String? e) =>
       (e ?? 'PENDIENTE').toUpperCase().replaceAll(' ', '_');
@@ -261,7 +171,6 @@ class SupervisorViewModel extends ChangeNotifier {
     int? liderId,
     List<int> apoyosIds = const [],
     int? choferId,
-    int? operadorId,
   }) async {
     try {
       final nueva = await _supervisorRepository.createCuadrilla(
@@ -269,7 +178,6 @@ class SupervisorViewModel extends ChangeNotifier {
         liderId: liderId,
         apoyosIds: apoyosIds,
         choferId: choferId,
-        operadorId: operadorId,
       );
       _cuadrillas = [..._cuadrillas, nueva];
       notifyListeners();

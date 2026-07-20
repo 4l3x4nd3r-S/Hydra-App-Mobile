@@ -11,8 +11,7 @@ class DataloggerListViewModel extends ChangeNotifier {
   List<Datalogger> get dataloggers => _dataloggers;
   bool get loading => _loading;
 
-  DataloggerListViewModel(
-      {required CatastroRepository catastroRepository})
+  DataloggerListViewModel({required CatastroRepository catastroRepository})
       : _catastroRepository = catastroRepository {
     load();
   }
@@ -20,8 +19,7 @@ class DataloggerListViewModel extends ChangeNotifier {
   Future<void> load() async {
     _loading = true;
     notifyListeners();
-    _dataloggers =
-        await _catastroRepository.getDataloggers();
+    _dataloggers = await _catastroRepository.getDataloggers();
     _loading = false;
     notifyListeners();
   }

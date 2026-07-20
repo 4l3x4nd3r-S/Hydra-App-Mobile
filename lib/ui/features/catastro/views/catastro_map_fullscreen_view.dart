@@ -5,18 +5,21 @@ import 'package:provider/provider.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import '../../../core/theme/app_colors.dart';
 import '../view_models/catastro_gis_view_model.dart';
+import '../../../../data/services/app_environment.dart';
 
 class CatastroMapFullscreenView extends StatefulWidget {
   const CatastroMapFullscreenView({super.key});
 
   @override
-  State<CatastroMapFullscreenView> createState() => _CatastroMapFullscreenViewState();
+  State<CatastroMapFullscreenView> createState() =>
+      _CatastroMapFullscreenViewState();
 }
 
 class _CatastroMapFullscreenViewState extends State<CatastroMapFullscreenView> {
   final MapController _mapController = MapController();
   final TextEditingController _searchController = TextEditingController();
-  final DraggableScrollableController _sheetController = DraggableScrollableController();
+  final DraggableScrollableController _sheetController =
+      DraggableScrollableController();
 
   @override
   void initState() {
@@ -36,7 +39,8 @@ class _CatastroMapFullscreenViewState extends State<CatastroMapFullscreenView> {
     _mapController.move(coords, 18.0);
   }
 
-  void _showElementDetails(BuildContext context, CatastroElement element, AppColors c) {
+  void _showElementDetails(
+      BuildContext context, CatastroElement element, AppColors c) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -83,7 +87,9 @@ class _CatastroMapFullscreenViewState extends State<CatastroMapFullscreenView> {
               Row(
                 children: [
                   Icon(
-                    element.tipo.contains('Válvula') ? Icons.tune_rounded : Icons.speed_rounded,
+                    element.tipo.contains('Válvula')
+                        ? Icons.tune_rounded
+                        : Icons.speed_rounded,
                     color: c.primary,
                     size: 18,
                   ),
@@ -99,7 +105,8 @@ class _CatastroMapFullscreenViewState extends State<CatastroMapFullscreenView> {
                 children: [
                   Icon(
                     Icons.info_outline_rounded,
-                    color: element.estado.toLowerCase().contains('activo') || element.estado.toLowerCase().contains('operativo')
+                    color: element.estado.toLowerCase().contains('activo') ||
+                            element.estado.toLowerCase().contains('operativo')
                         ? const Color(0xFF22C55E)
                         : const Color(0xFFF59E0B),
                     size: 18,
@@ -203,7 +210,7 @@ class _CatastroMapFullscreenViewState extends State<CatastroMapFullscreenView> {
     // Prepare markers
     final List<Marker> allMarkers = [];
     final List<Marker> sectorLabels = [];
-    
+
     if (vm.showPipesAndSectors) {
       for (var s in vm.sectores) {
         sectorLabels.add(Marker(
@@ -232,10 +239,11 @@ class _CatastroMapFullscreenViewState extends State<CatastroMapFullscreenView> {
         ));
       }
     }
-    
+
     if (vm.showValves) {
       for (var v in vm.valvulas) {
-        if (vm.searchQuery.isEmpty || v.nombre.toLowerCase().contains(vm.searchQuery.toLowerCase())) {
+        if (vm.searchQuery.isEmpty ||
+            v.nombre.toLowerCase().contains(vm.searchQuery.toLowerCase())) {
           allMarkers.add(Marker(
             point: v.ubicacion,
             width: 28,
@@ -247,9 +255,15 @@ class _CatastroMapFullscreenViewState extends State<CatastroMapFullscreenView> {
                   color: const Color(0xFFEF4444).withValues(alpha: 0.9),
                   shape: BoxShape.circle,
                   border: Border.all(color: Colors.white, width: 1.5),
-                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 4, offset: const Offset(0, 2))],
+                  boxShadow: [
+                    BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.2),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2))
+                  ],
                 ),
-                child: const Icon(Icons.build_circle_rounded, color: Colors.white, size: 16),
+                child: const Icon(Icons.build_circle_rounded,
+                    color: Colors.white, size: 16),
               ),
             ),
           ));
@@ -259,7 +273,8 @@ class _CatastroMapFullscreenViewState extends State<CatastroMapFullscreenView> {
 
     if (vm.showPressurePoints) {
       for (var pp in vm.puntosPresion) {
-        if (vm.searchQuery.isEmpty || pp.nombre.toLowerCase().contains(vm.searchQuery.toLowerCase())) {
+        if (vm.searchQuery.isEmpty ||
+            pp.nombre.toLowerCase().contains(vm.searchQuery.toLowerCase())) {
           allMarkers.add(Marker(
             point: pp.ubicacion,
             width: 28,
@@ -271,9 +286,15 @@ class _CatastroMapFullscreenViewState extends State<CatastroMapFullscreenView> {
                   color: const Color(0xFF3B82F6).withValues(alpha: 0.9),
                   shape: BoxShape.circle,
                   border: Border.all(color: Colors.white, width: 1.5),
-                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 4, offset: const Offset(0, 2))],
+                  boxShadow: [
+                    BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.2),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2))
+                  ],
                 ),
-                child: const Icon(Icons.water_drop_rounded, color: Colors.white, size: 16),
+                child: const Icon(Icons.water_drop_rounded,
+                    color: Colors.white, size: 16),
               ),
             ),
           ));
@@ -286,28 +307,32 @@ class _CatastroMapFullscreenViewState extends State<CatastroMapFullscreenView> {
         children: [
           FlutterMap(
             mapController: _mapController,
-            options: const MapOptions(
-              initialCenter: LatLng(-12.5933, -69.1883), // Puerto Maldonado center roughly
+            options: MapOptions(
+              initialCenter: LatLng(
+                double.parse(AppEnvironment.mapCenterLatitude),
+                double.parse(AppEnvironment.mapCenterLongitude),
+              ),
               initialZoom: 14.0,
               maxZoom: 22.0,
             ),
             children: [
               TileLayer(
-                urlTemplate: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+                urlTemplate: AppEnvironment.mapTileUrl,
                 subdomains: const ['a', 'b', 'c', 'd'],
                 userAgentPackageName: 'com.hydra.app',
               ),
               if (vm.showPipesAndSectors && vm.sectores.isNotEmpty)
                 PolygonLayer(
-                  polygons: vm.sectores.map((s) => Polygon(
-                    points: s.puntos,
-                    color: s.color,
-                    borderColor: s.color.withValues(alpha: 1.0),
-                    borderStrokeWidth: 2,
-                  )).toList(),
+                  polygons: vm.sectores
+                      .map((s) => Polygon(
+                            points: s.puntos,
+                            color: s.color,
+                            borderColor: s.color.withValues(alpha: 1.0),
+                            borderStrokeWidth: 2,
+                          ))
+                      .toList(),
                 ),
-              if (sectorLabels.isNotEmpty)
-                MarkerLayer(markers: sectorLabels),
+              if (sectorLabels.isNotEmpty) MarkerLayer(markers: sectorLabels),
               MarkerClusterLayerWidget(
                 options: MarkerClusterLayerOptions(
                   maxClusterRadius: 30,
@@ -326,7 +351,10 @@ class _CatastroMapFullscreenViewState extends State<CatastroMapFullscreenView> {
                       child: Center(
                         child: Text(
                           markers.length.toString(),
-                          style: TextStyle(color: c.onPrimary, fontWeight: FontWeight.bold, fontSize: 12),
+                          style: TextStyle(
+                              color: c.onPrimary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12),
                         ),
                       ),
                     );
@@ -346,161 +374,163 @@ class _CatastroMapFullscreenViewState extends State<CatastroMapFullscreenView> {
               return Material(
                 color: Colors.transparent,
                 child: Container(
-                decoration: BoxDecoration(
-                  color: c.background.withValues(alpha: 0.85),
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-                  border: Border.all(color: c.border.withValues(alpha: 0.5)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.3),
-                      blurRadius: 15,
-                      spreadRadius: 2,
-                    )
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onVerticalDragUpdate: (details) {
-                        final screenHeight = MediaQuery.of(context).size.height;
-                        final newSize = _sheetController.size - details.primaryDelta! / screenHeight;
-                        _sheetController.jumpTo(newSize.clamp(0.15, 0.5));
-                      },
-                      onVerticalDragEnd: (details) {
-                        final velocity = details.primaryVelocity ?? 0;
-                        final currentSize = _sheetController.size;
-                        if (velocity < -500) {
-                          _sheetController.animateTo(0.5,
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeOut);
-                        } else if (velocity > 500) {
-                          _sheetController.animateTo(0.15,
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeOut);
-                        } else if (currentSize > 0.325) {
-                          _sheetController.animateTo(0.5,
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeOut);
-                        } else {
-                          _sheetController.animateTo(0.15,
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeOut);
-                        }
-                      },
-                      child: Column(
-                        children: [
-                          Center(
-                            child: Container(
-                              width: 40,
-                              height: 4,
-                                margin: const EdgeInsets.only(
-                                    top: 8, bottom: 16),
-                              decoration: BoxDecoration(
-                                color: c.onSurfaceVariant
-                                    .withValues(alpha: 0.4),
-                                borderRadius:
-                                    BorderRadius.circular(2),
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 20),
-                            child: TextField(
-                              controller: _searchController,
-                              onChanged: (val) {
-                                vm.setSearchQuery(val);
-                                if (val.isNotEmpty) {
-                                  final firstMatch = [...vm.valvulas, ...vm.puntosPresion].where(
-                                    (e) => e.nombre.toLowerCase().contains(val.toLowerCase())
-                                  ).firstOrNull;
-                                  if (firstMatch != null) {
-                                    _flyTo(firstMatch.ubicacion);
-                                  }
-                                }
-                              },
-                              style: TextStyle(
-                                  color: c.onSurface),
-                              decoration: InputDecoration(
-                                isDense: true,
-                                hintText: 'Buscar Válvula 45...',
-                                hintStyle: TextStyle(
-                                    color: c.onSurfaceVariant),
-                                prefixIcon: Icon(
-                                    Icons.search_rounded,
-                                    color: c.primary),
-                                filled: true,
-                                fillColor: c.surface
-                                    .withValues(alpha: 0.5),
-                                border: OutlineInputBorder(
-                                  borderRadius:
-                                      BorderRadius.circular(16),
-                                  borderSide: BorderSide.none,
+                  decoration: BoxDecoration(
+                    color: c.background.withValues(alpha: 0.85),
+                    borderRadius:
+                        const BorderRadius.vertical(top: Radius.circular(24)),
+                    border: Border.all(color: c.border.withValues(alpha: 0.5)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.3),
+                        blurRadius: 15,
+                        spreadRadius: 2,
+                      )
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onVerticalDragUpdate: (details) {
+                          final screenHeight =
+                              MediaQuery.of(context).size.height;
+                          final newSize = _sheetController.size -
+                              details.primaryDelta! / screenHeight;
+                          _sheetController.jumpTo(newSize.clamp(0.15, 0.5));
+                        },
+                        onVerticalDragEnd: (details) {
+                          final velocity = details.primaryVelocity ?? 0;
+                          final currentSize = _sheetController.size;
+                          if (velocity < -500) {
+                            _sheetController.animateTo(0.5,
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeOut);
+                          } else if (velocity > 500) {
+                            _sheetController.animateTo(0.15,
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeOut);
+                          } else if (currentSize > 0.325) {
+                            _sheetController.animateTo(0.5,
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeOut);
+                          } else {
+                            _sheetController.animateTo(0.15,
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeOut);
+                          }
+                        },
+                        child: Column(
+                          children: [
+                            Center(
+                              child: Container(
+                                width: 40,
+                                height: 4,
+                                margin:
+                                    const EdgeInsets.only(top: 8, bottom: 16),
+                                decoration: BoxDecoration(
+                                  color:
+                                      c.onSurfaceVariant.withValues(alpha: 0.4),
+                                  borderRadius: BorderRadius.circular(2),
                                 ),
-                                contentPadding:
-                                    const EdgeInsets.symmetric(
-                                        horizontal: 16,
-                                        vertical: 8),
                               ),
                             ),
-                          ),
-                        ],
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 20),
+                              child: TextField(
+                                controller: _searchController,
+                                onChanged: (val) {
+                                  vm.setSearchQuery(val);
+                                  if (val.isNotEmpty) {
+                                    final firstMatch = [
+                                      ...vm.valvulas,
+                                      ...vm.puntosPresion
+                                    ]
+                                        .where((e) => e.nombre
+                                            .toLowerCase()
+                                            .contains(val.toLowerCase()))
+                                        .firstOrNull;
+                                    if (firstMatch != null) {
+                                      _flyTo(firstMatch.ubicacion);
+                                    }
+                                  }
+                                },
+                                style: TextStyle(color: c.onSurface),
+                                decoration: InputDecoration(
+                                  isDense: true,
+                                  hintText: 'Buscar Válvula 45...',
+                                  hintStyle:
+                                      TextStyle(color: c.onSurfaceVariant),
+                                  prefixIcon: Icon(Icons.search_rounded,
+                                      color: c.primary),
+                                  filled: true,
+                                  fillColor: c.surface.withValues(alpha: 0.5),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 8),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    Expanded(
-                      child: ListView(
-                        controller: scrollController,
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                         children: [
-                          Row(
-                            children: [
-                              Icon(Icons.layers_rounded, size: 18, color: c.primary),
-                              const SizedBox(width: 8),
-                              Text('Capas del Mapa',
-                                  style: TextStyle(
-                                      color: c.onSurface,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                      fontFamily: 'Outfit')),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          _buildLayerToggle(
-                            icon: Icons.layers_outlined,
-                            color: const Color(0xFF8B5CF6),
-                            title: 'Sectores',
-                            count: vm.sectores.length,
-                            value: vm.showPipesAndSectors,
-                            onChanged: vm.togglePipesAndSectors,
-                          ),
-                          _buildLayerToggle(
-                            icon: Icons.build_circle_rounded,
-                            color: const Color(0xFFEF4444),
-                            title: 'Válvulas',
-                            count: vm.valvulas.length,
-                            value: vm.showValves,
-                            onChanged: vm.toggleValves,
-                          ),
-                          _buildLayerToggle(
-                            icon: Icons.water_drop_rounded,
-                            color: const Color(0xFF3B82F6),
-                            title: 'Puntos de Presión',
-                            count: vm.puntosPresion.length,
-                            value: vm.showPressurePoints,
-                            onChanged: vm.togglePressurePoints,
-                          ),
-                        ],
+                      const SizedBox(height: 16),
+                      Expanded(
+                        child: ListView(
+                          controller: scrollController,
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.layers_rounded,
+                                    size: 18, color: c.primary),
+                                const SizedBox(width: 8),
+                                Text('Capas del Mapa',
+                                    style: TextStyle(
+                                        color: c.onSurface,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                        fontFamily: 'Outfit')),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            _buildLayerToggle(
+                              icon: Icons.layers_outlined,
+                              color: const Color(0xFF8B5CF6),
+                              title: 'Sectores',
+                              count: vm.sectores.length,
+                              value: vm.showPipesAndSectors,
+                              onChanged: vm.togglePipesAndSectors,
+                            ),
+                            _buildLayerToggle(
+                              icon: Icons.build_circle_rounded,
+                              color: const Color(0xFFEF4444),
+                              title: 'Válvulas',
+                              count: vm.valvulas.length,
+                              value: vm.showValves,
+                              onChanged: vm.toggleValves,
+                            ),
+                            _buildLayerToggle(
+                              icon: Icons.water_drop_rounded,
+                              color: const Color(0xFF3B82F6),
+                              title: 'Puntos de Presión',
+                              count: vm.puntosPresion.length,
+                              value: vm.showPressurePoints,
+                              onChanged: vm.togglePressurePoints,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
               );
             },
           ),
-          
+
           if (vm.isLoading)
             Container(
               color: c.background.withValues(alpha: 0.5),

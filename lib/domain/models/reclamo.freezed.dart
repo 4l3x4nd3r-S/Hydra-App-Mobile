@@ -25,7 +25,7 @@ mixin _$Reclamo {
   String? get descripcion => throw _privateConstructorUsedError;
   String? get nombreSolicitante => throw _privateConstructorUsedError;
   String? get direccion => throw _privateConstructorUsedError;
-  String? get numeroMedidor => throw _privateConstructorUsedError;
+  String? get numeroSuministro => throw _privateConstructorUsedError;
   String? get telefono => throw _privateConstructorUsedError;
   String? get email => throw _privateConstructorUsedError;
   String? get fechaRegistro => throw _privateConstructorUsedError;
@@ -51,7 +51,7 @@ abstract class $ReclamoCopyWith<$Res> {
       String? descripcion,
       String? nombreSolicitante,
       String? direccion,
-      String? numeroMedidor,
+      String? numeroSuministro,
       String? telefono,
       String? email,
       String? fechaRegistro});
@@ -81,7 +81,7 @@ class _$ReclamoCopyWithImpl<$Res, $Val extends Reclamo>
     Object? descripcion = freezed,
     Object? nombreSolicitante = freezed,
     Object? direccion = freezed,
-    Object? numeroMedidor = freezed,
+    Object? numeroSuministro = freezed,
     Object? telefono = freezed,
     Object? email = freezed,
     Object? fechaRegistro = freezed,
@@ -123,9 +123,9 @@ class _$ReclamoCopyWithImpl<$Res, $Val extends Reclamo>
           ? _value.direccion
           : direccion // ignore: cast_nullable_to_non_nullable
               as String?,
-      numeroMedidor: freezed == numeroMedidor
-          ? _value.numeroMedidor
-          : numeroMedidor // ignore: cast_nullable_to_non_nullable
+      numeroSuministro: freezed == numeroSuministro
+          ? _value.numeroSuministro
+          : numeroSuministro // ignore: cast_nullable_to_non_nullable
               as String?,
       telefono: freezed == telefono
           ? _value.telefono
@@ -160,7 +160,7 @@ abstract class _$$ReclamoImplCopyWith<$Res> implements $ReclamoCopyWith<$Res> {
       String? descripcion,
       String? nombreSolicitante,
       String? direccion,
-      String? numeroMedidor,
+      String? numeroSuministro,
       String? telefono,
       String? email,
       String? fechaRegistro});
@@ -188,7 +188,7 @@ class __$$ReclamoImplCopyWithImpl<$Res>
     Object? descripcion = freezed,
     Object? nombreSolicitante = freezed,
     Object? direccion = freezed,
-    Object? numeroMedidor = freezed,
+    Object? numeroSuministro = freezed,
     Object? telefono = freezed,
     Object? email = freezed,
     Object? fechaRegistro = freezed,
@@ -230,9 +230,9 @@ class __$$ReclamoImplCopyWithImpl<$Res>
           ? _value.direccion
           : direccion // ignore: cast_nullable_to_non_nullable
               as String?,
-      numeroMedidor: freezed == numeroMedidor
-          ? _value.numeroMedidor
-          : numeroMedidor // ignore: cast_nullable_to_non_nullable
+      numeroSuministro: freezed == numeroSuministro
+          ? _value.numeroSuministro
+          : numeroSuministro // ignore: cast_nullable_to_non_nullable
               as String?,
       telefono: freezed == telefono
           ? _value.telefono
@@ -263,7 +263,7 @@ class _$ReclamoImpl implements _Reclamo {
       this.descripcion,
       this.nombreSolicitante,
       this.direccion,
-      this.numeroMedidor,
+      this.numeroSuministro,
       this.telefono,
       this.email,
       this.fechaRegistro});
@@ -287,7 +287,7 @@ class _$ReclamoImpl implements _Reclamo {
   @override
   final String? direccion;
   @override
-  final String? numeroMedidor;
+  final String? numeroSuministro;
   @override
   final String? telefono;
   @override
@@ -297,7 +297,7 @@ class _$ReclamoImpl implements _Reclamo {
 
   @override
   String toString() {
-    return 'Reclamo(id: $id, formato: $formato, codigoSolicitud: $codigoSolicitud, canalEntrada: $canalEntrada, tipoProblema: $tipoProblema, estado: $estado, descripcion: $descripcion, nombreSolicitante: $nombreSolicitante, direccion: $direccion, numeroMedidor: $numeroMedidor, telefono: $telefono, email: $email, fechaRegistro: $fechaRegistro)';
+    return 'Reclamo(id: $id, formato: $formato, codigoSolicitud: $codigoSolicitud, canalEntrada: $canalEntrada, tipoProblema: $tipoProblema, estado: $estado, descripcion: $descripcion, nombreSolicitante: $nombreSolicitante, direccion: $direccion, numeroSuministro: $numeroSuministro, telefono: $telefono, email: $email, fechaRegistro: $fechaRegistro)';
   }
 
   @override
@@ -320,8 +320,8 @@ class _$ReclamoImpl implements _Reclamo {
                 other.nombreSolicitante == nombreSolicitante) &&
             (identical(other.direccion, direccion) ||
                 other.direccion == direccion) &&
-            (identical(other.numeroMedidor, numeroMedidor) ||
-                other.numeroMedidor == numeroMedidor) &&
+            (identical(other.numeroSuministro, numeroSuministro) ||
+                other.numeroSuministro == numeroSuministro) &&
             (identical(other.telefono, telefono) ||
                 other.telefono == telefono) &&
             (identical(other.email, email) || other.email == email) &&
@@ -341,7 +341,7 @@ class _$ReclamoImpl implements _Reclamo {
       descripcion,
       nombreSolicitante,
       direccion,
-      numeroMedidor,
+      numeroSuministro,
       telefono,
       email,
       fechaRegistro);
@@ -366,7 +366,7 @@ abstract class _Reclamo implements Reclamo {
       final String? descripcion,
       final String? nombreSolicitante,
       final String? direccion,
-      final String? numeroMedidor,
+      final String? numeroSuministro,
       final String? telefono,
       final String? email,
       final String? fechaRegistro}) = _$ReclamoImpl;
@@ -390,7 +390,7 @@ abstract class _Reclamo implements Reclamo {
   @override
   String? get direccion;
   @override
-  String? get numeroMedidor;
+  String? get numeroSuministro;
   @override
   String? get telefono;
   @override

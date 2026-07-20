@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../../data/services/app_environment.dart';
 import 'package:provider/provider.dart';
-import '../../../../domain/enums/tipo_problema.dart';
 import '../../../../domain/models/os.dart';
 import '../../../../domain/use_cases/save_os_report_use_case.dart';
 import '../../../core/theme/app_colors.dart';
@@ -149,8 +149,7 @@ class _OsExecutionBody extends StatelessWidget {
                       ),
                       children: [
                         TileLayer(
-                          urlTemplate:
-                              'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                          urlTemplate: AppEnvironment.mapTileUrl,
                           userAgentPackageName: 'com.emapat.hydra',
                         ),
                         MarkerLayer(
@@ -336,9 +335,9 @@ class _OsExecutionBody extends StatelessWidget {
         MapEntry('Formato', r?.formato ?? ''),
         MapEntry(
           'Tipo',
-          TipoProblema.etiquetaDescriptiva(r?.tipoProblema),
+          r?.tipoProblema ?? '',
         ),
-        MapEntry('Medidor', r?.numeroMedidor ?? ''),
+        MapEntry('Suministro', r?.numeroSuministro ?? ''),
         MapEntry('Telefono', r?.telefono ?? ''),
         MapEntry('Solicitante', r?.nombreSolicitante ?? ''),
         MapEntry('Email', r?.email ?? ''),
@@ -377,9 +376,6 @@ class _OsExecutionBody extends StatelessWidget {
       }
       if (cuadrilla.chofer != null) {
         fields.add(MapEntry('Chofer', cuadrilla.chofer!.nombre ?? '-'));
-      }
-      if (cuadrilla.operador != null) {
-        fields.add(MapEntry('Operador', cuadrilla.operador!.nombre ?? '-'));
       }
     }
     if (fields.isEmpty) {

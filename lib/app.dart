@@ -12,6 +12,7 @@ import 'data/repositories/auth_repository.dart';
 import 'data/repositories/os_repository.dart';
 import 'data/repositories/supervisor_repository.dart';
 import 'data/repositories/catastro_repository.dart';
+import 'data/repositories/catalog_repository.dart';
 import 'data/repositories/theme_repository.dart';
 import 'domain/use_cases/login_use_case.dart';
 import 'domain/use_cases/validate_session_use_case.dart';
@@ -29,6 +30,7 @@ class HydraApp extends StatefulWidget {
   final OsRepository osRepository;
   final SupervisorRepository supervisorRepository;
   final CatastroRepository catastroRepository;
+  final CatalogRepository catalogRepository;
   final ThemeRepository themeRepository;
   final LoginUseCase loginUseCase;
   final ValidateSessionUseCase validateSessionUseCase;
@@ -48,6 +50,7 @@ class HydraApp extends StatefulWidget {
     required this.osRepository,
     required this.supervisorRepository,
     required this.catastroRepository,
+    required this.catalogRepository,
     required this.themeRepository,
     required this.loginUseCase,
     required this.validateSessionUseCase,
@@ -101,6 +104,7 @@ class _HydraAppState extends State<HydraApp> {
         Provider.value(value: widget.osRepository),
         Provider.value(value: widget.supervisorRepository),
         Provider.value(value: widget.catastroRepository),
+        Provider.value(value: widget.catalogRepository),
         Provider.value(value: widget.themeRepository),
         Provider.value(value: widget.loginUseCase),
         Provider.value(value: widget.validateSessionUseCase),

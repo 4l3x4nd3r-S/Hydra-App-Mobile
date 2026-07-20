@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hydra/data/repositories/supervisor_repository.dart';
 import 'package:hydra/domain/models/gasfitero.dart';
 import 'package:hydra/ui/features/supervisor/view_models/nueva_cuadrilla_view_model.dart';
+import '../../helpers/fake_catalog_repository.dart';
 
 class _FakeSupervisorRepository implements SupervisorRepository {
   final personal = const [
@@ -10,18 +11,22 @@ class _FakeSupervisorRepository implements SupervisorRepository {
       nombre: 'Mantenimiento Uno',
       cargo: 'GASFITERO',
       area: 'MANTENIMIENTO',
+      puedeSerGasfitero: true,
     ),
     Gasfitero(
       id: 2,
       nombre: 'Mantenimiento Dos',
       cargo: 'GASFITERO',
       area: 'MANTENIMIENTO',
+      puedeSerGasfitero: true,
     ),
     Gasfitero(
       id: 3,
-      nombre: 'Distribución',
-      cargo: 'GASFITERO',
-      area: 'DISTRIBUCION',
+      nombre: 'Chofer Único',
+      cargo: 'CHOFER_CAMIONETA',
+      area: 'MANTENIMIENTO',
+      funcionVisible: 'Chofer',
+      puedeSerChofer: true,
     ),
   ];
 
@@ -38,23 +43,35 @@ void main() {
   setUp(() async {
     viewModel = NuevaCuadrillaViewModel(
       supervisorRepository: _FakeSupervisorRepository(),
+      catalogRepository: FakeCatalogRepository(),
     );
     await Future<void>.delayed(Duration.zero);
   });
 
   tearDown(() => viewModel.dispose());
 
-  test('Agua y Desagüe usan exclusivamente personal de Mantenimiento', () {
+  test('usa las funciones elegibles entregadas por el backend', () {
     expect(
       viewModel.gasfiterosDisponiblesParaRol.map((persona) => persona.id),
       [1, 2],
     );
+    expect(
+      viewModel.choferesDisponibles.map((persona) => persona.id),
+      [3],
+    );
 
-    viewModel.setEspecialidad(EspecialidadOption.desague);
+    viewModel.setEspecialidad(
+      viewModel.especialidades
+          .firstWhere((option) => option.value == 'Alcantarillado'),
+    );
 
     expect(
       viewModel.gasfiterosDisponiblesParaRol.map((persona) => persona.id),
       [1, 2],
+    );
+    expect(
+      viewModel.choferesDisponibles.map((persona) => persona.id),
+      [3],
     );
   });
 

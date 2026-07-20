@@ -97,7 +97,7 @@ class SupervisorRepository {
   Future<void> addGasfitero({
     required int cuadrillaId,
     required int usuarioId,
-    String rol = 'APOYO',
+    required String rol,
   }) async {
     await _apiService.addPersonal(
       cuadrillaId: cuadrillaId,
@@ -121,7 +121,6 @@ class SupervisorRepository {
     required int liderId,
     required List<int> apoyosIds,
     int? choferId,
-    int? operadorId,
   }) async {
     final response = await _apiService.updatePersonal(
       cuadrillaId: cuadrillaId,
@@ -129,7 +128,6 @@ class SupervisorRepository {
         'lider_id': liderId,
         'apoyos_ids': apoyosIds,
         'chofer_id': choferId,
-        'operador_id': operadorId,
       },
     );
     final dto = CuadrillaDto.fromJson(response.data as Map<String, dynamic>);
@@ -141,7 +139,6 @@ class SupervisorRepository {
     int? liderId,
     List<int> apoyosIds = const [],
     int? choferId,
-    int? operadorId,
   }) async {
     final body = <String, dynamic>{
       'especialidad': especialidad,
@@ -151,7 +148,6 @@ class SupervisorRepository {
         'lider_id': liderId,
         'apoyos_ids': apoyosIds,
         'chofer_id': choferId,
-        'operador_id': operadorId,
       };
     }
     final response = await _apiService.createCuadrilla(body);
@@ -175,7 +171,7 @@ class SupervisorRepository {
       descripcion: dto.descripcion,
       nombreSolicitante: dto.nombreSolicitante,
       direccion: dto.direccion,
-      numeroMedidor: dto.numeroMedidor,
+      numeroSuministro: dto.numeroSuministro,
       telefono: dto.telefono,
       email: dto.email,
     );
@@ -231,7 +227,6 @@ class SupervisorRepository {
       lider: dto.lider != null ? _gasfiteroToDomain(dto.lider!) : null,
       apoyos: dto.apoyos.map(_gasfiteroToDomain).toList(),
       chofer: dto.chofer != null ? _gasfiteroToDomain(dto.chofer!) : null,
-      operador: dto.operador != null ? _gasfiteroToDomain(dto.operador!) : null,
     );
   }
 
@@ -240,8 +235,19 @@ class SupervisorRepository {
       id: dto.id,
       nombre: dto.nombre,
       codigoEmpleado: dto.codigoEmpleado,
+      dni: dto.dni,
+      celular: dto.celular,
       cargo: dto.cargo,
+      cargoVisible: dto.cargoVisible,
       area: dto.area,
+      areaVisible: dto.areaVisible,
+      rolEnCuadrilla: dto.rolEnCuadrilla,
+      funcionVisible: dto.funcionVisible,
+      esPrincipal: dto.esPrincipal,
+      puedeSerGasfitero: dto.puedeSerGasfitero,
+      puedeSerChofer: dto.puedeSerChofer,
+      cuadrillaId: dto.cuadrillaId,
+      codigoCuadrilla: dto.codigoCuadrilla,
     );
   }
 
@@ -250,13 +256,13 @@ class SupervisorRepository {
         'codigo_solicitud': r.codigoSolicitud,
         'canal_entrada': r.canalEntrada,
         'tipo_problema': r.tipoProblema,
-        'estado': r.estado ?? 'PENDIENTE',
+        if (r.estado != null) 'estado': r.estado,
         'descripcion': r.descripcion,
         'nombre_solicitante': r.nombreSolicitante,
         'direccion': r.direccion,
         'telefono': r.telefono,
         'email': r.email,
-        'numero_medidor': r.numeroMedidor,
+        'numero_suministro': r.numeroSuministro,
         'fecha_registro': r.fechaRegistro,
         'latitud': null,
         'longitud': null,

@@ -11,8 +11,7 @@ class ValvulaListViewModel extends ChangeNotifier {
   List<Valvula> get valvulas => _valvulas;
   bool get loading => _loading;
 
-  ValvulaListViewModel(
-      {required CatastroRepository catastroRepository})
+  ValvulaListViewModel({required CatastroRepository catastroRepository})
       : _catastroRepository = catastroRepository {
     load();
   }

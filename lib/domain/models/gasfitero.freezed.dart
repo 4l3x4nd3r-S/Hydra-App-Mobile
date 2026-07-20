@@ -19,8 +19,19 @@ mixin _$Gasfitero {
   int get id => throw _privateConstructorUsedError;
   String? get nombre => throw _privateConstructorUsedError;
   String? get codigoEmpleado => throw _privateConstructorUsedError;
+  String? get dni => throw _privateConstructorUsedError;
+  String? get celular => throw _privateConstructorUsedError;
   String? get cargo => throw _privateConstructorUsedError;
+  String? get cargoVisible => throw _privateConstructorUsedError;
   String? get area => throw _privateConstructorUsedError;
+  String? get areaVisible => throw _privateConstructorUsedError;
+  String? get rolEnCuadrilla => throw _privateConstructorUsedError;
+  String? get funcionVisible => throw _privateConstructorUsedError;
+  bool get esPrincipal => throw _privateConstructorUsedError;
+  bool get puedeSerGasfitero => throw _privateConstructorUsedError;
+  bool get puedeSerChofer => throw _privateConstructorUsedError;
+  int? get cuadrillaId => throw _privateConstructorUsedError;
+  String? get codigoCuadrilla => throw _privateConstructorUsedError;
 
   /// Create a copy of Gasfitero
   /// with the given fields replaced by the non-null parameter values.
@@ -38,8 +49,19 @@ abstract class $GasfiteroCopyWith<$Res> {
       {int id,
       String? nombre,
       String? codigoEmpleado,
+      String? dni,
+      String? celular,
       String? cargo,
-      String? area});
+      String? cargoVisible,
+      String? area,
+      String? areaVisible,
+      String? rolEnCuadrilla,
+      String? funcionVisible,
+      bool esPrincipal,
+      bool puedeSerGasfitero,
+      bool puedeSerChofer,
+      int? cuadrillaId,
+      String? codigoCuadrilla});
 }
 
 /// @nodoc
@@ -60,8 +82,19 @@ class _$GasfiteroCopyWithImpl<$Res, $Val extends Gasfitero>
     Object? id = null,
     Object? nombre = freezed,
     Object? codigoEmpleado = freezed,
+    Object? dni = freezed,
+    Object? celular = freezed,
     Object? cargo = freezed,
+    Object? cargoVisible = freezed,
     Object? area = freezed,
+    Object? areaVisible = freezed,
+    Object? rolEnCuadrilla = freezed,
+    Object? funcionVisible = freezed,
+    Object? esPrincipal = null,
+    Object? puedeSerGasfitero = null,
+    Object? puedeSerChofer = null,
+    Object? cuadrillaId = freezed,
+    Object? codigoCuadrilla = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -76,13 +109,57 @@ class _$GasfiteroCopyWithImpl<$Res, $Val extends Gasfitero>
           ? _value.codigoEmpleado
           : codigoEmpleado // ignore: cast_nullable_to_non_nullable
               as String?,
+      dni: freezed == dni
+          ? _value.dni
+          : dni // ignore: cast_nullable_to_non_nullable
+              as String?,
+      celular: freezed == celular
+          ? _value.celular
+          : celular // ignore: cast_nullable_to_non_nullable
+              as String?,
       cargo: freezed == cargo
           ? _value.cargo
           : cargo // ignore: cast_nullable_to_non_nullable
               as String?,
+      cargoVisible: freezed == cargoVisible
+          ? _value.cargoVisible
+          : cargoVisible // ignore: cast_nullable_to_non_nullable
+              as String?,
       area: freezed == area
           ? _value.area
           : area // ignore: cast_nullable_to_non_nullable
+              as String?,
+      areaVisible: freezed == areaVisible
+          ? _value.areaVisible
+          : areaVisible // ignore: cast_nullable_to_non_nullable
+              as String?,
+      rolEnCuadrilla: freezed == rolEnCuadrilla
+          ? _value.rolEnCuadrilla
+          : rolEnCuadrilla // ignore: cast_nullable_to_non_nullable
+              as String?,
+      funcionVisible: freezed == funcionVisible
+          ? _value.funcionVisible
+          : funcionVisible // ignore: cast_nullable_to_non_nullable
+              as String?,
+      esPrincipal: null == esPrincipal
+          ? _value.esPrincipal
+          : esPrincipal // ignore: cast_nullable_to_non_nullable
+              as bool,
+      puedeSerGasfitero: null == puedeSerGasfitero
+          ? _value.puedeSerGasfitero
+          : puedeSerGasfitero // ignore: cast_nullable_to_non_nullable
+              as bool,
+      puedeSerChofer: null == puedeSerChofer
+          ? _value.puedeSerChofer
+          : puedeSerChofer // ignore: cast_nullable_to_non_nullable
+              as bool,
+      cuadrillaId: freezed == cuadrillaId
+          ? _value.cuadrillaId
+          : cuadrillaId // ignore: cast_nullable_to_non_nullable
+              as int?,
+      codigoCuadrilla: freezed == codigoCuadrilla
+          ? _value.codigoCuadrilla
+          : codigoCuadrilla // ignore: cast_nullable_to_non_nullable
               as String?,
     ) as $Val);
   }
@@ -100,8 +177,19 @@ abstract class _$$GasfiteroImplCopyWith<$Res>
       {int id,
       String? nombre,
       String? codigoEmpleado,
+      String? dni,
+      String? celular,
       String? cargo,
-      String? area});
+      String? cargoVisible,
+      String? area,
+      String? areaVisible,
+      String? rolEnCuadrilla,
+      String? funcionVisible,
+      bool esPrincipal,
+      bool puedeSerGasfitero,
+      bool puedeSerChofer,
+      int? cuadrillaId,
+      String? codigoCuadrilla});
 }
 
 /// @nodoc
@@ -120,8 +208,19 @@ class __$$GasfiteroImplCopyWithImpl<$Res>
     Object? id = null,
     Object? nombre = freezed,
     Object? codigoEmpleado = freezed,
+    Object? dni = freezed,
+    Object? celular = freezed,
     Object? cargo = freezed,
+    Object? cargoVisible = freezed,
     Object? area = freezed,
+    Object? areaVisible = freezed,
+    Object? rolEnCuadrilla = freezed,
+    Object? funcionVisible = freezed,
+    Object? esPrincipal = null,
+    Object? puedeSerGasfitero = null,
+    Object? puedeSerChofer = null,
+    Object? cuadrillaId = freezed,
+    Object? codigoCuadrilla = freezed,
   }) {
     return _then(_$GasfiteroImpl(
       id: null == id
@@ -136,13 +235,57 @@ class __$$GasfiteroImplCopyWithImpl<$Res>
           ? _value.codigoEmpleado
           : codigoEmpleado // ignore: cast_nullable_to_non_nullable
               as String?,
+      dni: freezed == dni
+          ? _value.dni
+          : dni // ignore: cast_nullable_to_non_nullable
+              as String?,
+      celular: freezed == celular
+          ? _value.celular
+          : celular // ignore: cast_nullable_to_non_nullable
+              as String?,
       cargo: freezed == cargo
           ? _value.cargo
           : cargo // ignore: cast_nullable_to_non_nullable
               as String?,
+      cargoVisible: freezed == cargoVisible
+          ? _value.cargoVisible
+          : cargoVisible // ignore: cast_nullable_to_non_nullable
+              as String?,
       area: freezed == area
           ? _value.area
           : area // ignore: cast_nullable_to_non_nullable
+              as String?,
+      areaVisible: freezed == areaVisible
+          ? _value.areaVisible
+          : areaVisible // ignore: cast_nullable_to_non_nullable
+              as String?,
+      rolEnCuadrilla: freezed == rolEnCuadrilla
+          ? _value.rolEnCuadrilla
+          : rolEnCuadrilla // ignore: cast_nullable_to_non_nullable
+              as String?,
+      funcionVisible: freezed == funcionVisible
+          ? _value.funcionVisible
+          : funcionVisible // ignore: cast_nullable_to_non_nullable
+              as String?,
+      esPrincipal: null == esPrincipal
+          ? _value.esPrincipal
+          : esPrincipal // ignore: cast_nullable_to_non_nullable
+              as bool,
+      puedeSerGasfitero: null == puedeSerGasfitero
+          ? _value.puedeSerGasfitero
+          : puedeSerGasfitero // ignore: cast_nullable_to_non_nullable
+              as bool,
+      puedeSerChofer: null == puedeSerChofer
+          ? _value.puedeSerChofer
+          : puedeSerChofer // ignore: cast_nullable_to_non_nullable
+              as bool,
+      cuadrillaId: freezed == cuadrillaId
+          ? _value.cuadrillaId
+          : cuadrillaId // ignore: cast_nullable_to_non_nullable
+              as int?,
+      codigoCuadrilla: freezed == codigoCuadrilla
+          ? _value.codigoCuadrilla
+          : codigoCuadrilla // ignore: cast_nullable_to_non_nullable
               as String?,
     ));
   }
@@ -155,8 +298,19 @@ class _$GasfiteroImpl implements _Gasfitero {
       {required this.id,
       this.nombre,
       this.codigoEmpleado,
+      this.dni,
+      this.celular,
       this.cargo,
-      this.area});
+      this.cargoVisible,
+      this.area,
+      this.areaVisible,
+      this.rolEnCuadrilla,
+      this.funcionVisible,
+      this.esPrincipal = false,
+      this.puedeSerGasfitero = false,
+      this.puedeSerChofer = false,
+      this.cuadrillaId,
+      this.codigoCuadrilla});
 
   @override
   final int id;
@@ -165,13 +319,38 @@ class _$GasfiteroImpl implements _Gasfitero {
   @override
   final String? codigoEmpleado;
   @override
+  final String? dni;
+  @override
+  final String? celular;
+  @override
   final String? cargo;
   @override
+  final String? cargoVisible;
+  @override
   final String? area;
+  @override
+  final String? areaVisible;
+  @override
+  final String? rolEnCuadrilla;
+  @override
+  final String? funcionVisible;
+  @override
+  @JsonKey()
+  final bool esPrincipal;
+  @override
+  @JsonKey()
+  final bool puedeSerGasfitero;
+  @override
+  @JsonKey()
+  final bool puedeSerChofer;
+  @override
+  final int? cuadrillaId;
+  @override
+  final String? codigoCuadrilla;
 
   @override
   String toString() {
-    return 'Gasfitero(id: $id, nombre: $nombre, codigoEmpleado: $codigoEmpleado, cargo: $cargo, area: $area)';
+    return 'Gasfitero(id: $id, nombre: $nombre, codigoEmpleado: $codigoEmpleado, dni: $dni, celular: $celular, cargo: $cargo, cargoVisible: $cargoVisible, area: $area, areaVisible: $areaVisible, rolEnCuadrilla: $rolEnCuadrilla, funcionVisible: $funcionVisible, esPrincipal: $esPrincipal, puedeSerGasfitero: $puedeSerGasfitero, puedeSerChofer: $puedeSerChofer, cuadrillaId: $cuadrillaId, codigoCuadrilla: $codigoCuadrilla)';
   }
 
   @override
@@ -183,13 +362,49 @@ class _$GasfiteroImpl implements _Gasfitero {
             (identical(other.nombre, nombre) || other.nombre == nombre) &&
             (identical(other.codigoEmpleado, codigoEmpleado) ||
                 other.codigoEmpleado == codigoEmpleado) &&
+            (identical(other.dni, dni) || other.dni == dni) &&
+            (identical(other.celular, celular) || other.celular == celular) &&
             (identical(other.cargo, cargo) || other.cargo == cargo) &&
-            (identical(other.area, area) || other.area == area));
+            (identical(other.cargoVisible, cargoVisible) ||
+                other.cargoVisible == cargoVisible) &&
+            (identical(other.area, area) || other.area == area) &&
+            (identical(other.areaVisible, areaVisible) ||
+                other.areaVisible == areaVisible) &&
+            (identical(other.rolEnCuadrilla, rolEnCuadrilla) ||
+                other.rolEnCuadrilla == rolEnCuadrilla) &&
+            (identical(other.funcionVisible, funcionVisible) ||
+                other.funcionVisible == funcionVisible) &&
+            (identical(other.esPrincipal, esPrincipal) ||
+                other.esPrincipal == esPrincipal) &&
+            (identical(other.puedeSerGasfitero, puedeSerGasfitero) ||
+                other.puedeSerGasfitero == puedeSerGasfitero) &&
+            (identical(other.puedeSerChofer, puedeSerChofer) ||
+                other.puedeSerChofer == puedeSerChofer) &&
+            (identical(other.cuadrillaId, cuadrillaId) ||
+                other.cuadrillaId == cuadrillaId) &&
+            (identical(other.codigoCuadrilla, codigoCuadrilla) ||
+                other.codigoCuadrilla == codigoCuadrilla));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, id, nombre, codigoEmpleado, cargo, area);
+  int get hashCode => Object.hash(
+      runtimeType,
+      id,
+      nombre,
+      codigoEmpleado,
+      dni,
+      celular,
+      cargo,
+      cargoVisible,
+      area,
+      areaVisible,
+      rolEnCuadrilla,
+      funcionVisible,
+      esPrincipal,
+      puedeSerGasfitero,
+      puedeSerChofer,
+      cuadrillaId,
+      codigoCuadrilla);
 
   /// Create a copy of Gasfitero
   /// with the given fields replaced by the non-null parameter values.
@@ -205,8 +420,19 @@ abstract class _Gasfitero implements Gasfitero {
       {required final int id,
       final String? nombre,
       final String? codigoEmpleado,
+      final String? dni,
+      final String? celular,
       final String? cargo,
-      final String? area}) = _$GasfiteroImpl;
+      final String? cargoVisible,
+      final String? area,
+      final String? areaVisible,
+      final String? rolEnCuadrilla,
+      final String? funcionVisible,
+      final bool esPrincipal,
+      final bool puedeSerGasfitero,
+      final bool puedeSerChofer,
+      final int? cuadrillaId,
+      final String? codigoCuadrilla}) = _$GasfiteroImpl;
 
   @override
   int get id;
@@ -215,9 +441,31 @@ abstract class _Gasfitero implements Gasfitero {
   @override
   String? get codigoEmpleado;
   @override
+  String? get dni;
+  @override
+  String? get celular;
+  @override
   String? get cargo;
   @override
+  String? get cargoVisible;
+  @override
   String? get area;
+  @override
+  String? get areaVisible;
+  @override
+  String? get rolEnCuadrilla;
+  @override
+  String? get funcionVisible;
+  @override
+  bool get esPrincipal;
+  @override
+  bool get puedeSerGasfitero;
+  @override
+  bool get puedeSerChofer;
+  @override
+  int? get cuadrillaId;
+  @override
+  String? get codigoCuadrilla;
 
   /// Create a copy of Gasfitero
   /// with the given fields replaced by the non-null parameter values.

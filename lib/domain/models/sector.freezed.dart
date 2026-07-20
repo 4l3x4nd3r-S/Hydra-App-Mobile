@@ -19,6 +19,7 @@ mixin _$Sector {
   int get id => throw _privateConstructorUsedError;
   String? get nombre => throw _privateConstructorUsedError;
   String? get reservorioAsociado => throw _privateConstructorUsedError;
+  String? get geometriaGeojson => throw _privateConstructorUsedError;
 
   /// Create a copy of Sector
   /// with the given fields replaced by the non-null parameter values.
@@ -31,7 +32,11 @@ abstract class $SectorCopyWith<$Res> {
   factory $SectorCopyWith(Sector value, $Res Function(Sector) then) =
       _$SectorCopyWithImpl<$Res, Sector>;
   @useResult
-  $Res call({int id, String? nombre, String? reservorioAsociado});
+  $Res call(
+      {int id,
+      String? nombre,
+      String? reservorioAsociado,
+      String? geometriaGeojson});
 }
 
 /// @nodoc
@@ -52,6 +57,7 @@ class _$SectorCopyWithImpl<$Res, $Val extends Sector>
     Object? id = null,
     Object? nombre = freezed,
     Object? reservorioAsociado = freezed,
+    Object? geometriaGeojson = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -66,6 +72,10 @@ class _$SectorCopyWithImpl<$Res, $Val extends Sector>
           ? _value.reservorioAsociado
           : reservorioAsociado // ignore: cast_nullable_to_non_nullable
               as String?,
+      geometriaGeojson: freezed == geometriaGeojson
+          ? _value.geometriaGeojson
+          : geometriaGeojson // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -77,7 +87,11 @@ abstract class _$$SectorImplCopyWith<$Res> implements $SectorCopyWith<$Res> {
       __$$SectorImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({int id, String? nombre, String? reservorioAsociado});
+  $Res call(
+      {int id,
+      String? nombre,
+      String? reservorioAsociado,
+      String? geometriaGeojson});
 }
 
 /// @nodoc
@@ -96,6 +110,7 @@ class __$$SectorImplCopyWithImpl<$Res>
     Object? id = null,
     Object? nombre = freezed,
     Object? reservorioAsociado = freezed,
+    Object? geometriaGeojson = freezed,
   }) {
     return _then(_$SectorImpl(
       id: null == id
@@ -110,6 +125,10 @@ class __$$SectorImplCopyWithImpl<$Res>
           ? _value.reservorioAsociado
           : reservorioAsociado // ignore: cast_nullable_to_non_nullable
               as String?,
+      geometriaGeojson: freezed == geometriaGeojson
+          ? _value.geometriaGeojson
+          : geometriaGeojson // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -117,7 +136,11 @@ class __$$SectorImplCopyWithImpl<$Res>
 /// @nodoc
 
 class _$SectorImpl implements _Sector {
-  const _$SectorImpl({required this.id, this.nombre, this.reservorioAsociado});
+  const _$SectorImpl(
+      {required this.id,
+      this.nombre,
+      this.reservorioAsociado,
+      this.geometriaGeojson});
 
   @override
   final int id;
@@ -125,10 +148,12 @@ class _$SectorImpl implements _Sector {
   final String? nombre;
   @override
   final String? reservorioAsociado;
+  @override
+  final String? geometriaGeojson;
 
   @override
   String toString() {
-    return 'Sector(id: $id, nombre: $nombre, reservorioAsociado: $reservorioAsociado)';
+    return 'Sector(id: $id, nombre: $nombre, reservorioAsociado: $reservorioAsociado, geometriaGeojson: $geometriaGeojson)';
   }
 
   @override
@@ -139,11 +164,14 @@ class _$SectorImpl implements _Sector {
             (identical(other.id, id) || other.id == id) &&
             (identical(other.nombre, nombre) || other.nombre == nombre) &&
             (identical(other.reservorioAsociado, reservorioAsociado) ||
-                other.reservorioAsociado == reservorioAsociado));
+                other.reservorioAsociado == reservorioAsociado) &&
+            (identical(other.geometriaGeojson, geometriaGeojson) ||
+                other.geometriaGeojson == geometriaGeojson));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, id, nombre, reservorioAsociado);
+  int get hashCode => Object.hash(
+      runtimeType, id, nombre, reservorioAsociado, geometriaGeojson);
 
   /// Create a copy of Sector
   /// with the given fields replaced by the non-null parameter values.
@@ -158,7 +186,8 @@ abstract class _Sector implements Sector {
   const factory _Sector(
       {required final int id,
       final String? nombre,
-      final String? reservorioAsociado}) = _$SectorImpl;
+      final String? reservorioAsociado,
+      final String? geometriaGeojson}) = _$SectorImpl;
 
   @override
   int get id;
@@ -166,6 +195,8 @@ abstract class _Sector implements Sector {
   String? get nombre;
   @override
   String? get reservorioAsociado;
+  @override
+  String? get geometriaGeojson;
 
   /// Create a copy of Sector
   /// with the given fields replaced by the non-null parameter values.

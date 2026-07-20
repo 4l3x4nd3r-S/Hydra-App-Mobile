@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../data/repositories/supervisor_repository.dart';
+import '../../../../data/repositories/catalog_repository.dart';
 import '../../../../domain/models/gasfitero.dart';
 import '../../../core/theme/app_colors.dart';
 import '../view_models/nueva_cuadrilla_view_model.dart';
@@ -16,6 +17,7 @@ Future<bool?> showNuevaCuadrillaModal(BuildContext context) {
     builder: (_) => ChangeNotifierProvider(
       create: (_) => NuevaCuadrillaViewModel(
         supervisorRepository: context.read<SupervisorRepository>(),
+        catalogRepository: context.read<CatalogRepository>(),
       ),
       child: const _NuevaCuadrillaModal(),
     ),
@@ -55,14 +57,18 @@ class _NuevaCuadrillaModal extends StatelessWidget {
             _buildLabel('Especialidad', c),
             const SizedBox(height: 6),
             Row(
-              children: EspecialidadOption.all
+              children: vm.especialidades
+                  .asMap()
+                  .entries
                   .map(
-                    (opcion) => Expanded(
+                    (entry) => Expanded(
                       child: Padding(
                         padding: EdgeInsets.only(
-                          right: opcion == EspecialidadOption.agua ? 8.0 : 0,
+                          right: entry.key < vm.especialidades.length - 1
+                              ? 8.0
+                              : 0,
                         ),
-                        child: _buildEspecialidadChip(vm, opcion, c),
+                        child: _buildEspecialidadChip(vm, entry.value, c),
                       ),
                     ),
                   )
@@ -99,25 +105,7 @@ class _NuevaCuadrillaModal extends StatelessWidget {
                 color: const Color(0xFF64748B),
                 selected: vm.apoyos,
               ),
-              if (vm.especialidad.value == 'Agua' &&
-                  vm.operadoresDisponibles.isNotEmpty) ...[
-                const SizedBox(height: 14),
-                _buildPersonSelector(
-                  context,
-                  vm: vm,
-                  c: c,
-                  icon: Icons.settings_applications_rounded,
-                  label: 'Operador',
-                  color: const Color(0xFF0F766E),
-                  persona: vm.operador,
-                  onSelect: (t) => vm.setOperador(t),
-                  required: false,
-                  optional: true,
-                  list: vm.operadoresDisponibles,
-                ),
-              ],
-              if (vm.especialidad.value == 'Desagüe' &&
-                  vm.choferesDisponibles.isNotEmpty) ...[
+              if (vm.choferesDisponibles.isNotEmpty) ...[
                 const SizedBox(height: 14),
                 _buildPersonSelector(
                   context,
@@ -206,7 +194,7 @@ class _NuevaCuadrillaModal extends StatelessWidget {
     EspecialidadOption opcion,
     AppColors c,
   ) {
-    final selected = vm.especialidad.value == opcion.value;
+    final selected = vm.especialidad?.value == opcion.value;
     return InkWell(
       borderRadius: BorderRadius.circular(10),
       onTap: () => vm.setEspecialidad(opcion),
@@ -625,7 +613,7 @@ class _NuevaCuadrillaModal extends StatelessWidget {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'Solo puedes seleccionar una persona · ${vm.especialidad.label}',
+                            'Solo puedes seleccionar una persona · ${vm.especialidad?.label ?? ''}',
                             style: TextStyle(
                               fontSize: 12,
                               color: c.onSurfaceVariant,

@@ -108,27 +108,8 @@ class _CuadrillaDetalleBodyState extends State<_CuadrillaDetalleBody> {
                     c: c,
                     vm: vm,
                   ),
-
-                  // Operador (Solo Agua)
-                  if (cu.especialidad == 'Agua' &&
-                      (cu.operador != null ||
-                          vm.operadoresDisponibles.isNotEmpty)) ...[
-                    const SizedBox(height: 12),
-                    _buildRoleSection(
-                      context,
-                      icon: Icons.directions_car_rounded,
-                      label: 'Operador',
-                      color: const Color(0xFF0F766E),
-                      persona: cu.operador,
-                      c: c,
-                      vm: vm,
-                    ),
-                  ],
-
-                  // Chofer (Solo Alcantarillado / Mantenimiento)
-                  if (cu.especialidad != 'Agua' &&
-                      (cu.chofer != null ||
-                          vm.choferesDisponibles.isNotEmpty)) ...[
+                  if (cu.chofer != null ||
+                      vm.choferesDisponibles.isNotEmpty) ...[
                     const SizedBox(height: 12),
                     _buildRoleSection(
                       context,
@@ -140,7 +121,6 @@ class _CuadrillaDetalleBodyState extends State<_CuadrillaDetalleBody> {
                       vm: vm,
                     ),
                   ],
-
                   const SizedBox(height: 24),
                 ],
               ),
@@ -299,11 +279,7 @@ class _CuadrillaDetalleBodyState extends State<_CuadrillaDetalleBody> {
     required CuadrillaDetalleViewModel vm,
     bool isOptionalLabel = false,
   }) {
-    final rolRuta = label.contains('Principal')
-        ? 'LIDER'
-        : label.contains('Chofer')
-            ? 'CHOFER'
-            : 'OPERADOR';
+    final rolRuta = label.contains('Principal') ? 'LIDER' : 'CHOFER';
 
     return Container(
       padding: const EdgeInsets.all(14),
@@ -973,18 +949,12 @@ class _CuadrillaDetalleBodyState extends State<_CuadrillaDetalleBody> {
     if (vm.current.lider != null) idsEnCuadrilla.add(vm.current.lider!.id);
     idsEnCuadrilla.addAll(vm.current.apoyos.map((t) => t.id));
     if (vm.current.chofer != null) idsEnCuadrilla.add(vm.current.chofer!.id);
-    if (vm.current.operador != null) {
-      idsEnCuadrilla.add(vm.current.operador!.id);
-    }
     final disponiblesFiltrados =
         vm.disponibles.where((t) => !idsEnCuadrilla.contains(t.id)).where((t) {
-      final cargo = (t.cargo ?? '').toUpperCase();
       if (rol == 'LIDER' || rol == 'APOYO') {
-        return !cargo.contains('CHOFER') && !cargo.contains('OPERADOR');
+        return t.puedeSerGasfitero;
       } else if (rol == 'CHOFER') {
-        return cargo.contains('CHOFER');
-      } else if (rol == 'OPERADOR') {
-        return cargo.contains('OPERADOR');
+        return t.puedeSerChofer;
       }
       return true;
     }).toList();
