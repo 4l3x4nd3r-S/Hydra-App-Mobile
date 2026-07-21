@@ -1055,15 +1055,25 @@ class _CuadrillaDetalleBodyState extends State<_CuadrillaDetalleBody> {
           TextButton(
             onPressed: () async {
               Navigator.pop(ctx);
-              final ok = await vm.deleteCuadrilla();
-              if (ok && context.mounted) {
+              final errorMsg = await vm.deleteCuadrilla();
+              if (errorMsg == null && context.mounted) {
                 Navigator.pop(
                     context, true); // Retornar true para indicar que se eliminó
-              } else if (!ok && context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text('Error al eliminar la cuadrilla'),
-                      backgroundColor: Color(0xFFDC2626)),
+              } else if (errorMsg != null && context.mounted) {
+                showDialog(
+                  context: context,
+                  builder: (ctxErr) => AlertDialog(
+                    backgroundColor: c.surface,
+                    title: Text('No se puede eliminar',
+                        style: TextStyle(color: c.onSurface, fontWeight: FontWeight.bold)),
+                    content: Text(errorMsg, style: TextStyle(color: c.onSurfaceVariant)),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctxErr),
+                        child: Text('Entendido', style: TextStyle(color: c.onSurfaceVariant)),
+                      ),
+                    ],
+                  ),
                 );
               }
             },

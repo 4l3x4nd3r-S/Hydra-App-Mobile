@@ -204,12 +204,17 @@ class CuadrillaDetalleViewModel extends ChangeNotifier {
     }
   }
 
-  Future<bool> deleteCuadrilla() async {
+  Future<String?> deleteCuadrilla() async {
     try {
       await _supervisorRepository.deleteCuadrilla(cuadrilla.id);
-      return true;
+      return null;
+    } on DioException catch (error) {
+      final detail = error.response?.data is Map
+          ? (error.response?.data as Map)['detail']?.toString()
+          : null;
+      return detail ?? 'Error interno al intentar eliminar la cuadrilla.';
     } catch (e) {
-      return false;
+      return 'Ocurrió un error inesperado. Verifique su conexión.';
     }
   }
 }
