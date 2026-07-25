@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../data/repositories/auth_repository.dart';
+import '../../../../data/repositories/catalog_repository.dart';
 import '../../../../data/repositories/os_repository.dart';
 import '../../../../data/repositories/supervisor_repository.dart';
 import '../../../../data/repositories/catastro_repository.dart';
@@ -34,6 +35,7 @@ class SupervisorView extends StatelessWidget {
       create: (_) => SupervisorViewModel(
         supervisorRepository: context.read<SupervisorRepository>(),
         authRepository: context.read<AuthRepository>(),
+        catalogRepository: context.read<CatalogRepository>(),
       ),
       child: const _SupervisorBody(),
     );
@@ -522,6 +524,7 @@ class _SupervisorBodyState extends State<_SupervisorBody>
     String emptyMsg,
     IconData emptyIcon,
   ) {
+    final vm = context.read<SupervisorViewModel>();
     if (reclamos.isEmpty) {
       return RefreshIndicator(
         onRefresh: () async {
@@ -566,6 +569,8 @@ class _SupervisorBodyState extends State<_SupervisorBody>
           return ReclamoListTile(
             data: ReclamoTileData.fromReclamo(
               r,
+              tipoProblemaDescripcion:
+                  vm.descripcionTipoProblema(r.tipoProblema),
               onTap: () async {
                 final vm = context.read<SupervisorViewModel>();
                 await Navigator.push(

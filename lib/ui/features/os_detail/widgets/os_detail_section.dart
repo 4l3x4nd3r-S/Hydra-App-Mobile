@@ -278,6 +278,7 @@ class OsDetailSection extends StatelessWidget {
     final key = label.toLowerCase();
     const halfWidthFields = {
       'n° de o.s.',
+      'código de solicitud',
       'formato',
       'telefono',
       'teléfono',
@@ -360,6 +361,7 @@ class OsDetailSection extends StatelessWidget {
   IconData _fieldIcon(String label) {
     final key = label.toLowerCase();
     if (key.contains('o.s.')) return Icons.tag_rounded;
+    if (key.contains('código de solicitud')) return Icons.tag_rounded;
     if (key.contains('solicitante')) return Icons.person_outline_rounded;
     if (key == 'tipo') return Icons.build_outlined;
     if (key.contains('formato')) return Icons.description_outlined;

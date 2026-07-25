@@ -6,6 +6,7 @@ import 'package:hydra/domain/models/gasfitero.dart';
 import 'package:hydra/data/repositories/auth_repository.dart';
 import 'package:hydra/data/repositories/supervisor_repository.dart';
 import 'package:hydra/ui/features/supervisor/view_models/supervisor_view_model.dart';
+import '../../helpers/fake_catalog_repository.dart';
 
 class _FakeAuthRepository implements AuthRepository {
   @override
@@ -55,6 +56,7 @@ void main() {
     vm = SupervisorViewModel(
       supervisorRepository: fakeRepo,
       authRepository: _FakeAuthRepository(),
+      catalogRepository: FakeCatalogRepository(),
     );
   });
 
@@ -131,6 +133,13 @@ void main() {
   });
 
   group('Getters de filtrado de reclamos', () {
+    test('obtiene la descripción del tipo de problema desde el catálogo',
+        () async {
+      await vm.cargarTodo();
+
+      expect(vm.descripcionTipoProblema('OP-1'), 'Obras inconclusas');
+    });
+
     test('reclamosPendientes filtra por estado PENDIENTE', () async {
       fakeRepo.reclamos = [
         Reclamo(id: 1, estado: 'PENDIENTE'),

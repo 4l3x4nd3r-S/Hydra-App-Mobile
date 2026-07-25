@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../../../data/repositories/auth_repository.dart';
+import '../../../../data/repositories/catalog_repository.dart';
 import '../../../../data/repositories/supervisor_repository.dart';
 import '../../../../domain/models/reclamo.dart';
 import '../../../../domain/models/cuadrilla.dart';
@@ -11,6 +12,7 @@ import '../../../../domain/models/gasfitero.dart';
 class SupervisorViewModel extends ChangeNotifier {
   final SupervisorRepository _supervisorRepository;
   final AuthRepository _authRepository;
+  final CatalogRepository? _catalogRepository;
 
   Timer? _refreshTimer;
   String _userName = '';
@@ -21,6 +23,7 @@ class SupervisorViewModel extends ChangeNotifier {
   List<Cuadrilla> _cuadrillas = [];
   List<Gasfitero> _gasfiteros = [];
   List<Gasfitero> _gasfiterosDisponibles = [];
+  Map<String, String> _descripcionesTipoProblema = const {};
   bool _loadingReclamos = false;
   bool _loadingCuadrillas = false;
   bool _loadinggasfiteros = false;
@@ -40,6 +43,8 @@ class SupervisorViewModel extends ChangeNotifier {
   String get userRole => _userRole;
   String? get userCode => _userCode;
   String? get errorMessageReclamos => _errorMessageReclamos;
+  String? descripcionTipoProblema(String? codigo) =>
+      codigo == null ? null : _descripcionesTipoProblema[codigo];
 
   List<Reclamo> get reclamosPendientes =>
       _reclamos.where((r) => _normEstado(r.estado) == 'PENDIENTE').toList();
@@ -63,8 +68,10 @@ class SupervisorViewModel extends ChangeNotifier {
   SupervisorViewModel({
     required SupervisorRepository supervisorRepository,
     required AuthRepository authRepository,
+    CatalogRepository? catalogRepository,
   })  : _supervisorRepository = supervisorRepository,
-        _authRepository = authRepository {
+        _authRepository = authRepository,
+        _catalogRepository = catalogRepository {
     _cargarNombreUsuario();
     cargarTodo();
     _refreshTimer = Timer.periodic(
@@ -94,7 +101,23 @@ class SupervisorViewModel extends ChangeNotifier {
       _cargarCuadrillas(silent: silent),
       _cargargasfiteros(silent: silent),
       _cargarGasfiterosDisponibles(silent: silent),
+      _cargarDescripcionesTipoProblema(),
     ]);
+  }
+
+  Future<void> _cargarDescripcionesTipoProblema() async {
+    final repository = _catalogRepository;
+    if (repository == null) return;
+    try {
+      final options = await repository.getGroup('TIPO_PROBLEMA');
+      _descripcionesTipoProblema = {
+        for (final option in options)
+          if (option.description?.trim().isNotEmpty ?? false)
+            option.code: option.description!.trim(),
+      };
+    } catch (e) {
+      debugPrint('Error cargando descripciones de tipos de problema: $e');
+    }
   }
 
   Future<void> _cargarReclamos({bool silent = false}) async {

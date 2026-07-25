@@ -221,6 +221,69 @@ class SyncQueueStorageService {
     );
   }
 
+  Future<void> saveDraft({
+    required int osId,
+    String? insumosUtilizados,
+    String? observacionesGasfitero,
+    String? rutaCarpetaEvidencias,
+    String? trabajoEjecutado,
+    String? problemas,
+    String? soluciones,
+    String? comentariosInstrucciones,
+    double? latitud,
+    double? longitud,
+    String? fotosProblemaUrls,
+    String? fotosSolucionUrls,
+    String? fechaEjecucionInicio,
+    String? fechaEjecucionFin,
+  }) async {
+    final db = await database;
+    await db.insert(
+      'offline_sync_queue',
+      {
+        'os_id': osId,
+        'insumos_utilizados': insumosUtilizados,
+        'observaciones_gasfitero': observacionesGasfitero,
+        'ruta_carpeta_evidencias': rutaCarpetaEvidencias,
+        'trabajo_ejecutado': trabajoEjecutado,
+        'problemas': problemas,
+        'soluciones': soluciones,
+        'comentarios_instrucciones': comentariosInstrucciones,
+        'latitud': latitud,
+        'longitud': longitud,
+        'fotos_problema_urls': fotosProblemaUrls,
+        'fotos_solucion_urls': fotosSolucionUrls,
+        'fecha_ejecucion_inicio': fechaEjecucionInicio,
+        'fecha_ejecucion_fin': fechaEjecucionFin,
+        'status': 'DRAFT',
+        'created_at': DateTime.now().toIso8601String(),
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<Map<String, dynamic>?> getDraft(int osId) async {
+    final db = await database;
+    final results = await db.query(
+      'offline_sync_queue',
+      where: 'os_id = ? AND status = ?',
+      whereArgs: [osId, 'DRAFT'],
+    );
+    if (results.isNotEmpty) {
+      return results.first;
+    }
+    return null;
+  }
+
+  Future<void> deleteDraft(int osId) async {
+    final db = await database;
+    await db.delete(
+      'offline_sync_queue',
+      where: 'os_id = ? AND status = ?',
+      whereArgs: [osId, 'DRAFT'],
+    );
+  }
+
   Future<List<Map<String, dynamic>>> getPending() async {
     final db = await database;
     return await db.query(

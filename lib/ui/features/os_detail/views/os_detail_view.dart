@@ -241,7 +241,7 @@ class _OsDetailBody extends StatelessWidget {
       title: 'Inf. de Reclamo',
       c: c,
       fields: [
-        MapEntry('N° de O.S.', os.numeroOrden ?? ''),
+        MapEntry('Código de solicitud', r?.codigoSolicitud ?? ''),
         MapEntry('Formato', r?.formato ?? ''),
         MapEntry(
           'Tipo',

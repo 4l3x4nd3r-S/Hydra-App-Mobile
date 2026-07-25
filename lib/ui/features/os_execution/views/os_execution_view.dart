@@ -3,6 +3,7 @@ import '../../../../data/services/app_environment.dart';
 import 'package:provider/provider.dart';
 import '../../../../domain/models/os.dart';
 import '../../../../domain/use_cases/save_os_report_use_case.dart';
+import '../../../../data/services/sync_queue_storage_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../view_models/os_execution_view_model.dart';
 import '../../os_detail/widgets/os_detail_section.dart';
@@ -23,6 +24,7 @@ class OsExecutionView extends StatelessWidget {
       create: (_) => OsExecutionViewModel(
         os: os,
         saveOsReportUseCase: context.read<SaveOsReportUseCase>(),
+        syncQueueStorageService: context.read<SyncQueueStorageService>(),
       ),
       child: const _OsExecutionBody(),
     );
@@ -62,6 +64,18 @@ class _OsExecutionBody extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (vm.isDraftLoaded) ...[
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: vm.progress,
+                  backgroundColor: c.primary.withValues(alpha: 0.1),
+                  valueColor: AlwaysStoppedAnimation<Color>(c.primary),
+                  minHeight: 6,
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
             _buildReclamoSection(c, os),
             const SizedBox(height: 12),
             _buildCuadrillaSection(c, os),
@@ -173,22 +187,43 @@ class _OsExecutionBody extends StatelessWidget {
               ),
             ],
             const SizedBox(height: 16),
-            _buildEditableFechaPicker(context, c, 'Fecha Hora Inicio',
-                vm.fechaInicio, vm.updateFechaInicio,
-                minimumDateTime: DateTime.now()),
-            const SizedBox(height: 12),
-            _buildPhotoEvidenceSection(
-              c: c,
-              title: 'Fotos del problema',
-              photos: vm.fotosProblema,
-              onAdd: vm.takeFotoProblema,
-              onRemove: vm.removeFotoProblema,
-            ),
-            const SizedBox(height: 16),
+            if (vm.fechaInicio == null) ...[
+              _buildBigActionButton(
+                c: c,
+                icon: Icons.play_arrow_rounded,
+                label: 'INICIAR TAREA AHORA',
+                onPressed: vm.iniciarAhora,
+                isPrimary: true,
+              ),
+              const SizedBox(height: 16),
+            ] else ...[
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: c.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: c.border),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.play_circle_outline, color: c.primary, size: 20),
+                    const SizedBox(width: 10),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Hora de Inicio', style: TextStyle(color: c.primary, fontSize: 11, fontWeight: FontWeight.bold)),
+                        Text(DateFormat('dd/MM/yyyy HH:mm').format(vm.fechaInicio!), style: TextStyle(color: c.onSurface, fontWeight: FontWeight.bold, fontSize: 14)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
             _buildTextField(
               c: c,
               controller: vm.trabajoEjecutadoController,
-              label: 'Trabajo ejecutado',
+              label: 'Trabajo ejecutado (Obligatorio)',
               hint: 'Describa el trabajo ejecutado...',
               maxLines: 3,
             ),
@@ -200,21 +235,66 @@ class _OsExecutionBody extends StatelessWidget {
               hint: 'Describa los problemas y soluciones...',
               maxLines: 3,
             ),
-            const SizedBox(height: 12),
-            _buildTextField(
-              c: c,
-              controller: vm.comentariosInstruccionesController,
-              label: 'Comentarios / Instrucciones Especiales',
-              hint: 'Agregue comentarios adicionales...',
-              maxLines: 2,
+            const SizedBox(height: 16),
+            Theme(
+              data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+              child: ExpansionTile(
+                title: Text('Campos Adicionales (Opcional)', style: TextStyle(color: c.primary, fontWeight: FontWeight.bold, fontSize: 14)),
+                iconColor: c.primary,
+                collapsedIconColor: c.primary,
+                tilePadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                childrenPadding: const EdgeInsets.only(bottom: 12),
+                collapsedShape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: c.border),
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: c.primary),
+                ),
+                backgroundColor: c.surface,
+                collapsedBackgroundColor: c.surface,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Column(
+                      children: [
+                        _buildTextField(
+                          c: c,
+                          controller: vm.insumosController,
+                          label: 'Insumos utilizados',
+                          hint: 'Describa los insumos...',
+                          maxLines: 2,
+                        ),
+                        const SizedBox(height: 12),
+                        _buildTextField(
+                          c: c,
+                          controller: vm.comentariosInstruccionesController,
+                          label: 'Comentarios Especiales',
+                          hint: 'Agregue comentarios...',
+                          maxLines: 2,
+                        ),
+                        const SizedBox(height: 12),
+                        _buildTextField(
+                          c: c,
+                          controller: vm.observacionesController,
+                          label: 'Observaciones',
+                          hint: 'Observaciones generales...',
+                          maxLines: 2,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 12),
-            _buildTextField(
+            const SizedBox(height: 16),
+            _buildPhotoEvidenceSection(
               c: c,
-              controller: vm.observacionesController,
-              label: 'Observaciones',
-              hint: 'Observaciones generales del gasfitero...',
-              maxLines: 2,
+              title: 'Fotos del problema',
+              photos: vm.fotosProblema,
+              onAdd: vm.takeFotoProblema,
+              onRemove: vm.removeFotoProblema,
             ),
             const SizedBox(height: 16),
             _buildPhotoEvidenceSection(
@@ -224,16 +304,47 @@ class _OsExecutionBody extends StatelessWidget {
               onAdd: vm.takeFotoSolucion,
               onRemove: vm.removeFotoSolucion,
             ),
-            const SizedBox(height: 12),
-            _buildEditableFechaPicker(
-              context,
-              c,
-              'Fecha Hora Fin',
-              vm.fechaFin,
-              vm.updateFechaFin,
-              minimumDateTime: vm.fechaInicio ?? DateTime.now(),
-              mustBeAfterMinimum: true,
-            ),
+            const SizedBox(height: 16),
+            if (vm.fechaFin == null) ...[
+              _buildBigActionButton(
+                c: c,
+                icon: Icons.stop_circle_outlined,
+                label: 'FINALIZAR TAREA AHORA',
+                onPressed: vm.finalizarAhora,
+                isPrimary: false,
+              ),
+              const SizedBox(height: 16),
+            ] else ...[
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: c.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: c.border),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.stop_circle, color: c.primary, size: 20),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Hora de Finalización', style: TextStyle(color: c.primary, fontSize: 11, fontWeight: FontWeight.bold)),
+                          Text(DateFormat('dd/MM/yyyy HH:mm').format(vm.fechaFin!), style: TextStyle(color: c.onSurface, fontWeight: FontWeight.bold, fontSize: 14)),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.refresh, color: c.primary),
+                      onPressed: vm.finalizarAhora,
+                      tooltip: 'Actualizar hora fin',
+                    )
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
             if (vm.errorMsg != null) ...[
               const SizedBox(height: 12),
               Text(
@@ -385,6 +496,41 @@ class _OsExecutionBody extends StatelessWidget {
       title: 'Responsables',
       c: c,
       fields: fields,
+    );
+  }
+
+  Widget _buildBigActionButton({
+    required AppColors c,
+    required IconData icon,
+    required String label,
+    required VoidCallback onPressed,
+    required bool isPrimary,
+  }) {
+    return SizedBox(
+      width: double.infinity,
+      height: 54,
+      child: ElevatedButton.icon(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: isPrimary ? c.primary : c.surface,
+          foregroundColor: isPrimary ? c.onPrimary : c.primary,
+          elevation: isPrimary ? 2 : 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: isPrimary ? BorderSide.none : BorderSide(color: c.primary),
+          ),
+        ),
+        onPressed: onPressed,
+        icon: Icon(icon, size: 22),
+        label: Text(
+          label,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Outfit',
+            letterSpacing: 0.5,
+          ),
+        ),
+      ),
     );
   }
 

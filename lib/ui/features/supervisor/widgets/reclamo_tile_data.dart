@@ -8,6 +8,7 @@ class ReclamoTileData {
   final String? nombreSolicitante;
   final String? direccion;
   final String? tipoProblema;
+  final String? tipoProblemaDescripcion;
   final String? formato;
   final String? codigoSolicitud;
   final String? descripcion;
@@ -21,6 +22,7 @@ class ReclamoTileData {
     this.nombreSolicitante,
     this.direccion,
     this.tipoProblema,
+    this.tipoProblemaDescripcion,
     this.formato,
     this.codigoSolicitud,
     this.descripcion,
@@ -28,7 +30,11 @@ class ReclamoTileData {
     this.onTap,
   });
 
-  factory ReclamoTileData.fromReclamo(Reclamo r, {VoidCallback? onTap}) {
+  factory ReclamoTileData.fromReclamo(
+    Reclamo r, {
+    String? tipoProblemaDescripcion,
+    VoidCallback? onTap,
+  }) {
     return ReclamoTileData(
       id: r.id,
       estado: r.estado,
@@ -36,6 +42,7 @@ class ReclamoTileData {
       nombreSolicitante: r.nombreSolicitante,
       direccion: r.direccion,
       tipoProblema: r.tipoProblema,
+      tipoProblemaDescripcion: tipoProblemaDescripcion,
       formato: r.formato,
       codigoSolicitud: r.codigoSolicitud,
       descripcion: r.descripcion,

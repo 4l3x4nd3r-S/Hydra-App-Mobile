@@ -126,26 +126,42 @@ class ReclamoListTile extends StatelessWidget {
               ),
               const SizedBox(height: 10),
 
-              // Tipo Problema (chip secundario)
+              // Tipo de problema y significado configurado en el catálogo.
               if (data.tipoProblema != null)
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: c.primary.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(6),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: c.primary.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: data.tipoProblema!.toUpperCase(),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        if (data.tipoProblemaDescripcion?.trim().isNotEmpty ??
+                            false)
+                          TextSpan(
+                            text: ' · ${data.tipoProblemaDescripcion}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                      ],
                     ),
-                    child: Text(
-                      (data.tipoProblema ?? '').toUpperCase(),
-                      style: TextStyle(
-                        color: c.primary,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Inter',
-                        letterSpacing: 0.4,
-                      ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: c.primary,
+                      fontSize: 10.5,
+                      fontFamily: 'Inter',
+                      height: 1.3,
+                      letterSpacing: 0.3,
                     ),
                   ),
                 ),

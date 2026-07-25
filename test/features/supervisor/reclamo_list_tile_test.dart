@@ -5,7 +5,11 @@ import 'package:hydra/ui/features/supervisor/widgets/reclamo_list_tile.dart';
 import 'package:hydra/ui/features/supervisor/widgets/reclamo_tile_data.dart';
 
 void main() {
-  Widget construirTarjeta({String? codigoSolicitud}) {
+  Widget construirTarjeta({
+    String? codigoSolicitud,
+    String? tipoProblema,
+    String? tipoProblemaDescripcion,
+  }) {
     return MaterialApp(
       home: Scaffold(
         body: ReclamoListTile(
@@ -13,6 +17,8 @@ void main() {
           data: ReclamoTileData(
             id: 2026,
             codigoSolicitud: codigoSolicitud,
+            tipoProblema: tipoProblema,
+            tipoProblemaDescripcion: tipoProblemaDescripcion,
           ),
         ),
       ),
@@ -32,5 +38,16 @@ void main() {
 
     expect(find.text('Solicitud N° -----'), findsOneWidget);
     expect(find.text('Solicitud N° 2026'), findsNothing);
+  });
+
+  testWidgets('muestra el significado del tipo de problema', (tester) async {
+    await tester.pumpWidget(
+      construirTarjeta(
+        tipoProblema: 'OP-1',
+        tipoProblemaDescripcion: 'Obras inconclusas',
+      ),
+    );
+
+    expect(find.text('OP-1 · Obras inconclusas'), findsOneWidget);
   });
 }
