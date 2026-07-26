@@ -76,12 +76,47 @@ class _OsExecutionBody extends StatelessWidget {
               ),
               const SizedBox(height: 16),
             ],
-            _buildReclamoSection(c, os),
-            const SizedBox(height: 12),
-            _buildCuadrillaSection(c, os),
-            const SizedBox(height: 12),
-            _buildResponsablesSection(c, os),
-            const SizedBox(height: 12),
+            Theme(
+              data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+              child: ExpansionTile(
+                title: Text(
+                  'Ver Detalles de la Orden',
+                  style: TextStyle(
+                      color: c.primary,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14),
+                ),
+                iconColor: c.primary,
+                collapsedIconColor: c.primary,
+                tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                childrenPadding: const EdgeInsets.only(bottom: 16),
+                collapsedBackgroundColor: c.surface,
+                backgroundColor: c.surface,
+                collapsedShape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: c.border),
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: c.primary),
+                ),
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Column(
+                      children: [
+                        _buildReclamoSection(c, os),
+                        const SizedBox(height: 12),
+                        _buildCuadrillaSection(c, os),
+                        const SizedBox(height: 12),
+                        _buildResponsablesSection(c, os),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
             OsDetailActionButton(
               icon: Icons.location_on_outlined,
               label: vm.isLocating ? 'Obteniendo...' : 'Grabar ubicacion',
