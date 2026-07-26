@@ -59,23 +59,21 @@ class _OsExecutionBody extends StatelessWidget {
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (vm.isDraftLoaded) ...[
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: LinearProgressIndicator(
-                  value: vm.progress,
-                  backgroundColor: c.primary.withValues(alpha: 0.1),
-                  valueColor: AlwaysStoppedAnimation<Color>(c.primary),
-                  minHeight: 6,
-                ),
-              ),
-              const SizedBox(height: 16),
-            ],
+      body: Column(
+        children: [
+          if (vm.isDraftLoaded)
+            LinearProgressIndicator(
+              value: vm.progress,
+              backgroundColor: c.primary.withValues(alpha: 0.1),
+              valueColor: AlwaysStoppedAnimation<Color>(c.primary),
+              minHeight: 6,
+            ),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
             Theme(
               data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
               child: ExpansionTile(
@@ -117,11 +115,36 @@ class _OsExecutionBody extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
+            if (vm.fechaInicio == null) ...[
+              _buildBigActionButton(
+                c: c,
+                icon: Icons.play_arrow_rounded,
+                label: 'INICIAR TAREA AHORA',
+                onPressed: vm.iniciarAhora,
+                isPrimary: true,
+              ),
+              const SizedBox(height: 16),
+            ] else ...[
+              _buildEditableTimePicker(
+                context,
+                c,
+                'Hora de Inicio',
+                vm.fechaInicio,
+                (date) {
+                  vm.updateFechaInicio(date);
+                  return true;
+                },
+                baseDate: vm.fechaInicio ?? DateTime.now(),
+                hasError: vm.showValidationErrors && vm.fechaInicio == null,
+              ),
+              const SizedBox(height: 16),
+            ],
             OsDetailActionButton(
               icon: Icons.location_on_outlined,
-              label: vm.isLocating ? 'Obteniendo...' : 'Grabar ubicacion',
+              label: vm.isLocating ? 'Obteniendo...' : 'Registrar ubicacion',
               onPressed: vm.isLocating ? null : () => vm.recordLocation(),
               c: c,
+              hasError: vm.showValidationErrors && vm.latitud == null,
             ),
             if (vm.lastLocationError != null) ...[
               const SizedBox(height: 8),
@@ -222,45 +245,23 @@ class _OsExecutionBody extends StatelessWidget {
               ),
             ],
             const SizedBox(height: 16),
-            if (vm.fechaInicio == null) ...[
-              _buildBigActionButton(
-                c: c,
-                icon: Icons.play_arrow_rounded,
-                label: 'INICIAR TAREA AHORA',
-                onPressed: vm.iniciarAhora,
-                isPrimary: true,
-              ),
-              const SizedBox(height: 16),
-            ] else ...[
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color: c.surface,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: c.border),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.play_circle_outline, color: c.primary, size: 20),
-                    const SizedBox(width: 10),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Hora de Inicio', style: TextStyle(color: c.primary, fontSize: 11, fontWeight: FontWeight.bold)),
-                        Text(DateFormat('dd/MM/yyyy HH:mm').format(vm.fechaInicio!), style: TextStyle(color: c.onSurface, fontWeight: FontWeight.bold, fontSize: 14)),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-            ],
+            _buildPhotoEvidenceSection(
+              c: c,
+              title: 'Fotos del problema',
+              photos: vm.fotosProblema,
+              onAdd: vm.takeFotoProblema,
+              onRemove: vm.removeFotoProblema,
+              firstPhotoLabel: 'AÑADIR FOTO',
+              hasError: vm.showValidationErrors && vm.fotosProblema.isEmpty,
+            ),
+            const SizedBox(height: 16),
             _buildTextField(
               c: c,
               controller: vm.trabajoEjecutadoController,
               label: 'Trabajo ejecutado (Obligatorio)',
               hint: 'Describa el trabajo ejecutado...',
               maxLines: 3,
+              hasError: vm.showValidationErrors && vm.trabajoEjecutadoController.text.trim().isEmpty,
             ),
             const SizedBox(height: 12),
             _buildTextField(
@@ -274,11 +275,11 @@ class _OsExecutionBody extends StatelessWidget {
             Theme(
               data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
               child: ExpansionTile(
-                title: Text('Campos Adicionales (Opcional)', style: TextStyle(color: c.primary, fontWeight: FontWeight.bold, fontSize: 14)),
+                title: Text('Información Adicional (Opcional)', style: TextStyle(color: c.primary, fontWeight: FontWeight.bold, fontSize: 14)),
                 iconColor: c.primary,
                 collapsedIconColor: c.primary,
                 tilePadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
-                childrenPadding: const EdgeInsets.only(bottom: 12),
+                childrenPadding: const EdgeInsets.only(top: 12, bottom: 12),
                 collapsedShape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                   side: BorderSide(color: c.border),
@@ -326,60 +327,28 @@ class _OsExecutionBody extends StatelessWidget {
             const SizedBox(height: 16),
             _buildPhotoEvidenceSection(
               c: c,
-              title: 'Fotos del problema',
-              photos: vm.fotosProblema,
-              onAdd: vm.takeFotoProblema,
-              onRemove: vm.removeFotoProblema,
-            ),
-            const SizedBox(height: 16),
-            _buildPhotoEvidenceSection(
-              c: c,
               title: 'Fotos de la solución',
               photos: vm.fotosSolucion,
               onAdd: vm.takeFotoSolucion,
               onRemove: vm.removeFotoSolucion,
+              firstPhotoLabel: 'AÑADIR FOTO',
+              hasError: vm.showValidationErrors && vm.fotosSolucion.isEmpty,
             ),
             const SizedBox(height: 16),
-            if (vm.fechaFin == null) ...[
-              _buildBigActionButton(
-                c: c,
-                icon: Icons.stop_circle_outlined,
-                label: 'FINALIZAR TAREA AHORA',
-                onPressed: vm.finalizarAhora,
-                isPrimary: false,
-              ),
-              const SizedBox(height: 16),
-            ] else ...[
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color: c.surface,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: c.border),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.stop_circle, color: c.primary, size: 20),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Hora de Finalización', style: TextStyle(color: c.primary, fontSize: 11, fontWeight: FontWeight.bold)),
-                          Text(DateFormat('dd/MM/yyyy HH:mm').format(vm.fechaFin!), style: TextStyle(color: c.onSurface, fontWeight: FontWeight.bold, fontSize: 14)),
-                        ],
-                      ),
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.refresh, color: c.primary),
-                      onPressed: vm.finalizarAhora,
-                      tooltip: 'Actualizar hora fin',
-                    )
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-            ],
+            _buildEditableTimePicker(
+              context,
+              c,
+              'Hora de Finalización',
+              vm.fechaFin,
+              (date) {
+                vm.updateFechaFin(date);
+                return true;
+              },
+              baseDate: vm.fechaFin ?? DateTime.now(),
+              minimumDate: vm.fechaInicio,
+              hasError: vm.showValidationErrors && vm.fechaFin == null,
+            ),
+            const SizedBox(height: 16),
             if (vm.errorMsg != null) ...[
               const SizedBox(height: 12),
               Text(
@@ -428,19 +397,31 @@ class _OsExecutionBody extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      onPressed: () async {
+                      onPressed: vm.isSubmitting ? null : () async {
                         final ok = await vm.submit();
                         if (ok && context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'O.S. guardada en el dispositivo. Se enviará cuando haya conexión.',
+                          if (vm.errorMsg == null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'O.S. finalizada y subida al sistema correctamente.',
+                                ),
+                                backgroundColor: Color(0xFF10B981), // Verde éxito
                               ),
-                              backgroundColor: Color(0xFFF59E0B),
-                            ),
-                          );
-                          Navigator.pop(context);
+                            );
+                            Navigator.pop(context);
+                          } else {
+                            // Se guardó offline pero no se pudo subir de inmediato
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(vm.errorMsg!),
+                                backgroundColor: const Color(0xFFF59E0B),
+                              ),
+                            );
+                            Navigator.pop(context);
+                          }
                         } else if (context.mounted && vm.errorMsg != null) {
+                          // Error de validación local
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(vm.errorMsg!),
@@ -449,16 +430,25 @@ class _OsExecutionBody extends StatelessWidget {
                           );
                         }
                       },
-                      child: Text(
-                        'GUARDAR Y FINALIZAR',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: c.onPrimary,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                          fontFamily: 'Outfit',
-                        ),
-                      ),
+                      child: vm.isSubmitting
+                          ? SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                color: c.onPrimary,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : Text(
+                              'FINALIZAR TAREA',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: c.onPrimary,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                                fontFamily: 'Outfit',
+                              ),
+                            ),
                     ),
                   ),
                 ),
@@ -468,7 +458,19 @@ class _OsExecutionBody extends StatelessWidget {
           ],
         ),
       ),
+    ),
+    ],
+    ),
     );
+  }
+
+  String _getTipoProblemaLabel(String? code) {
+    if (code == null || code.isEmpty) return '';
+    final map = {
+      'B6': 'Alcantarillado · Atoro',
+      'OP-1': 'Obras inconclusas',
+    };
+    return map.containsKey(code) ? '$code - ${map[code]}' : code;
   }
 
   Widget _buildReclamoSection(AppColors c, Os os) {
@@ -477,11 +479,11 @@ class _OsExecutionBody extends StatelessWidget {
       title: 'Inf. de Reclamo',
       c: c,
       fields: [
-        MapEntry('N° de O.S.', os.numeroOrden ?? ''),
+        MapEntry('Cód. Solicitud', r?.codigoSolicitud ?? ''),
         MapEntry('Formato', r?.formato ?? ''),
         MapEntry(
           'Tipo',
-          r?.tipoProblema ?? '',
+          _getTipoProblemaLabel(r?.tipoProblema),
         ),
         MapEntry('Suministro', r?.numeroSuministro ?? ''),
         MapEntry('Telefono', r?.telefono ?? ''),
@@ -569,92 +571,110 @@ class _OsExecutionBody extends StatelessWidget {
     );
   }
 
-  Widget _buildEditableFechaPicker(
+  Widget _buildEditableTimePicker(
     BuildContext context,
     AppColors c,
     String label,
     DateTime? date,
     bool Function(DateTime) onChanged, {
-    required DateTime minimumDateTime,
-    bool mustBeAfterMinimum = false,
+    required DateTime baseDate,
+    DateTime? minimumDate,
+    bool hasError = false,
   }) {
-    final dateStr =
-        date != null ? DateFormat('yyyy-MM-dd HH:mm').format(date) : '-';
+    final hasDate = date != null;
+    final timeStr = hasDate ? DateFormat('hh:mm a').format(date) : 'Tocar para seleccionar hora';
     return InkWell(
       onTap: () async {
-        final now = DateTime.now();
-        final today = DateTime(now.year, now.month, now.day);
-        final minimumDay = DateTime(
-          minimumDateTime.year,
-          minimumDateTime.month,
-          minimumDateTime.day,
-        );
-        final firstDate = minimumDay.isAfter(today) ? minimumDay : today;
-        final selectedInitialDate =
-            date == null || date.isBefore(firstDate) ? firstDate : date;
-        final d = await showDatePicker(
+        final t = await showTimePicker(
           context: context,
-          initialDate: selectedInitialDate,
-          firstDate: firstDate,
-          lastDate: DateTime(2030),
+          initialTime: TimeOfDay.fromDateTime(date ?? DateTime.now()),
         );
-        if (d != null && context.mounted) {
-          final t = await showTimePicker(
-            context: context,
-            initialTime: TimeOfDay.fromDateTime(date ?? DateTime.now()),
-          );
-          if (t != null) {
-            if (!context.mounted) return;
-            final combined = DateTime(d.year, d.month, d.day, t.hour, t.minute);
-            final minimumMinute = DateTime(
-              minimumDateTime.year,
-              minimumDateTime.month,
-              minimumDateTime.day,
-              minimumDateTime.hour,
-              minimumDateTime.minute,
-            );
-            final isInvalid = mustBeAfterMinimum
-                ? !combined.isAfter(minimumMinute)
-                : combined.isBefore(minimumMinute);
-            if (isInvalid) {
-              final message = mustBeAfterMinimum
-                  ? 'La finalización debe ser posterior al inicio.'
-                  : 'No puede seleccionar una fecha u hora pasada.';
+        if (t != null && context.mounted) {
+          final combined = DateTime(
+              baseDate.year, baseDate.month, baseDate.day, t.hour, t.minute);
+          
+          if (minimumDate != null) {
+            if (!combined.isAfter(minimumDate)) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(message)),
+                const SnackBar(content: Text('La finalización debe ser posterior al inicio.')),
               );
               return;
             }
-            onChanged(combined);
           }
+          onChanged(combined);
         }
       },
       borderRadius: BorderRadius.circular(12),
-      child: InputDecorator(
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: TextStyle(
-              color: c.primary, fontWeight: FontWeight.bold, fontSize: 13),
-          filled: true,
-          fillColor: c.surface,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: c.border),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: c.border),
-          ),
-          suffixIcon:
-              Icon(Icons.edit_calendar_rounded, color: c.primary, size: 20),
-          floatingLabelBehavior: FloatingLabelBehavior.always,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: hasError ? const Color(0xFFFEF2F2) : c.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: hasError ? const Color(0xFFDC2626) : c.border),
         ),
-        child: Text(
-          dateStr,
-          style: TextStyle(
-              color: c.onSurface, fontSize: 14, fontWeight: FontWeight.w500),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: c.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(Icons.access_time_rounded, color: c.primary, size: 20),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      color: c.onSurfaceVariant,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  if (hasDate)
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Text(
+                          timeStr,
+                          style: TextStyle(
+                            color: c.onSurface,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Outfit',
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${date!.day} de ${['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'][date.month - 1]}',
+                          style: TextStyle(
+                            color: c.onSurfaceVariant.withValues(alpha: 0.8),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    )
+                  else
+                    Text(
+                      timeStr,
+                      style: TextStyle(
+                        color: c.onSurfaceVariant,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            Icon(Icons.edit_outlined, color: c.primary, size: 20),
+          ],
         ),
       ),
     );
@@ -666,6 +686,8 @@ class _OsExecutionBody extends StatelessWidget {
     required List<String> photos,
     required VoidCallback onAdd,
     required ValueChanged<int> onRemove,
+    required String firstPhotoLabel,
+    bool hasError = false,
   }) {
     final photoLabel = photos.length == 1 ? '1 foto' : '${photos.length} fotos';
 
@@ -726,10 +748,10 @@ class _OsExecutionBody extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 18),
                 decoration: BoxDecoration(
-                  color: c.primary.withValues(alpha: 0.05),
+                  color: hasError ? const Color(0xFFFEF2F2) : c.primary.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: c.primary.withValues(alpha: 0.45),
+                    color: hasError ? const Color(0xFFDC2626) : c.primary.withValues(alpha: 0.45),
                   ),
                 ),
                 child: Column(
@@ -741,7 +763,7 @@ class _OsExecutionBody extends StatelessWidget {
                     ),
                     const SizedBox(height: 7),
                     Text(
-                      'TOMAR PRIMERA FOTO',
+                      firstPhotoLabel,
                       style: TextStyle(
                         color: c.primary,
                         fontFamily: 'Outfit',
@@ -1055,35 +1077,60 @@ class _OsExecutionBody extends StatelessWidget {
     required String label,
     String? hint,
     int maxLines = 1,
+    bool hasError = false,
+    int maxLength = 250,
   }) {
-    return TextField(
-      controller: controller,
-      maxLines: maxLines,
-      style: TextStyle(color: c.onSurface, fontSize: 13),
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        labelStyle: TextStyle(
-            color: c.primary, fontWeight: FontWeight.bold, fontSize: 13),
-        hintStyle: TextStyle(color: c.onSurfaceVariant.withValues(alpha: 0.5)),
-        filled: true,
-        fillColor: c.surface,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: c.border),
+    return Stack(
+      children: [
+        TextField(
+          controller: controller,
+          maxLines: maxLines,
+          maxLength: maxLength,
+          buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
+          style: TextStyle(color: c.onSurface, fontSize: 13),
+          decoration: InputDecoration(
+            labelText: label,
+            hintText: hint,
+            labelStyle: TextStyle(
+                color: hasError ? const Color(0xFFDC2626) : c.primary, fontWeight: FontWeight.bold, fontSize: 13),
+            hintStyle: TextStyle(color: c.onSurfaceVariant.withValues(alpha: 0.5)),
+            filled: true,
+            fillColor: hasError ? const Color(0xFFFEF2F2) : c.surface,
+            contentPadding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: hasError ? const Color(0xFFDC2626) : c.border),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: hasError ? const Color(0xFFDC2626) : c.border),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: hasError ? const Color(0xFFDC2626) : c.primary, width: 1.5),
+            ),
+            floatingLabelBehavior: FloatingLabelBehavior.always,
+          ),
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: c.border),
+        Positioned(
+          bottom: 10,
+          right: 14,
+          child: ValueListenableBuilder<TextEditingValue>(
+            valueListenable: controller,
+            builder: (context, value, child) {
+              return Text(
+                '${value.text.length}/$maxLength',
+                style: TextStyle(
+                  color: c.onSurfaceVariant.withValues(alpha: 0.6),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Outfit',
+                ),
+              );
+            },
+          ),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: c.primary, width: 1.5),
-        ),
-        floatingLabelBehavior: FloatingLabelBehavior.always,
-      ),
+      ],
     );
   }
 }

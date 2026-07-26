@@ -184,8 +184,8 @@ class OsRepository {
               'comentarios_instrucciones': report['comentarios_instrucciones'],
               'latitud': report['latitud'],
               'longitud': report['longitud'],
-              'fotos_problema_urls': fotosProblema,
-              'fotos_solucion_urls': fotosSolucion,
+              'fotos_problema_urls': fotosProblema ?? [],
+              'fotos_solucion_urls': fotosSolucion ?? [],
               'fecha_ejecucion_inicio': report['fecha_ejecucion_inicio'],
               'fecha_ejecucion_fin': report['fecha_ejecucion_fin'],
             },
@@ -271,22 +271,28 @@ class OsRepository {
     if (rawPaths == null || rawPaths.trim().isEmpty) return null;
 
     final photos = rawPaths.split(',');
-    for (var i = 0; i < photos.length; i++) {
-      final path = photos[i];
-      if (path.startsWith('/uploads') || path.startsWith('http')) continue;
+    
+    final uploadTasks = photos.map((path) async {
+      if (path.startsWith('/uploads') || path.startsWith('http')) {
+        return path;
+      }
       final uploadedUrl = await uploadImage(path);
       if (uploadedUrl == null) {
         throw StateError('No se pudo subir una fotografía pendiente.');
       }
-      photos[i] = uploadedUrl;
-      final updatedPaths = photos.join(',');
-      if (areProblemPhotos) {
-        await _syncQueueStorage.updatePendingProblemPhotos(osId, updatedPaths);
-      } else {
-        await _syncQueueStorage.updatePendingSolutionPhotos(osId, updatedPaths);
-      }
+      return uploadedUrl;
+    }).toList();
+
+    final uploadedPhotos = await Future.wait(uploadTasks);
+    final updatedPaths = uploadedPhotos.join(',');
+
+    if (areProblemPhotos) {
+      await _syncQueueStorage.updatePendingProblemPhotos(osId, updatedPaths);
+    } else {
+      await _syncQueueStorage.updatePendingSolutionPhotos(osId, updatedPaths);
     }
-    return photos;
+    
+    return uploadedPhotos;
   }
 
   String _describeSyncError(Object error) {
@@ -298,6 +304,10 @@ class OsRepository {
       }
       final statusCode = error.response?.statusCode;
       if (statusCode != null) {
+        if (statusCode == 422) {
+          final data = error.response?.data;
+          return 'Error de validación (422): $data';
+        }
         return 'El servidor rechazó la sincronización (código $statusCode). Inténtelo nuevamente.';
       }
       return 'No se pudo conectar con el servidor. Verifique que HYDRA tenga acceso a internet.';

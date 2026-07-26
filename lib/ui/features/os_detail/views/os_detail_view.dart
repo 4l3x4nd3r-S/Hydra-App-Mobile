@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../data/services/app_environment.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/status_chip.dart';
 import 'package:provider/provider.dart';
 import '../../../../domain/models/os.dart';
 import '../../../core/theme/app_colors.dart';
@@ -77,6 +80,18 @@ class _OsDetailBody extends StatelessWidget {
             color: c.onSurface,
           ),
         ),
+        actions: [
+          if (os.estadoOrden != null)
+            Padding(
+              padding: const EdgeInsets.only(right: 16.0),
+              child: Center(
+                child: Hero(
+                  tag: 'os_status_${os.id}',
+                  child: StatusChip(status: os.estadoOrden!),
+                ),
+              ),
+            ),
+        ],
       ),
       body: Column(
         mainAxisSize: MainAxisSize.min,
@@ -101,14 +116,11 @@ class _OsDetailBody extends StatelessWidget {
                     const SizedBox(height: 12),
                     _buildResponsablesSection(c, os),
                   ],
-                  if (os.fechaEjecucionInicio != null) ...[
-                    _buildFechaInicioSection(c, os, vm),
-                    const SizedBox(height: 12),
-                  ],
+                  // Eliminado: Sección de Fecha Inicio a pedido del usuario
                   if (os.fotosProblemaUrls.isNotEmpty) ...[
                     const SizedBox(height: 12),
                     _buildFotosSection(
-                        c, 'Fotos del problema', os.fotosProblemaUrls),
+                        c, 'Fotos del problema', os.fotosProblemaUrls, context),
                     const SizedBox(height: 12),
                   ],
                   if (os.trabajoEjecutado != null &&
@@ -134,7 +146,7 @@ class _OsDetailBody extends StatelessWidget {
                   if (os.fotosSolucionUrls.isNotEmpty) ...[
                     const SizedBox(height: 12),
                     _buildFotosSection(
-                        c, 'Fotos de la solucion', os.fotosSolucionUrls),
+                        c, 'Fotos de la solucion', os.fotosSolucionUrls, context),
                     const SizedBox(height: 12),
                   ],
                   if (os.fechaEjecucionFin != null) ...[
@@ -304,16 +316,6 @@ class _OsDetailBody extends StatelessWidget {
     );
   }
 
-  Widget _buildFechaInicioSection(AppColors c, Os os, OsDetailViewModel vm) {
-    return OsDetailSection(
-      title: 'Fecha Hora Inicio',
-      c: c,
-      fields: [
-        MapEntry('Fecha Hora Inicio', vm.formatDate(os.fechaEjecucionInicio)),
-      ],
-    );
-  }
-
   Widget _buildTrabajoEjecutadoSection(AppColors c, Os os) {
     return OsDetailSection(
       title: 'Trabajo Ejecutado',
@@ -429,7 +431,7 @@ class _OsDetailBody extends StatelessWidget {
     );
   }
 
-  Widget _buildFotosSection(AppColors c, String title, List<String> urls) {
+  Widget _buildFotosSection(AppColors c, String title, List<String> urls, BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -459,17 +461,35 @@ class _OsDetailBody extends StatelessWidget {
                 padding: const EdgeInsets.only(right: 8.0),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
-                  child: Image.network(
-                    url,
-                    width: 120,
-                    height: 120,
-                    fit: BoxFit.cover,
-                    errorBuilder: (ctx, err, stack) => Container(
-                      width: 120,
-                      height: 120,
-                      color: c.surface,
-                      child: Icon(Icons.broken_image_rounded,
-                          color: c.onSurfaceVariant),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () => _showPhotoPreview(context, url: url, index: index),
+                      child: CachedNetworkImage(
+                        imageUrl: url,
+                        width: 120,
+                        height: 120,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(
+                          width: 120,
+                          height: 120,
+                          color: c.surface,
+                          child: const Center(
+                            child: SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          width: 120,
+                          height: 120,
+                          color: c.surface,
+                          child: Icon(Icons.broken_image_rounded,
+                              color: c.onSurfaceVariant),
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -478,6 +498,129 @@ class _OsDetailBody extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Future<void> _showPhotoPreview(
+    BuildContext context, {
+    required String url,
+    required int index,
+  }) {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      barrierColor: Colors.black.withValues(alpha: 0.88),
+      builder: (dialogContext) {
+        final screenHeight = MediaQuery.sizeOf(dialogContext).height;
+
+        return Dialog(
+          insetPadding:
+              const EdgeInsets.symmetric(horizontal: 14, vertical: 28),
+          backgroundColor: const Color(0xFF0B0B0B),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: SizedBox(
+            width: double.infinity,
+            height: screenHeight * 0.82,
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 10, 8, 8),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Foto ${index + 1}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'Outfit',
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      Semantics(
+                        button: true,
+                        label: 'Cerrar previsualización',
+                        child: TextButton.icon(
+                          onPressed: () => Navigator.of(dialogContext).pop(),
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            backgroundColor:
+                                Colors.white.withValues(alpha: 0.10),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 11,
+                              vertical: 7,
+                            ),
+                          ),
+                          icon: const Icon(Icons.close_rounded, size: 20),
+                          label: const Text(
+                            'Cerrar',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1, color: Color(0xFF2B2B2B)),
+                Expanded(
+                  child: InteractiveViewer(
+                    minScale: 1,
+                    maxScale: 4,
+                    child: Center(
+                      child: CachedNetworkImage(
+                        imageUrl: url,
+                        width: double.infinity,
+                        height: double.infinity,
+                        fit: BoxFit.contain,
+                        placeholder: (context, url) => const Center(
+                          child: CircularProgressIndicator(color: Colors.white),
+                        ),
+                        errorWidget: (context, url, error) => const Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.broken_image_outlined,
+                              color: Colors.white54,
+                              size: 48,
+                            ),
+                            SizedBox(height: 10),
+                            Text(
+                              'No se pudo cargar la imagen',
+                              style: TextStyle(color: Colors.white70),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.pinch_outlined,
+                        color: Colors.white60,
+                        size: 17,
+                      ),
+                      SizedBox(width: 7),
+                      Text(
+                        'Pellizca para ampliar la imagen',
+                        style: TextStyle(color: Colors.white60, fontSize: 11),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

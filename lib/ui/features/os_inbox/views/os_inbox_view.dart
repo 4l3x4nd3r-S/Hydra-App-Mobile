@@ -111,6 +111,7 @@ class _OsInboxBody extends StatelessWidget {
                       userName: vm.userName,
                       role: vm.userRole,
                       codigo: vm.userCode,
+                      cuadrilla: vm.cuadrillaNombre,
                     );
                     break;
                   case 'theme':
@@ -206,6 +207,17 @@ class _OsInboxBody extends StatelessWidget {
         isLiderOfOs: vm.canExecuteOs,
         onTapActiva: (os) {
           final isLider = vm.canExecuteOs(os);
+          
+          if (isLider && os.estadoOrden != 'ASIGNADO') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => OsExecutionView(os: os),
+              ),
+            );
+            return;
+          }
+
           Navigator.push(
             context,
             MaterialPageRoute(

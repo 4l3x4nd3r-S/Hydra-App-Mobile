@@ -6,6 +6,7 @@ class OsDetailActionButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
   final AppColors c;
+  final bool hasError;
 
   const OsDetailActionButton({
     super.key,
@@ -13,6 +14,7 @@ class OsDetailActionButton extends StatelessWidget {
     required this.label,
     required this.onPressed,
     required this.c,
+    this.hasError = false,
   });
 
   @override
@@ -24,8 +26,10 @@ class OsDetailActionButton extends StatelessWidget {
         height: 44,
         child: OutlinedButton.icon(
           style: OutlinedButton.styleFrom(
-            foregroundColor: c.primary,
-            side: BorderSide(color: c.primary.withValues(alpha: 0.4)),
+            backgroundColor: hasError ? const Color(0xFFFEF2F2) : Colors.transparent,
+            foregroundColor: hasError ? const Color(0xFFDC2626) : c.primary,
+            side: BorderSide(
+                color: hasError ? const Color(0xFFDC2626) : c.primary.withValues(alpha: 0.4)),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),

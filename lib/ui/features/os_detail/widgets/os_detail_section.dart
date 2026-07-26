@@ -278,6 +278,7 @@ class OsDetailSection extends StatelessWidget {
     final key = label.toLowerCase();
     const halfWidthFields = {
       'n° de o.s.',
+      'cód. solicitud',
       'código de solicitud',
       'formato',
       'telefono',

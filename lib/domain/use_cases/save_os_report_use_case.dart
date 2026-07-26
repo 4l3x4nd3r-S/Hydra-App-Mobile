@@ -40,8 +40,7 @@ class SaveOsReportUseCase {
       fechaEjecucionInicio: fechaEjecucionInicio,
       fechaEjecucionFin: fechaEjecucionFin,
     );
-    // El guardado local es la confirmación principal para el trabajador.
-    // La red nunca debe mantener bloqueado el formulario en campo.
-    unawaited(_osRepository.triggerSync());
+    // Se espera la sincronización para subir al sistema de inmediato si hay red.
+    await _osRepository.triggerSync();
   }
 }

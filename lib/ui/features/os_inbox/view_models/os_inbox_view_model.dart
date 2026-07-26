@@ -94,6 +94,17 @@ class OsInboxViewModel extends ChangeNotifier {
   String? get userCode => _userCode;
   int? get currentUserId => _currentUserId;
 
+  String? get cuadrillaNombre {
+    for (final os in _osList) {
+      if (os.cuadrilla != null) {
+        final cod = os.cuadrilla!.codigoGrupo ?? os.cuadrilla!.id.toString();
+        final codeClean = cod.replaceFirst(RegExp(r'^Cuadrilla\s+', caseSensitive: false), '');
+        return '$codeClean · ${os.cuadrilla!.especialidad ?? "Sin especialidad"}';
+      }
+    }
+    return null;
+  }
+
   bool canExecuteOs(Os os) {
     if (_currentUserId == null) return false;
 

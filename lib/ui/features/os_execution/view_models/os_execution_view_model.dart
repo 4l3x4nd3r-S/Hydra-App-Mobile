@@ -46,11 +46,18 @@ class OsExecutionViewModel extends ChangeNotifier {
   String? _errorMsg;
   LocationError? _lastLocationError;
 
+  bool _showValidationErrors = false;
+  bool get showValidationErrors => _showValidationErrors;
+
   String? get errorMsg => _errorMsg;
   LocationError? get lastLocationError => _lastLocationError;
 
   bool _isDraftLoaded = false;
   bool get isDraftLoaded => _isDraftLoaded;
+
+  bool _isSubmitting = false;
+  bool get isSubmitting => _isSubmitting;
+
 
   OsExecutionViewModel({
     required this.os,
@@ -123,12 +130,13 @@ class OsExecutionViewModel extends ChangeNotifier {
   }
 
   double get progress {
-    int total = 5;
+    int total = 6;
     int completed = 0;
     if (fechaInicio != null) completed++;
     if (trabajoEjecutadoController.text.trim().isNotEmpty) completed++;
     if (latitud != null && longitud != null) completed++;
-    if (_fotosProblema.isNotEmpty || _fotosSolucion.isNotEmpty) completed++;
+    if (_fotosProblema.isNotEmpty) completed++;
+    if (_fotosSolucion.isNotEmpty) completed++;
     if (fechaFin != null) completed++;
     return completed / total;
   }
@@ -156,6 +164,25 @@ class OsExecutionViewModel extends ChangeNotifier {
 
   void iniciarAhora() {
     fechaInicio = DateTime.now();
+    saveDraft();
+    notifyListeners();
+  }
+
+  void updateFechaInicio(DateTime date) {
+    fechaInicio = date;
+    _errorMsg = null;
+    saveDraft();
+    notifyListeners();
+  }
+
+  void updateFechaFin(DateTime date) {
+    if (fechaInicio != null && date.isBefore(fechaInicio!)) {
+      _errorMsg = 'La finalización no puede ser anterior al inicio';
+      notifyListeners();
+      return;
+    }
+    fechaFin = date;
+    _errorMsg = null;
     saveDraft();
     notifyListeners();
   }
@@ -224,7 +251,11 @@ class OsExecutionViewModel extends ChangeNotifier {
 
   Future<void> takeFotoProblema() async {
     try {
-      final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
+      final XFile? photo = await _picker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 60,
+        maxWidth: 1600,
+      );
       if (photo != null) {
         _fotosProblema.add(photo.path);
         _errorMsg = null;
@@ -239,7 +270,11 @@ class OsExecutionViewModel extends ChangeNotifier {
 
   Future<void> takeFotoSolucion() async {
     try {
-      final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
+      final XFile? photo = await _picker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 60,
+        maxWidth: 1600,
+      );
       if (photo != null) {
         _fotosSolucion.add(photo.path);
         _errorMsg = null;
@@ -267,24 +302,34 @@ class OsExecutionViewModel extends ChangeNotifier {
   }
 
   Future<bool> submit() async {
-    if (trabajoEjecutadoController.text.trim().isEmpty) {
-      _errorMsg = 'Debe ingresar el trabajo ejecutado';
+    final missing = <String>[];
+
+    if (fechaInicio == null) missing.add('Fecha de inicio');
+    if (latitud == null || longitud == null) missing.add('Ubicación');
+    if (_fotosProblema.isEmpty) missing.add('Fotos del problema');
+    if (trabajoEjecutadoController.text.trim().isEmpty) missing.add('Trabajo ejecutado');
+    if (_fotosSolucion.isEmpty) missing.add('Fotos de la solución');
+    if (fechaFin == null) missing.add('Fecha de finalización');
+
+    if (missing.isNotEmpty) {
+      _showValidationErrors = true;
+      _errorMsg = 'Debe completar los campos resaltados en rojo.';
       notifyListeners();
       return false;
     }
 
-    if (fechaInicio == null) {
-      _errorMsg = 'Debe registrar la fecha y hora de inicio';
-      notifyListeners();
-      return false;
-    }
+    _showValidationErrors = false;
 
-    if (fechaFin == null || !fechaFin!.isAfter(fechaInicio!)) {
+    if (!fechaFin!.isAfter(fechaInicio!)) {
       _errorMsg =
           'La finalización debe ser posterior a la fecha y hora de inicio';
       notifyListeners();
       return false;
     }
+
+    _isSubmitting = true;
+    _errorMsg = null;
+    notifyListeners();
 
     try {
       await _saveOsReportUseCase(
@@ -307,14 +352,20 @@ class OsExecutionViewModel extends ChangeNotifier {
         fechaEjecucionFin: fechaFin?.toUtc().toIso8601String(),
       );
 
-      // Si todo fue exitoso, limpiamos el borrador local
+      // Si todo fue exitoso y la sincronización no arrojó excepción no capturada
+      // borramos el draft
       await _syncQueueStorageService.deleteDraft(os.id);
 
+      _isSubmitting = false;
+      notifyListeners();
       return true;
     } catch (e) {
-      _errorMsg = 'Error al guardar reporte';
+      _isSubmitting = false;
+      _errorMsg = 'No se pudo subir la orden al sistema de inmediato. Se intentará en segundo plano si hay red.';
       notifyListeners();
-      return false;
+      // Retornamos true porque la orden sí se guardó en local y se intentará reenviar.
+      // Así el usuario puede continuar.
+      return true;
     }
   }
 

@@ -73,7 +73,10 @@ class _ReclamoDetalleBodyState extends State<_ReclamoDetalleBody> {
               title: 'INFORMACIÓN DEL RECLAMO',
               subtitle: 'Resumen de la solicitud registrada',
               icon: Icons.assignment_outlined,
-              trailing: _buildEstadoChip(c, r.estado ?? 'No disponible'),
+              trailing: Hero(
+                tag: 'reclamo_status_${r.id ?? r.codigoSolicitud}',
+                child: _buildEstadoChip(c, r.estado ?? 'No disponible'),
+              ),
               child: _buildInfoGrid(c, [
                 _DetailItem(
                   icon: Icons.description_outlined,

@@ -397,22 +397,29 @@ class _SupervisorBodyState extends State<_SupervisorBody>
           ),
         ),
         Expanded(
-          child: vm.loadingReclamos
-              ? Center(child: CircularProgressIndicator(color: c.primary))
-              : IndexedStack(
-                  index: _selectedSubTabIndex,
-                  children: [
-                    _buildListaPorEstado(c, vm.reclamosPendientes,
-                        'No hay reclamos pendientes', Icons.schedule_outlined),
-                    _buildListaPorEstado(
-                        c,
-                        vm.reclamosAsignados,
-                        'No hay reclamos asignados',
-                        Icons.assignment_turned_in_outlined),
-                    _buildListaPorEstado(c, vm.reclamosCerrados,
-                        'No hay reclamos cerrados', Icons.check_circle_outline),
-                  ],
-                ),
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: vm.loadingReclamos
+                ? Center(
+                    key: const ValueKey('loading'),
+                    child: CircularProgressIndicator(color: c.primary),
+                  )
+                : IndexedStack(
+                    key: const ValueKey('content'),
+                    index: _selectedSubTabIndex,
+                    children: [
+                      _buildListaPorEstado(c, vm.reclamosPendientes,
+                          'No hay reclamos pendientes', Icons.schedule_outlined),
+                      _buildListaPorEstado(
+                          c,
+                          vm.reclamosAsignados,
+                          'No hay reclamos asignados',
+                          Icons.assignment_turned_in_outlined),
+                      _buildListaPorEstado(c, vm.reclamosCerrados,
+                          'No hay reclamos cerrados', Icons.check_circle_outline),
+                    ],
+                  ),
+          ),
         ),
       ],
     );
@@ -641,12 +648,14 @@ class _SupervisorBodyState extends State<_SupervisorBody>
             (cu.especialidad ?? '') != 'Alcantarillado')
         .toList();
 
+    Widget content;
     if (vm.loadingCuadrillas) {
-      return Center(child: CircularProgressIndicator(color: c.primary));
-    }
-
-    if (vm.cuadrillas.isEmpty) {
-      return RefreshIndicator(
+      content = Center(
+          key: const ValueKey('loading'),
+          child: CircularProgressIndicator(color: c.primary));
+    } else if (vm.cuadrillas.isEmpty) {
+      content = RefreshIndicator(
+        key: const ValueKey('empty'),
         onRefresh: () async => await vm.cargarTodo(),
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
@@ -671,43 +680,49 @@ class _SupervisorBodyState extends State<_SupervisorBody>
           ],
         ),
       );
+    } else {
+      content = RefreshIndicator(
+        key: const ValueKey('list'),
+        onRefresh: () async => await vm.cargarTodo(),
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+          children: [
+            _buildHeader(c, vm),
+            const SizedBox(height: 16),
+            if (agua.isNotEmpty) ...[
+              _buildSectionLabel('Agua', agua.length, c),
+              const SizedBox(height: 8),
+              ...agua.map((cu) => _buildCuadrillaCard(cu)),
+              const SizedBox(height: 20),
+            ],
+            if (alcantarillado.isNotEmpty) ...[
+              _buildSectionLabel('Alcantarillado', alcantarillado.length, c),
+              const SizedBox(height: 8),
+              ...alcantarillado.map((cu) => _buildCuadrillaCard(cu)),
+              const SizedBox(height: 20),
+            ],
+            if (sinClasificar.isNotEmpty) ...[
+              _buildSectionLabel('Sin clasificar', sinClasificar.length, c),
+              const SizedBox(height: 8),
+              ...sinClasificar.map((cu) => _buildCuadrillaCard(cu)),
+            ],
+            if (agua.isEmpty && alcantarillado.isEmpty && sinClasificar.isEmpty) ...[
+              const SizedBox(height: 24),
+              Center(
+                child: Text(
+                  'Aún no hay cuadrillas con especialidad asignada',
+                  style: TextStyle(color: c.onSurfaceVariant, fontSize: 12),
+                ),
+              ),
+            ],
+          ],
+        ),
+      );
     }
 
-    return RefreshIndicator(
-      onRefresh: () async => await vm.cargarTodo(),
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-        children: [
-          _buildHeader(c, vm),
-          const SizedBox(height: 16),
-          if (agua.isNotEmpty) ...[
-            _buildSectionLabel('Agua', agua.length, c),
-            const SizedBox(height: 8),
-            ...agua.map((cu) => _buildCuadrillaCard(cu)),
-            const SizedBox(height: 20),
-          ],
-          if (alcantarillado.isNotEmpty) ...[
-            _buildSectionLabel('Alcantarillado', alcantarillado.length, c),
-            const SizedBox(height: 8),
-            ...alcantarillado.map((cu) => _buildCuadrillaCard(cu)),
-            const SizedBox(height: 20),
-          ],
-          if (sinClasificar.isNotEmpty) ...[
-            _buildSectionLabel('Sin clasificar', sinClasificar.length, c),
-            const SizedBox(height: 8),
-            ...sinClasificar.map((cu) => _buildCuadrillaCard(cu)),
-          ],
-          if (agua.isEmpty && alcantarillado.isEmpty) ...[
-            const SizedBox(height: 24),
-            Center(
-              child: Text(
-                'Aún no hay cuadrillas con especialidad asignada',
-                style: TextStyle(color: c.onSurfaceVariant, fontSize: 12),
-              ),
-            ),
-          ],
-        ],
-      ),
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      child: content,
     );
   }
 

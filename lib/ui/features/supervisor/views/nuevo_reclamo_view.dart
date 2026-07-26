@@ -88,6 +88,7 @@ class _NuevoReclamoBodyState extends State<_NuevoReclamoBody> {
                 controller: vm.nombreController,
                 label: 'Nombres y Apellidos',
                 hint: 'Ingrese nombres completos',
+                maxLength: 100,
                 error: vm.fieldErrors['nombre_solicitante'],
                 onChanged: (_) => vm.clearFieldError('nombre_solicitante'),
               ),
@@ -122,9 +123,10 @@ class _NuevoReclamoBodyState extends State<_NuevoReclamoBody> {
               _buildTextField(
                 c: c,
                 controller: vm.emailController,
-                label: 'Correo Electr\u00f3nico',
+                label: 'Correo Electrónico',
                 hint: 'ejemplo@correo.com',
                 keyboardType: TextInputType.emailAddress,
+                maxLength: 100,
                 error: vm.fieldErrors['email'],
                 onChanged: (_) => vm.clearFieldError('email'),
               ),
@@ -132,8 +134,9 @@ class _NuevoReclamoBodyState extends State<_NuevoReclamoBody> {
               _buildTextField(
                 c: c,
                 controller: vm.direccionController,
-                label: 'Direcci\u00f3n',
+                label: 'Dirección',
                 hint: 'Av. Principal 123',
+                maxLength: 150,
                 error: vm.fieldErrors['direccion'],
                 onChanged: (_) => vm.clearFieldError('direccion'),
               ),
@@ -380,40 +383,63 @@ class _NuevoReclamoBodyState extends State<_NuevoReclamoBody> {
     String? error,
     ValueChanged<String>? onChanged,
   }) {
-    return TextFormField(
-      controller: controller,
-      style: TextStyle(color: c.onSurface, fontSize: 15),
-      maxLines: 5,
-      maxLength: 500,
-      onChanged: onChanged,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        alignLabelWithHint: true,
-        labelStyle: TextStyle(color: c.onSurfaceVariant, fontSize: 14),
-        hintStyle: TextStyle(
-            color: c.onSurfaceVariant.withValues(alpha: 0.5), fontSize: 13),
-        errorText: error,
-        errorStyle: const TextStyle(color: Color(0xFFDC2626), fontSize: 12),
-        filled: true,
-        fillColor: c.surface,
-        counterStyle: TextStyle(color: c.onSurfaceVariant, fontSize: 11),
-        border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none),
-        enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: c.border)),
-        focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: c.primary)),
-        errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFFDC2626))),
-        focusedErrorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFFDC2626))),
-      ),
+    return Stack(
+      children: [
+        TextFormField(
+          controller: controller,
+          style: TextStyle(color: c.onSurface, fontSize: 15),
+          maxLines: 5,
+          maxLength: 250,
+          onChanged: onChanged,
+          buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
+          decoration: InputDecoration(
+            labelText: label,
+            hintText: hint,
+            alignLabelWithHint: true,
+            labelStyle: TextStyle(color: c.onSurfaceVariant, fontSize: 14),
+            hintStyle: TextStyle(
+                color: c.onSurfaceVariant.withValues(alpha: 0.5), fontSize: 13),
+            errorText: error,
+            errorStyle: const TextStyle(color: Color(0xFFDC2626), fontSize: 12),
+            filled: true,
+            fillColor: c.surface,
+            contentPadding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+            border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none),
+            enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: c.border)),
+            focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: c.primary)),
+            errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Color(0xFFDC2626))),
+            focusedErrorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Color(0xFFDC2626))),
+          ),
+        ),
+        Positioned(
+          bottom: 10,
+          right: 14,
+          child: ValueListenableBuilder<TextEditingValue>(
+            valueListenable: controller,
+            builder: (context, value, child) {
+              return Text(
+                '${value.text.length}/250',
+                style: TextStyle(
+                  color: c.onSurfaceVariant.withValues(alpha: 0.6),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Outfit',
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -584,9 +610,20 @@ class _NuevoReclamoBodyState extends State<_NuevoReclamoBody> {
     required DateTime value,
     required ValueChanged<DateTime> onChanged,
   }) {
-    String formatDateTime(DateTime dt) {
-      return '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
-    }
+    final meses = [
+      'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+    ];
+    final mes = meses[value.month - 1];
+    
+    int hora = value.hour;
+    final minuto = value.minute.toString().padLeft(2, '0');
+    final ampm = hora >= 12 ? 'PM' : 'AM';
+    if (hora == 0) hora = 12;
+    else if (hora > 12) hora -= 12;
+    
+    final timeStr = '$hora:$minuto $ampm';
+    final dateStr = '${value.day} de $mes de ${value.year}';
 
     return InkWell(
       onTap: () async {
@@ -603,34 +640,76 @@ class _NuevoReclamoBodyState extends State<_NuevoReclamoBody> {
           );
           if (time != null) {
             onChanged(DateTime(
-                date.year, date.month, date.day, time.hour, time.minute));
+              date.year,
+              date.month,
+              date.day,
+              time.hour,
+              time.minute,
+            ));
           }
         }
       },
-      child: InputDecorator(
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: TextStyle(color: c.onSurfaceVariant, fontSize: 14),
-          filled: true,
-          fillColor: c.surface,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-          border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none),
-          enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: c.border)),
-          focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: c.border)),
-          suffixIcon: Icon(Icons.calendar_today_rounded,
-              color: c.onSurfaceVariant, size: 20),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: c.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: c.border),
         ),
-        child: Text(
-          formatDateTime(value),
-          style: TextStyle(
-              color: c.onSurface, fontSize: 15, fontWeight: FontWeight.w500),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: c.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(Icons.access_time_rounded, color: c.primary, size: 20),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      color: c.onSurfaceVariant,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text(
+                        timeStr,
+                        style: TextStyle(
+                          color: c.onSurface,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Outfit',
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        dateStr,
+                        style: TextStyle(
+                          color: c.onSurfaceVariant.withValues(alpha: 0.8),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.calendar_today_outlined, color: c.primary, size: 20),
+          ],
         ),
       ),
     );

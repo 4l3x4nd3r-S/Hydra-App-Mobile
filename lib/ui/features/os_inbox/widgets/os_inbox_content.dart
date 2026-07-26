@@ -175,27 +175,34 @@ class _OsInboxContentState extends State<OsInboxContent> {
           ),
         ),
         Expanded(
-          child: widget.isLoading
-              ? Center(child: CircularProgressIndicator(color: c.primary))
-              : IndexedStack(
-                  index: _selectedSubTabIndex,
-                  children: [
-                    _buildListaPorEstado(
-                      c,
-                      widget.osActivas,
-                      'No hay ordenes de servicio activas',
-                      Icons.engineering_outlined,
-                      widget.onTapActiva,
-                    ),
-                    _buildListaPorEstado(
-                      c,
-                      widget.osArchivadas,
-                      'No hay ordenes de servicio archivadas',
-                      Icons.archive_outlined,
-                      widget.onTapArchivada,
-                    ),
-                  ],
-                ),
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: widget.isLoading
+                ? Center(
+                    key: const ValueKey('loading'),
+                    child: CircularProgressIndicator(color: c.primary),
+                  )
+                : IndexedStack(
+                    key: const ValueKey('content'),
+                    index: _selectedSubTabIndex,
+                    children: [
+                      _buildListaPorEstado(
+                        c,
+                        widget.osActivas,
+                        'No hay ordenes de servicio activas',
+                        Icons.engineering_outlined,
+                        widget.onTapActiva,
+                      ),
+                      _buildListaPorEstado(
+                        c,
+                        widget.osArchivadas,
+                        'No hay ordenes de servicio archivadas',
+                        Icons.archive_outlined,
+                        widget.onTapArchivada,
+                      ),
+                    ],
+                  ),
+          ),
         ),
       ],
     );

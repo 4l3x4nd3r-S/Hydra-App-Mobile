@@ -79,7 +79,11 @@ class ReclamoListTile extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                       ],
-                      if (data.estado != null) StatusChip(status: data.estado!),
+                      if (data.estado != null)
+                        Hero(
+                          tag: 'reclamo_status_${data.id ?? data.codigoSolicitud}',
+                          child: StatusChip(status: data.estado!),
+                        ),
                     ],
                   ),
                 ],

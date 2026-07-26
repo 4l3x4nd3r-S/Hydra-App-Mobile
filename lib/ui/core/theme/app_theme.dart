@@ -12,6 +12,12 @@ class AppTheme {
       brightness: brightness,
       scaffoldBackgroundColor: c.background,
       primaryColor: c.primary,
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: ZoomPageTransitionsBuilder(),
+          TargetPlatform.iOS: ZoomPageTransitionsBuilder(),
+        },
+      ),
       colorScheme: isDark
           ? ColorScheme.dark(
               primary: c.primary,
