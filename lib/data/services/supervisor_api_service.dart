@@ -46,14 +46,23 @@ class SupervisorApiService {
     return _apiClient.dio.get('/cuadrillas/$id');
   }
 
+  String _rolBackend(String rol) {
+    switch (rol) {
+      case 'LIDER':  return 'GASFITERO_PRINCIPAL';
+      case 'APOYO':  return 'GASFITERO_APOYO';
+      case 'CHOFER': return 'CHOFER_CAMIONETA';
+      default:       return rol;
+    }
+  }
+
   Future<Response> addPersonal({
     required int cuadrillaId,
     required int usuarioId,
-    String rol = 'APOYO',
+    String rol = 'GASFITERO_APOYO',
   }) async {
     return _apiClient.dio.post(
       '/cuadrillas/$cuadrillaId/personal/$usuarioId',
-      queryParameters: {'rol': rol},
+      queryParameters: {'rol': _rolBackend(rol)},
     );
   }
 
