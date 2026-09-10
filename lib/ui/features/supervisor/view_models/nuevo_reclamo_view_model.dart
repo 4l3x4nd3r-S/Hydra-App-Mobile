@@ -165,9 +165,7 @@ class NuevoReclamoViewModel extends ChangeNotifier {
     } else if (!RegExp(r'^9\d{8}$').hasMatch(telefono)) {
       fieldErrors['telefono'] = 'Debe empezar con 9 y tener 9 dígitos';
     }
-    if (email.isEmpty) {
-      fieldErrors['email'] = 'Requerido';
-    } else if (!RegExp(r'^[^@\s]+@[^@\s]+\.[a-zA-Z]{2,}$').hasMatch(email)) {
+    if (email.isNotEmpty && !RegExp(r'^[^@\s]+@[^@\s]+\.[a-zA-Z]{2,}$').hasMatch(email)) {
       fieldErrors['email'] = 'Email inválido';
     }
     if (direccion.isEmpty) {
@@ -177,10 +175,10 @@ class NuevoReclamoViewModel extends ChangeNotifier {
     }
     if (numeroSuministro.isEmpty) {
       fieldErrors['numero_suministro'] = 'Requerido';
-    } else if (!RegExp(r'^\d{7}$').hasMatch(numeroSuministro)) {
-      fieldErrors['numero_suministro'] = 'Debe tener exactamente 7 dígitos';
-    } else if (numeroSuministro == '0000000') {
-      fieldErrors['numero_suministro'] = 'No puede ser 0000000';
+    } else if (!RegExp(r'^\d{6,7}$').hasMatch(numeroSuministro)) {
+      fieldErrors['numero_suministro'] = 'Debe tener 6 o 7 dígitos';
+    } else if (numeroSuministro == '0000000' || numeroSuministro == '000000') {
+      fieldErrors['numero_suministro'] = 'No puede ser todo ceros';
     }
 
     if (fieldErrors.isNotEmpty) {

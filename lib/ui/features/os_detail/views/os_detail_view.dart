@@ -5,18 +5,19 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/status_chip.dart';
 import 'package:provider/provider.dart';
 import '../../../../domain/models/os.dart';
-import '../../../core/theme/app_colors.dart';
 import '../view_models/os_detail_view_model.dart';
 import '../widgets/os_detail_section.dart';
 import '../../../../data/services/api_endpoints.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import '../../../../core/utils/os_pdf_generator.dart';
+import 'package:printing/printing.dart';
 
 class OsDetailView extends StatelessWidget {
   final Os os;
   final bool showReadOnlyBanner;
   final bool isGasfiteroView;
-  final VoidCallback? onRegistrarSolucion;
+  final Future<void> Function()? onRegistrarSolucion;
 
   const OsDetailView({
     super.key,
@@ -42,7 +43,7 @@ class OsDetailView extends StatelessWidget {
 class _OsDetailBody extends StatelessWidget {
   final bool showReadOnlyBanner;
   final bool isGasfiteroView;
-  final VoidCallback? onRegistrarSolucion;
+  final Future<void> Function()? onRegistrarSolucion;
 
   const _OsDetailBody({
     this.showReadOnlyBanner = false,
@@ -143,12 +144,30 @@ class _OsDetailBody extends StatelessWidget {
                     _buildObservacionesSection(c, os),
                     const SizedBox(height: 12),
                   ],
-                  if (os.fotosSolucionUrls.isNotEmpty) ...[
-                    const SizedBox(height: 12),
-                    _buildFotosSection(
-                        c, 'Fotos de la solucion', os.fotosSolucionUrls, context),
-                    const SizedBox(height: 12),
-                  ],
+                  Builder(
+                    builder: (context) {
+                      bool isSignature(String url) => url.contains('/firma') || url.contains('signature');
+                      final solutionPhotos = os.fotosSolucionUrls.where((url) => !isSignature(url)).toList();
+                      final signaturePhotos = os.fotosSolucionUrls.where((url) => isSignature(url)).toList();
+                      
+                      return Column(
+                        children: [
+                          if (solutionPhotos.isNotEmpty) ...[
+                            const SizedBox(height: 12),
+                            _buildFotosSection(
+                                c, 'Fotos de la solución', solutionPhotos, context),
+                            const SizedBox(height: 12),
+                          ],
+                          if (signaturePhotos.isNotEmpty) ...[
+                            const SizedBox(height: 12),
+                            _buildFotosSection(
+                                c, 'Firma de conformidad del usuario', signaturePhotos, context, isSignature: true),
+                            const SizedBox(height: 12),
+                          ],
+                        ],
+                      );
+                    }
+                  ),
                   if (os.fechaEjecucionFin != null) ...[
                     _buildFechaFinSection(c, os, vm),
                     const SizedBox(height: 12),
@@ -157,48 +176,46 @@ class _OsDetailBody extends StatelessWidget {
                     _buildMapSection(c, os),
                     const SizedBox(height: 12),
                   ],
+                  if (os.trabajoEjecutado != null && os.trabajoEjecutado!.isNotEmpty) ...[
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        icon: const Icon(Icons.picture_as_pdf, color: Colors.white),
+                        label: const Text('Exportar Reporte a PDF', style: TextStyle(color: Colors.white, fontSize: 15, fontFamily: 'Outfit', fontWeight: FontWeight.bold)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: c.primary,
+                          padding: const EdgeInsets.symmetric(vertical: 18),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          elevation: 0,
+                        ),
+                        onPressed: () async {
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (context) => const Center(child: CircularProgressIndicator()),
+                          );
+                          try {
+                            final bytes = await OsPdfGenerator.generate(os);
+                            if (context.mounted) Navigator.pop(context);
+                            await Printing.layoutPdf(onLayout: (format) async => bytes);
+                          } catch (e) {
+                            if (context.mounted) {
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error generando PDF: $e')));
+                            }
+                          }
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
                 ],
               ),
             ),
           ),
           if (onRegistrarSolucion != null)
-            Container(
-              decoration: BoxDecoration(
-                color: c.surface,
-                border: Border(
-                  top: BorderSide(
-                    color: c.border.withValues(alpha: 0.3),
-                    width: 1,
-                  ),
-                ),
-              ),
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-              child: SafeArea(
-                top: false,
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: c.primary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onPressed: onRegistrarSolucion,
-                    child: Text(
-                      'REGISTRAR SOLUCION',
-                      style: TextStyle(
-                        color: c.onPrimary,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        fontFamily: 'Outfit',
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            _RegistrarSolucionButton(onRegistrarSolucion: onRegistrarSolucion, c: c),
         ],
       ),
     );
@@ -431,7 +448,7 @@ class _OsDetailBody extends StatelessWidget {
     );
   }
 
-  Widget _buildFotosSection(AppColors c, String title, List<String> urls, BuildContext context) {
+  Widget _buildFotosSection(AppColors c, String title, List<String> urls, BuildContext context, {bool isSignature = false}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -462,14 +479,14 @@ class _OsDetailBody extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: Material(
-                    color: Colors.transparent,
+                    color: isSignature ? Colors.white : Colors.transparent,
                     child: InkWell(
                       onTap: () => _showPhotoPreview(context, url: url, index: index),
                       child: CachedNetworkImage(
                         imageUrl: url,
-                        width: 120,
+                        width: isSignature ? 240 : 120,
                         height: 120,
-                        fit: BoxFit.cover,
+                        fit: isSignature ? BoxFit.contain : BoxFit.cover,
                         placeholder: (context, url) => Container(
                           width: 120,
                           height: 120,
@@ -621,6 +638,85 @@ class _OsDetailBody extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _RegistrarSolucionButton extends StatefulWidget {
+  final Future<void> Function()? onRegistrarSolucion;
+  final AppColors c;
+
+  const _RegistrarSolucionButton({super.key, required this.onRegistrarSolucion, required this.c});
+
+  @override
+  _RegistrarSolucionButtonState createState() => _RegistrarSolucionButtonState();
+}
+
+class _RegistrarSolucionButtonState extends State<_RegistrarSolucionButton> {
+  bool _isLoading = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: widget.c.surface,
+        border: Border(
+          top: BorderSide(
+            color: widget.c.border.withValues(alpha: 0.3),
+            width: 1,
+          ),
+        ),
+      ),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+      child: SafeArea(
+        top: false,
+        child: SizedBox(
+          width: double.infinity,
+          height: 52,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: widget.c.primary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: widget.onRegistrarSolucion == null || _isLoading
+                ? null
+                : () async {
+                    setState(() {
+                      _isLoading = true;
+                    });
+                    try {
+                      await widget.onRegistrarSolucion!();
+                    } finally {
+                      if (mounted) {
+                        setState(() {
+                          _isLoading = false;
+                        });
+                      }
+                    }
+                  },
+            child: _isLoading
+                ? SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      color: widget.c.onPrimary,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : Text(
+                    'REGISTRAR SOLUCION',
+                    style: TextStyle(
+                      color: widget.c.onPrimary,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      fontFamily: 'Outfit',
+                    ),
+                  ),
+          ),
+        ),
+      ),
     );
   }
 }

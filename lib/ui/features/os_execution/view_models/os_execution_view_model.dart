@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import '../../../../domain/models/os.dart';
 import '../../../../domain/use_cases/save_os_report_use_case.dart';
 import '../../../../data/services/sync_queue_storage_service.dart';
+import 'dart:typed_data';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -58,6 +61,14 @@ class OsExecutionViewModel extends ChangeNotifier {
   bool _isSubmitting = false;
   bool get isSubmitting => _isSubmitting;
 
+  Uint8List? _userSignature;
+  Uint8List? get userSignature => _userSignature;
+
+  void setSignature(Uint8List? bytes) {
+    _userSignature = bytes;
+    notifyListeners();
+  }
+
 
   OsExecutionViewModel({
     required this.os,
@@ -103,7 +114,9 @@ class OsExecutionViewModel extends ChangeNotifier {
 
       final fIni = draft['fecha_ejecucion_inicio'] as String?;
       if (fIni != null && fIni.isNotEmpty) {
-        fechaInicio = DateTime.tryParse(fIni)?.toLocal();
+        fechaInicio = DateTime.tryParse(fIni)?.toLocal() ?? DateTime.now();
+      } else {
+        fechaInicio = DateTime.now();
       }
 
       final fFin = draft['fecha_ejecucion_fin'] as String?;
@@ -114,7 +127,9 @@ class OsExecutionViewModel extends ChangeNotifier {
       // Valores por defecto si no hay borrador
       if (os.fechaEjecucionInicio != null &&
           os.fechaEjecucionInicio!.isNotEmpty) {
-        fechaInicio = DateTime.tryParse(os.fechaEjecucionInicio!)?.toLocal();
+        fechaInicio = DateTime.tryParse(os.fechaEjecucionInicio!)?.toLocal() ?? DateTime.now();
+      } else {
+        fechaInicio = DateTime.now();
       }
     }
 
@@ -249,10 +264,10 @@ class OsExecutionViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> takeFotoProblema() async {
+  Future<void> takeFotoProblema(ImageSource source) async {
     try {
       final XFile? photo = await _picker.pickImage(
-        source: ImageSource.camera,
+        source: source,
         imageQuality: 60,
         maxWidth: 1600,
       );
@@ -268,10 +283,10 @@ class OsExecutionViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> takeFotoSolucion() async {
+  Future<void> takeFotoSolucion(ImageSource source) async {
     try {
       final XFile? photo = await _picker.pickImage(
-        source: ImageSource.camera,
+        source: source,
         imageQuality: 60,
         maxWidth: 1600,
       );
@@ -332,6 +347,15 @@ class OsExecutionViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
+      final solutionPhotos = List<String>.from(_fotosSolucion);
+      if (_userSignature != null) {
+        final tempDir = await getTemporaryDirectory();
+        final file = File('${tempDir.path}/signature_${os.id}.png');
+        if (file.existsSync()) {
+          solutionPhotos.add(file.path);
+        }
+      }
+
       await _saveOsReportUseCase(
         osId: os.id,
         insumosUtilizados: insumosController.text.trim(),
@@ -347,7 +371,7 @@ class OsExecutionViewModel extends ChangeNotifier {
         fotosProblemaUrls:
             _fotosProblema.isNotEmpty ? _fotosProblema.join(',') : null,
         fotosSolucionUrls:
-            _fotosSolucion.isNotEmpty ? _fotosSolucion.join(',') : null,
+            solutionPhotos.isNotEmpty ? solutionPhotos.join(',') : null,
         fechaEjecucionInicio: fechaInicio?.toUtc().toIso8601String(),
         fechaEjecucionFin: fechaFin?.toUtc().toIso8601String(),
       );

@@ -27,10 +27,18 @@ class OsApiService {
     );
   }
 
-  Future<Response> uploadImage(String filePath) async {
-    final formData = FormData.fromMap({
+  Future<Response> uploadImage(String filePath, {int? osId, String? categoria}) async {
+    final Map<String, dynamic> formDataMap = {
       'file': await MultipartFile.fromFile(filePath),
-    });
+    };
+    if (osId != null) {
+      formDataMap['os_id'] = osId.toString();
+    }
+    if (categoria != null) {
+      formDataMap['categoria'] = categoria;
+    }
+    final formData = FormData.fromMap(formDataMap);
+    
     return _apiClient.dio.post(
       ApiEndpoints.uploads,
       data: formData,

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import '../models/os_dto.dart';
@@ -94,8 +95,8 @@ class OsRepository {
     }
   }
 
-  Future<String?> uploadImage(String filePath) async {
-    final response = await _osApiService.uploadImage(filePath);
+  Future<String?> uploadImage(String filePath, {int? osId, String? categoria}) async {
+    final response = await _osApiService.uploadImage(filePath, osId: osId, categoria: categoria);
     final statusCode = response.statusCode;
     if (statusCode != null && statusCode >= 200 && statusCode < 300) {
       return response.data['url'] as String;
@@ -200,6 +201,19 @@ class OsRepository {
             }
             await _syncQueueStorage.markSynced(osId);
             await _syncQueueStorage.markOrderStartSynced(osId);
+            
+            // Eliminar los archivos locales para liberar espacio
+            final String? rutaEvidencias = report['ruta_carpeta_evidencias'] as String?;
+            if (rutaEvidencias != null && rutaEvidencias.isNotEmpty) {
+              try {
+                final dir = Directory(rutaEvidencias);
+                if (await dir.exists()) {
+                  await dir.delete(recursive: true);
+                }
+              } catch (_) {
+                // Ignorar si no se puede borrar, la app no debe fallar por esto.
+              }
+            }
           }
         } catch (error) {
           _lastSyncErrorMessage = _describeSyncError(error);
@@ -276,7 +290,13 @@ class OsRepository {
       if (path.startsWith('/uploads') || path.startsWith('http')) {
         return path;
       }
-      final uploadedUrl = await uploadImage(path);
+      
+      String categoria = areProblemPhotos ? 'problemas' : 'soluciones';
+      if (path.contains('signature_')) {
+        categoria = 'firma';
+      }
+      
+      final uploadedUrl = await uploadImage(path, osId: osId, categoria: categoria);
       if (uploadedUrl == null) {
         throw StateError('No se pudo subir una fotografía pendiente.');
       }

@@ -37,7 +37,6 @@ class SupervisorApiService {
     return _apiClient.dio.post('/supervisor/ordenes-servicio', data: {
       'reclamo_id': reclamoId,
       'cuadrilla_id': cuadrillaId,
-      'sector_id': null,
       'fecha_programacion': DateTime.now().toIso8601String(),
     });
   }

@@ -118,6 +118,24 @@ class _OsInboxBody extends StatelessWidget {
                     themeVm.toggle();
                     break;
                   case 'logout':
+                    if (vm.pendingSyncOrders.isNotEmpty) {
+                      if (!context.mounted) break;
+                      showDialog(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          title: const Text('Sincronización Pendiente'),
+                          content: const Text(
+                              'No puedes cerrar sesión porque tienes reportes sin sincronizar. Por favor, conéctate a internet y espera a que se envíen antes de salir.'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx),
+                              child: const Text('Entendido'),
+                            ),
+                          ],
+                        ),
+                      );
+                      break;
+                    }
                     final authRepo = context.read<AuthRepository>();
                     await authRepo.logout();
                     if (context.mounted) {

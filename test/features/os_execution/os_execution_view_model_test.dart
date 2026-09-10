@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hydra/domain/models/os.dart';
 import 'package:hydra/domain/use_cases/save_os_report_use_case.dart';
+import 'package:hydra/data/services/sync_queue_storage_service.dart';
 import 'package:hydra/ui/features/os_execution/view_models/os_execution_view_model.dart';
 
 class _FakeSaveOsReportUseCase implements SaveOsReportUseCase {
@@ -8,46 +9,58 @@ class _FakeSaveOsReportUseCase implements SaveOsReportUseCase {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+class _FakeSyncQueueStorageService implements SyncQueueStorageService {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+  
+  @override
+  Future<Map<String, dynamic>?> getDraft(int osId) async => null;
+  
+  @override
+  Future<void> saveDraft({
+    required int osId,
+    String? insumosUtilizados,
+    String? observacionesGasfitero,
+    String? rutaCarpetaEvidencias,
+    String? trabajoEjecutado,
+    String? problemas,
+    String? soluciones,
+    String? comentariosInstrucciones,
+    double? latitud,
+    double? longitud,
+    String? fotosProblemaUrls,
+    String? fotosSolucionUrls,
+    String? fechaEjecucionInicio,
+    String? fechaEjecucionFin,
+  }) async {}
+}
+
 OsExecutionViewModel _createViewModel() => OsExecutionViewModel(
       os: const Os(id: 1),
       saveOsReportUseCase: _FakeSaveOsReportUseCase(),
+      syncQueueStorageService: _FakeSyncQueueStorageService(),
     );
 
 void main() {
-  test('rechaza una fecha de inicio pasada', () {
-    final viewModel = _createViewModel();
-
-    final accepted = viewModel.updateFechaInicio(
-      DateTime.now().subtract(const Duration(days: 1)),
-    );
-
-    expect(accepted, isFalse);
-    expect(viewModel.fechaInicio, isNull);
-    expect(viewModel.errorMsg, contains('no pueden estar en el pasado'));
-    viewModel.dispose();
-  });
-
-  test('al cambiar el inicio mantiene la finalización posterior', () {
+  test('actualiza correctamente fechaInicio', () {
     final viewModel = _createViewModel();
     final start = DateTime.now().add(const Duration(hours: 2));
 
-    final accepted = viewModel.updateFechaInicio(start);
+    viewModel.updateFechaInicio(start);
 
-    expect(accepted, isTrue);
     expect(viewModel.fechaInicio, start);
-    expect(viewModel.fechaFin, start.add(const Duration(minutes: 1)));
+    expect(viewModel.errorMsg, isNull);
     viewModel.dispose();
   });
 
-  test('rechaza una finalización igual o anterior al inicio', () {
+  test('rechaza una finalizacion igual o anterior al inicio', () {
     final viewModel = _createViewModel();
     final start = DateTime.now().add(const Duration(hours: 2));
     viewModel.updateFechaInicio(start);
 
-    final accepted = viewModel.updateFechaFin(start);
+    viewModel.updateFechaFin(start);
 
-    expect(accepted, isFalse);
-    expect(viewModel.errorMsg, contains('debe ser posterior'));
+    expect(viewModel.errorMsg, contains('anterior al inicio'));
     viewModel.dispose();
   });
 }

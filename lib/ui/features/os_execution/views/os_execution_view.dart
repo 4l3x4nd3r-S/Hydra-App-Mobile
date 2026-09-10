@@ -12,6 +12,10 @@ import 'dart:io';
 import 'package:intl/intl.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:image_picker/image_picker.dart';
+import '../../../common/widgets/voice_text_field.dart';
+import 'package:signature/signature.dart';
+import 'package:path_provider/path_provider.dart';
 
 class OsExecutionView extends StatelessWidget {
   final Os os;
@@ -249,7 +253,7 @@ class _OsExecutionBody extends StatelessWidget {
               c: c,
               title: 'Fotos del problema',
               photos: vm.fotosProblema,
-              onAdd: vm.takeFotoProblema,
+              onAdd: () => _showImageSourceSheet(context, vm.takeFotoProblema),
               onRemove: vm.removeFotoProblema,
               firstPhotoLabel: 'AÑADIR FOTO',
               hasError: vm.showValidationErrors && vm.fotosProblema.isEmpty,
@@ -262,14 +266,6 @@ class _OsExecutionBody extends StatelessWidget {
               hint: 'Describa el trabajo ejecutado...',
               maxLines: 3,
               hasError: vm.showValidationErrors && vm.trabajoEjecutadoController.text.trim().isEmpty,
-            ),
-            const SizedBox(height: 12),
-            _buildTextField(
-              c: c,
-              controller: vm.problemasSolucionesController,
-              label: 'Problemas / Soluciones',
-              hint: 'Describa los problemas y soluciones...',
-              maxLines: 3,
             ),
             const SizedBox(height: 16),
             Theme(
@@ -295,6 +291,14 @@ class _OsExecutionBody extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: Column(
                       children: [
+                        _buildTextField(
+                          c: c,
+                          controller: vm.problemasSolucionesController,
+                          label: 'Problemas / Soluciones',
+                          hint: 'Describa los problemas y soluciones...',
+                          maxLines: 3,
+                        ),
+                        const SizedBox(height: 12),
                         _buildTextField(
                           c: c,
                           controller: vm.insumosController,
@@ -329,7 +333,7 @@ class _OsExecutionBody extends StatelessWidget {
               c: c,
               title: 'Fotos de la solución',
               photos: vm.fotosSolucion,
-              onAdd: vm.takeFotoSolucion,
+              onAdd: () => _showImageSourceSheet(context, vm.takeFotoSolucion),
               onRemove: vm.removeFotoSolucion,
               firstPhotoLabel: 'AÑADIR FOTO',
               hasError: vm.showValidationErrors && vm.fotosSolucion.isEmpty,
@@ -347,6 +351,70 @@ class _OsExecutionBody extends StatelessWidget {
               baseDate: vm.fechaFin ?? DateTime.now(),
               minimumDate: vm.fechaInicio,
               hasError: vm.showValidationErrors && vm.fechaFin == null,
+            ),
+            const SizedBox(height: 16),
+            if (vm.userSignature != null) ...[
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: c.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: c.border),
+                ),
+                child: Column(
+                  children: [
+                    Text('Firma del Usuario', style: TextStyle(color: c.onSurfaceVariant, fontSize: 13)),
+                    const SizedBox(height: 8),
+                    Container(
+                      height: 100,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Image.memory(vm.userSignature!, fit: BoxFit.contain),
+                    ),
+                    const SizedBox(height: 8),
+                    TextButton.icon(
+                      onPressed: () {
+                        vm.setSignature(null);
+                        // Limpiar el archivo temporal
+                        getTemporaryDirectory().then((tempDir) {
+                          final file = File('${tempDir.path}/signature_${vm.os.id}.png');
+                          if (file.existsSync()) file.deleteSync();
+                        });
+                      },
+                      icon: const Icon(Icons.delete_outline, size: 18),
+                      label: const Text('Eliminar firma'),
+                      style: TextButton.styleFrom(foregroundColor: const Color(0xFFDC2626)),
+                    )
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+            SizedBox(
+              width: double.infinity,
+              height: 54,
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: c.primary,
+                  side: BorderSide(color: c.primary),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                icon: const Icon(Icons.draw),
+                label: Text(vm.userSignature == null ? 'FIRMA DE CONFORMIDAD DEL USUARIO' : 'MODIFICAR FIRMA', style: const TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Outfit')),
+                onPressed: () async {
+                  FocusManager.instance.primaryFocus?.unfocus();
+                  await Future.delayed(const Duration(milliseconds: 150));
+                  if (context.mounted) {
+                    await _showSignaturePad(context, vm);
+                    FocusManager.instance.primaryFocus?.unfocus();
+                  }
+                },
+              ),
             ),
             const SizedBox(height: 16),
             if (vm.errorMsg != null) ...[
@@ -461,6 +529,40 @@ class _OsExecutionBody extends StatelessWidget {
     ),
     ],
     ),
+    );
+  }
+
+  void _showImageSourceSheet(BuildContext context, Future<void> Function(ImageSource) onSelected) {
+    FocusManager.instance.primaryFocus?.unfocus();
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt_outlined),
+              title: const Text('Tomar foto con la cámara'),
+              onTap: () {
+                FocusManager.instance.primaryFocus?.unfocus();
+                Navigator.pop(context);
+                onSelected(ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined),
+              title: const Text('Elegir de la galería'),
+              onTap: () {
+                FocusManager.instance.primaryFocus?.unfocus();
+                Navigator.pop(context);
+                onSelected(ImageSource.gallery);
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -652,7 +754,7 @@ class _OsExecutionBody extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          '${date!.day} de ${['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'][date.month - 1]}',
+                          '${date.day} de ${['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'][date.month - 1]}',
                           style: TextStyle(
                             color: c.onSurfaceVariant.withValues(alpha: 0.8),
                             fontSize: 13,
@@ -1080,57 +1182,102 @@ class _OsExecutionBody extends StatelessWidget {
     bool hasError = false,
     int maxLength = 250,
   }) {
-    return Stack(
-      children: [
-        TextField(
-          controller: controller,
-          maxLines: maxLines,
-          maxLength: maxLength,
-          buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
-          style: TextStyle(color: c.onSurface, fontSize: 13),
-          decoration: InputDecoration(
-            labelText: label,
-            hintText: hint,
-            labelStyle: TextStyle(
-                color: hasError ? const Color(0xFFDC2626) : c.primary, fontWeight: FontWeight.bold, fontSize: 13),
-            hintStyle: TextStyle(color: c.onSurfaceVariant.withValues(alpha: 0.5)),
-            filled: true,
-            fillColor: hasError ? const Color(0xFFFEF2F2) : c.surface,
-            contentPadding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: hasError ? const Color(0xFFDC2626) : c.border),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: hasError ? const Color(0xFFDC2626) : c.border),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: hasError ? const Color(0xFFDC2626) : c.primary, width: 1.5),
-            ),
-            floatingLabelBehavior: FloatingLabelBehavior.always,
+    return VoiceTextField(
+      controller: controller,
+      label: label,
+      hint: hint ?? '',
+      maxLines: maxLines,
+      hasError: hasError,
+      primaryColor: c.primary,
+      surfaceColor: c.surface,
+      onSurfaceColor: c.onSurface,
+      onSurfaceVariantColor: c.onSurfaceVariant,
+      borderColor: c.border,
+    );
+  }
+
+  Future<void> _showSignaturePad(BuildContext context, OsExecutionViewModel vm) {
+    final SignatureController controller = SignatureController(
+      penStrokeWidth: 3,
+      penColor: Colors.black,
+      exportBackgroundColor: Colors.transparent,
+    );
+    final c = Theme.of(context).extension<AppColors>()!;
+
+    return showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.7,
+          decoration: BoxDecoration(
+            color: c.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
-        ),
-        Positioned(
-          bottom: 10,
-          right: 14,
-          child: ValueListenableBuilder<TextEditingValue>(
-            valueListenable: controller,
-            builder: (context, value, child) {
-              return Text(
-                '${value.text.length}/$maxLength',
-                style: TextStyle(
-                  color: c.onSurfaceVariant.withValues(alpha: 0.6),
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: 'Outfit',
+          child: Column(
+            children: [
+              const SizedBox(height: 16),
+              Container(width: 40, height: 4, decoration: BoxDecoration(color: c.border, borderRadius: BorderRadius.circular(2))),
+              const SizedBox(height: 16),
+              Text('Firma del Usuario', style: TextStyle(color: c.onSurface, fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Outfit')),
+              const SizedBox(height: 16),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: c.border),
+                        color: Colors.grey[100],
+                      ),
+                      child: Signature(
+                        controller: controller,
+                        backgroundColor: Colors.grey[100]!,
+                      ),
+                    ),
+                  ),
                 ),
-              );
-            },
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  TextButton(
+                    onPressed: () => controller.clear(),
+                    child: const Text('Limpiar', style: TextStyle(color: Color(0xFFDC2626))),
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: c.primary,
+                      foregroundColor: c.onPrimary,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    onPressed: () async {
+                      if (controller.isNotEmpty) {
+                        final bytes = await controller.toPngBytes();
+                        if (bytes != null) {
+                          // Save in memory for UI preview
+                          vm.setSignature(bytes);
+                          
+                          // Save temporary for PDF
+                          final tempDir = await getTemporaryDirectory();
+                          final file = File('${tempDir.path}/signature_${vm.os.id}.png');
+                          await file.writeAsBytes(bytes);
+                        }
+                      }
+                      if (context.mounted) Navigator.pop(context);
+                    },
+                    child: const Text('Guardar Firma'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 32),
+            ],
           ),
-        ),
-      ],
+        );
+      },
     );
   }
 }

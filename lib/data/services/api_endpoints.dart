@@ -9,5 +9,5 @@ class ApiEndpoints {
       '/ordenes-servicio/$ordenId/iniciar';
   static String finalizarOrden(int ordenId) =>
       '/ordenes-servicio/$ordenId/finalizar';
-  static const String uploads = '/uploads';
+  static const String uploads = '/uploads/evidencias';
 }

@@ -80,13 +80,25 @@ class ReclamoDetalleViewModel extends ChangeNotifier {
 
   String _mapDioError(DioException e) {
     final statusCode = e.response?.statusCode;
-    final detail = e.response?.data is Map
-        ? (e.response?.data as Map)['detail'] as String? ?? ''
-        : '';
+    
+    String detailStr = '';
+    if (e.response?.data is Map) {
+      final detailRaw = (e.response?.data as Map)['detail'];
+      if (detailRaw is String) {
+        detailStr = detailRaw;
+      } else if (detailRaw is List && detailRaw.isNotEmpty) {
+        final firstError = detailRaw.first;
+        if (firstError is Map && firstError.containsKey('msg')) {
+          detailStr = firstError['msg'].toString();
+        } else {
+          detailStr = firstError.toString();
+        }
+      }
+    }
 
     switch (statusCode) {
       case 400:
-        return detail.isNotEmpty ? detail : 'Datos invalidos.';
+        return detailStr.isNotEmpty ? detailStr : 'Datos invalidos.';
       case 401:
         return 'Sesion expirada. Inicie sesion nuevamente.';
       case 403:
@@ -96,8 +108,8 @@ class ReclamoDetalleViewModel extends ChangeNotifier {
       case 500:
         return 'Error del servidor. Intente nuevamente.';
       default:
-        return detail.isNotEmpty
-            ? detail
+        return detailStr.isNotEmpty
+            ? detailStr
             : 'No se pudo crear la O.S. Verifique su conexion.';
     }
   }

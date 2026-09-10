@@ -77,6 +77,21 @@ class OsInboxViewModel extends ChangeNotifier {
     for (final os in remotasArchivadas) {
       if (addedIds.add(os.id)) todas.add(os);
     }
+    
+    todas.sort((a, b) {
+      DateTime getEffectiveDate(Os os) {
+        if (os.fechaEjecucionFin != null) return DateTime.tryParse(os.fechaEjecucionFin!) ?? DateTime(2000);
+        if (os.fechaEjecucionInicio != null) return DateTime.tryParse(os.fechaEjecucionInicio!) ?? DateTime(2000);
+        if (os.fechaProgramacion != null) return DateTime.tryParse(os.fechaProgramacion!) ?? DateTime(2000);
+        return DateTime(2000);
+      }
+      final dateA = getEffectiveDate(a);
+      final dateB = getEffectiveDate(b);
+      final cmp = dateB.compareTo(dateA);
+      if (cmp != 0) return cmp;
+      return b.id.compareTo(a.id);
+    });
+
     return todas;
   }
 

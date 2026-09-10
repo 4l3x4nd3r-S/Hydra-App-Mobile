@@ -150,7 +150,7 @@ class _SupervisorBodyState extends State<_SupervisorBody>
                   case 'logout':
                     final authRepo = context.read<AuthRepository>();
                     await authRepo.logout();
-                    if (mounted) {
+                    if (context.mounted) {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
