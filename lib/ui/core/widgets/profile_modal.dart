@@ -4,7 +4,6 @@ import '../../core/theme/app_colors.dart';
 class ProfileModal extends StatelessWidget {
   final String userName;
   final String role;
-  final String? codigo;
   final String? dni;
   final String? celular;
   final String? cuadrilla;
@@ -14,7 +13,6 @@ class ProfileModal extends StatelessWidget {
     super.key,
     required this.userName,
     required this.role,
-    this.codigo,
     this.dni,
     this.celular,
     this.cuadrilla,
@@ -25,7 +23,6 @@ class ProfileModal extends StatelessWidget {
     BuildContext context, {
     required String userName,
     required String role,
-    String? codigo,
     String? dni,
     String? celular,
     String? cuadrilla,
@@ -36,7 +33,6 @@ class ProfileModal extends StatelessWidget {
       builder: (context) => ProfileModal(
         userName: userName,
         role: role,
-        codigo: codigo,
         dni: dni,
         celular: celular,
         cuadrilla: cuadrilla,
@@ -119,10 +115,6 @@ class ProfileModal extends StatelessWidget {
               _buildInfoRow(context, Icons.badge_outlined,
                   'Nombres y Apellidos', userName.isNotEmpty ? userName : '-'),
               const SizedBox(height: 12),
-              if (codigo != null && codigo!.trim().isNotEmpty) ...[
-                _buildInfoRow(context, Icons.badge_outlined, 'Código', codigo!),
-                const SizedBox(height: 12),
-              ],
               if (dni != null && dni!.trim().isNotEmpty) ...[
                 _buildInfoRow(context, Icons.credit_card_rounded, 'DNI', dni!),
                 const SizedBox(height: 12),

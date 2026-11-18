@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import '../../../../core/utils/os_excel_exporter.dart';
+import '../../../../data/repositories/catalog_repository.dart';
 import '../../../../data/repositories/os_repository.dart';
 import '../../../../data/repositories/supervisor_repository.dart';
 import '../../../../domain/models/os.dart';
@@ -10,6 +11,7 @@ import '../../../../domain/models/pending_sync_report.dart';
 class SupervisorOsViewModel extends ChangeNotifier {
   final OsRepository _osRepository;
   final SupervisorRepository _supervisorRepository;
+  final CatalogRepository? _catalogRepository;
 
   StreamSubscription<void>? _syncSubscription;
 
@@ -17,6 +19,12 @@ class SupervisorOsViewModel extends ChangeNotifier {
   List<PendingSyncReport> _colaLocal = [];
   bool _isLoading = false;
   String? _errorMessage;
+  bool _isExporting = false;
+  bool _disposed = false;
+  String? _exportErrorMessage;
+
+  bool get isExporting => _isExporting;
+  String? get exportErrorMessage => _exportErrorMessage;
 
   List<Os> get osActivas {
     final localOsIds = _colaLocal.map((r) => r.osId).toSet();
@@ -47,14 +55,21 @@ class SupervisorOsViewModel extends ChangeNotifier {
     for (final os in localesArchivadas) {
       if (addedIds.add(os.id)) todas.add(os);
     }
-    
+
     todas.sort((a, b) {
       DateTime getEffectiveDate(Os os) {
-        if (os.fechaEjecucionFin != null) return DateTime.tryParse(os.fechaEjecucionFin!) ?? DateTime(2000);
-        if (os.fechaEjecucionInicio != null) return DateTime.tryParse(os.fechaEjecucionInicio!) ?? DateTime(2000);
-        if (os.fechaProgramacion != null) return DateTime.tryParse(os.fechaProgramacion!) ?? DateTime(2000);
+        if (os.fechaEjecucionFin != null) {
+          return DateTime.tryParse(os.fechaEjecucionFin!) ?? DateTime(2000);
+        }
+        if (os.fechaEjecucionInicio != null) {
+          return DateTime.tryParse(os.fechaEjecucionInicio!) ?? DateTime(2000);
+        }
+        if (os.fechaProgramacion != null) {
+          return DateTime.tryParse(os.fechaProgramacion!) ?? DateTime(2000);
+        }
         return DateTime(2000);
       }
+
       final dateA = getEffectiveDate(a);
       final dateB = getEffectiveDate(b);
       final cmp = dateB.compareTo(dateA);
@@ -73,8 +88,10 @@ class SupervisorOsViewModel extends ChangeNotifier {
   SupervisorOsViewModel({
     required OsRepository osRepository,
     required SupervisorRepository supervisorRepository,
+    CatalogRepository? catalogRepository,
   })  : _osRepository = osRepository,
-        _supervisorRepository = supervisorRepository {
+        _supervisorRepository = supervisorRepository,
+        _catalogRepository = catalogRepository {
     _loadAll();
 
     _syncSubscription = _osRepository.syncStream.listen((_) {
@@ -84,10 +101,67 @@ class SupervisorOsViewModel extends ChangeNotifier {
 
   Future<void> cargarTodo() => _loadAll();
 
+  Future<OsExcelExport?> exportCompletedOrders() async {
+    if (_isExporting || _disposed) return null;
+    _isExporting = true;
+    _exportErrorMessage = null;
+    _notify();
+    try {
+      // Fetch again: never export a stale list after a failed refresh.
+      final orders = await _supervisorRepository.getOrdenesServicio();
+      final localReports = await _osRepository.getPendingReports();
+      final completed = OsExcelExporter.completedOrders(
+        orders,
+        excludedIds: localReports
+            .where((report) => report.status != 'SYNCED')
+            .map((report) => report.osId)
+            .toSet(),
+      );
+      if (completed.isEmpty) {
+        _exportErrorMessage =
+            'No hay órdenes realizadas y sincronizadas para exportar.';
+        return null;
+      }
+      final descriptions = <String, String>{};
+      try {
+        final options = await _catalogRepository?.getGroup('TIPO_PROBLEMA');
+        for (final option in options ?? []) {
+          final description = option.description?.trim();
+          descriptions[option.code] =
+              description?.isNotEmpty == true ? description! : option.label;
+        }
+      } catch (_) {
+        // The original problem code remains available if the catalog is down.
+      }
+      if (_disposed) return null;
+      return await compute(
+          OsExcelExporter.generate,
+          OsExcelExportRequest(
+            orders: completed,
+            generatedAt: DateTime.now(),
+            problemDescriptions: descriptions,
+          ));
+    } on DioException catch (e) {
+      _exportErrorMessage = _mapDioError(e);
+      return null;
+    } catch (e) {
+      _exportErrorMessage = 'No se pudo generar el Excel. Intente nuevamente.';
+      debugPrint('Error exportando órdenes realizadas: $e');
+      return null;
+    } finally {
+      _isExporting = false;
+      _notify();
+    }
+  }
+
+  void _notify() {
+    if (!_disposed) notifyListeners();
+  }
+
   Future<void> _loadAll() async {
     _isLoading = true;
     _errorMessage = null;
-    notifyListeners();
+    _notify();
 
     try {
       _colaLocal = await _osRepository.getPendingReports();
@@ -102,7 +176,7 @@ class SupervisorOsViewModel extends ChangeNotifier {
       debugPrint('Error inesperado: $e\n$st');
     } finally {
       _isLoading = false;
-      notifyListeners();
+      _notify();
     }
   }
 
@@ -121,6 +195,7 @@ class SupervisorOsViewModel extends ChangeNotifier {
 
   @override
   void dispose() {
+    _disposed = true;
     _syncSubscription?.cancel();
     super.dispose();
   }

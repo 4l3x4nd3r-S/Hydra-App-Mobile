@@ -31,183 +31,156 @@ class OsListTileData {
 class OsListTile extends StatelessWidget {
   final OsListTileData data;
   final AppColors c;
+  final bool showOperationalDetails;
 
   const OsListTile({
     super.key,
     required this.data,
     required this.c,
+    this.showOperationalDetails = true,
   });
 
   @override
   Widget build(BuildContext context) {
+    final orderNumber = data.numeroOrden?.trim();
+    final description = data.descripcion?.trim();
+    final address = data.direccion?.trim();
+    final assignment = data.asignadoA?.trim();
+    final problem = data.tipoProblema?.trim();
+
     return Card(
       color: c.surface,
-      margin: const EdgeInsets.only(bottom: 8),
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      clipBehavior: Clip.antiAlias,
+      margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: c.border),
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: c.border.withValues(alpha: 0.55)),
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
         onTap: data.onTap,
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Header: O.S. No. / Status / Pill
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Wrap(
+                spacing: 12,
+                runSpacing: 8,
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: c.onSurfaceVariant.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            data.numeroOrden != null
-                                ? 'N° ${data.numeroOrden}'
-                                : 'N° ${data.id}',
-                            style: TextStyle(
-                              color: c.onSurfaceVariant,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        if (data.asignadoA != null) ...[
-                          const SizedBox(height: 6),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.engineering_outlined,
-                                  size: 14, color: c.onSurface),
-                              const SizedBox(width: 4),
-                              Text(
-                                data.asignadoA!,
-                                style: TextStyle(
-                                  color: c.onSurface,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ],
+                  Text(
+                    orderNumber != null && orderNumber.isNotEmpty
+                        ? 'N.º $orderNumber'
+                        : 'Orden de servicio',
+                    style: TextStyle(
+                      color: c.primary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-                  if (data.estado != null)
+                  if (data.estado?.trim().isNotEmpty ?? false)
                     Hero(
                       tag: 'os_status_${data.id}',
                       child: StatusChip(status: data.estado!),
                     ),
                 ],
               ),
-              const SizedBox(height: 10),
-
-              // Descripción (contenido principal)
-              if (data.descripcion != null) ...[
+              if (showOperationalDetails &&
+                  assignment != null &&
+                  assignment.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.engineering_outlined,
+                        size: 16, color: c.onSurfaceVariant),
+                    const SizedBox(width: 6),
+                    Expanded(
+                        child: Text(assignment,
+                            style: TextStyle(
+                              color: c.onSurface,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ))),
+                  ],
+                ),
+              ],
+              if (description != null && description.isNotEmpty) ...[
+                const SizedBox(height: 12),
                 Text(
-                  data.descripcion!,
+                  description,
                   style: TextStyle(
-                    color: c.onSurface,
-                    fontFamily: 'Inter',
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14,
-                    height: 1.35,
-                  ),
-                  maxLines: 3,
+                      color: c.onSurface,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                      height: 1.35),
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 10),
               ],
-
-              // Address
+              const SizedBox(height: 8),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Icon(Icons.location_on_outlined,
-                      size: 16, color: c.onSurfaceVariant),
-                  const SizedBox(width: 4),
+                      size: 18, color: c.onSurfaceVariant),
+                  const SizedBox(width: 6),
                   Expanded(
-                    child: Text(
-                      data.direccion ?? 'Sin dirección',
-                      style: TextStyle(
-                        color: c.onSurfaceVariant,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
+                      child: Text(
+                    address != null && address.isNotEmpty
+                        ? address
+                        : 'Sin dirección',
+                    style: TextStyle(
+                        color: c.onSurfaceVariant, fontSize: 14, height: 1.35),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  )),
                 ],
               ),
-              const SizedBox(height: 10),
-
-              // Tipo Problema (chip secundario)
-              if (data.tipoProblema != null)
+              if (showOperationalDetails &&
+                  problem != null &&
+                  problem.isNotEmpty) ...[
+                const SizedBox(height: 12),
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Container(
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: c.primary.withValues(alpha: 0.08),
+                      color: c.primary.withValues(alpha: 0.07),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      _getTipoProblemaLabel(data.tipoProblema).toUpperCase(),
+                      _getTipoProblemaLabel(problem).toUpperCase(),
                       style: TextStyle(
-                        color: c.primary,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Inter',
-                        letterSpacing: 0.4,
-                      ),
+                          color: c.primary,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600),
                     ),
                   ),
                 ),
-              const SizedBox(height: 12),
-
-              Divider(height: 1, color: c.border.withValues(alpha: 0.5)),
-              const SizedBox(height: 12),
-
-              // Footer: Date
+              ],
+              const SizedBox(height: 14),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Icon(Icons.calendar_today_outlined,
+                      size: 16, color: c.onSurfaceVariant),
+                  const SizedBox(width: 8),
                   Expanded(
-                    child: Row(
-                      children: [
-                        Icon(Icons.calendar_today_outlined,
-                            size: 14, color: c.onSurfaceVariant),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            _formatFecha(data.fechaProgramacion),
-                            style: TextStyle(
-                              color: c.onSurfaceVariant,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(
-                    Icons.arrow_forward_ios,
-                    size: 14,
-                    color: c.onSurfaceVariant,
-                  ),
+                      child: Text(
+                    _formatFecha(data.fechaProgramacion),
+                    style: TextStyle(
+                        color: c.onSurfaceVariant, fontSize: 13, height: 1.35),
+                  )),
+                  if (data.onTap != null) ...[
+                    const SizedBox(width: 12),
+                    Icon(Icons.chevron_right_rounded,
+                        size: 20, color: c.onSurfaceVariant),
+                  ],
                 ],
               ),
             ],
@@ -218,9 +191,10 @@ class OsListTile extends StatelessWidget {
   }
 
   String _formatFecha(String? fechaRaw) {
-    if (fechaRaw == null || fechaRaw.isEmpty) return 'No programado';
+    if (fechaRaw == null || fechaRaw.trim().isEmpty)
+      return 'Sin fecha programada';
     try {
-      final date = DateTime.parse(fechaRaw);
+      final date = DateTime.parse(fechaRaw).toLocal();
       final dia = date.day.toString().padLeft(2, '0');
       final mes = date.month.toString().padLeft(2, '0');
       final anio = date.year.toString();
@@ -236,10 +210,10 @@ class OsListTile extends StatelessWidget {
       }
       final horaStr = hora.toString().padLeft(2, '0');
 
-      return 'Programado: $dia/$mes/$anio - $horaStr:$minuto $ampm';
+      return '$dia/$mes/$anio · $horaStr:$minuto $ampm';
     } catch (e) {
       // In case it's not ISO format and already somewhat formatted
-      return 'Programado: $fechaRaw';
+      return fechaRaw;
     }
   }
 
@@ -254,7 +228,7 @@ class OsListTile extends StatelessWidget {
       'OP-5': 'Cortes del servicio no programados',
       'OP-6': 'Falta de accesorios de seguridad en trabajos',
       'OP-7': 'Seguridad: emanaciones del sistema de alcantarillado',
-      
+
       // Agua Potable (Formato 1)
       'B1': 'Agua potable · Fugas en conexión domiciliaria',
       'B5': 'Agua potable · Fugas en red matriz',
@@ -270,16 +244,20 @@ class OsListTile extends StatelessWidget {
       'CAMBIO DE LLAVE DE PASO': 'Agua potable · Válvula malograda',
       'REUBICACIÓN DE CONEXION': 'Agua potable · Mover toma',
       'REPOSICIÓN DE MARCO Y TAPA DE AGUA': 'Agua potable · Cambio de cubierta',
-      'NIVELACIÓN DE CAJA DE REGISTRO DE AGUA': 'Agua potable · Ajuste a vereda',
-      
+      'NIVELACIÓN DE CAJA DE REGISTRO DE AGUA':
+          'Agua potable · Ajuste a vereda',
+
       // Alcantarillado (Formato 1)
       'B6': 'Alcantarillado · Atoro en conexión domiciliaria',
       'B7': 'Alcantarillado · Atoro en red matriz',
       'B12': 'Alcantarillado · Buzón sin tapa',
-      'REPOSICIÓN DE MARCO Y TAPA DE ALCANTARILLADO': 'Alcantarillado · Tapa dañada',
-      'NIVELACIÓN DE CAJA DE REGISTRO DE ALCANTARILLADO': 'Alcantarillado · Alinear caja',
-      'REPOSICIÓN DE TUBERIA DE CONCRETO A PVC - ALCANTARILLADO': 'Alcantarillado · Modernización',
-      
+      'REPOSICIÓN DE MARCO Y TAPA DE ALCANTARILLADO':
+          'Alcantarillado · Tapa dañada',
+      'NIVELACIÓN DE CAJA DE REGISTRO DE ALCANTARILLADO':
+          'Alcantarillado · Alinear caja',
+      'REPOSICIÓN DE TUBERIA DE CONCRETO A PVC - ALCANTARILLADO':
+          'Alcantarillado · Modernización',
+
       // Otros
       'A1': 'Otros · Filtración externa',
       'TRABAJOS COLATERAS': 'Otros · Daños incidentales',

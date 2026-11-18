@@ -11,13 +11,12 @@ class StatusChip extends StatelessWidget {
   });
 
   static Color colorForStatus(String status) {
-    final norm = status.toUpperCase().replaceAll(' ', '_');
+    final norm = _normalize(status);
     switch (norm) {
       case 'PENDIENTE':
         return const Color(0xFF60A5FA);
       case 'ASIGNADO':
       case 'EN_PROCESO':
-      case 'EN PROCESO':
       case 'PENDIENTE_DE_SINCRONIZAR':
         return const Color(0xFFF59E0B);
       case 'ATENDIDO':
@@ -32,12 +31,36 @@ class StatusChip extends StatelessWidget {
     }
   }
 
+  static String _normalize(String status) =>
+      status.trim().toUpperCase().replaceAll(RegExp(r'[\s_]+'), '_');
+
+  Color _textColor(BuildContext context, Color base) {
+    if (color != null || Theme.of(context).brightness == Brightness.dark) {
+      return base;
+    }
+    switch (_normalize(status)) {
+      case 'PENDIENTE':
+        return const Color(0xFF1D4ED8);
+      case 'ASIGNADO':
+      case 'EN_PROCESO':
+      case 'PENDIENTE_DE_SINCRONIZAR':
+        return const Color(0xFF92400E);
+      case 'ATENDIDO':
+      case 'COMPLETADO':
+      case 'CERRADO':
+        return const Color(0xFF166534);
+      default:
+        return const Color(0xFF475569);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final chipColor = color ?? colorForStatus(status);
-    final normalized = status.toUpperCase().replaceAll(' ', '_');
-    final label =
-        normalized == 'PENDIENTE_DE_SINCRONIZAR' ? 'POR SINCRONIZAR' : status;
+    final normalized = _normalize(status);
+    final label = normalized == 'PENDIENTE_DE_SINCRONIZAR'
+        ? 'POR SINCRONIZAR'
+        : normalized.replaceAll('_', ' ');
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -49,9 +72,9 @@ class StatusChip extends StatelessWidget {
       child: Text(
         label,
         style: TextStyle(
-          color: chipColor,
-          fontSize: 10,
-          fontWeight: FontWeight.bold,
+          color: _textColor(context, chipColor),
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );

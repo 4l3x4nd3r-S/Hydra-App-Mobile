@@ -16,6 +16,7 @@ class OsInboxContent extends StatefulWidget {
   final List<Os> pendingSyncOrders;
   final bool isSyncing;
   final Future<void> Function()? onSync;
+  final bool showOperationalDetails;
 
   const OsInboxContent({
     super.key,
@@ -31,6 +32,7 @@ class OsInboxContent extends StatefulWidget {
     this.pendingSyncOrders = const [],
     this.isSyncing = false,
     this.onSync,
+    this.showOperationalDetails = true,
   });
 
   @override
@@ -572,6 +574,7 @@ class _OsInboxContentState extends State<OsInboxContent> {
         }
 
         return OsListTile(
+          showOperationalDetails: widget.showOperationalDetails,
           data: OsListTileData(
             id: os.id,
             numeroOrden: os.numeroOrden,

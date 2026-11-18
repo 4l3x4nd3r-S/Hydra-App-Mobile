@@ -443,7 +443,11 @@ class OsPdfGenerator {
   }
 
   static Future<pw.Widget> _fetchTile(int x, int y, int z) async {
-    final url = 'https://a.basemaps.cartocdn.com/light_all/$z/$x/$y.png';
+    final url = AppEnvironment.mapTileUrl
+        .replaceAll('{s}', 'a')
+        .replaceAll('{z}', '$z')
+        .replaceAll('{x}', '$x')
+        .replaceAll('{y}', '$y');
     try {
       final img = await networkImage(url);
       return pw.Image(img, width: 256, height: 256, fit: pw.BoxFit.fill);

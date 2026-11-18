@@ -77,14 +77,18 @@ class OsInboxViewModel extends ChangeNotifier {
     for (final os in remotasArchivadas) {
       if (addedIds.add(os.id)) todas.add(os);
     }
-    
+
     todas.sort((a, b) {
       DateTime getEffectiveDate(Os os) {
-        if (os.fechaEjecucionFin != null) return DateTime.tryParse(os.fechaEjecucionFin!) ?? DateTime(2000);
-        if (os.fechaEjecucionInicio != null) return DateTime.tryParse(os.fechaEjecucionInicio!) ?? DateTime(2000);
-        if (os.fechaProgramacion != null) return DateTime.tryParse(os.fechaProgramacion!) ?? DateTime(2000);
+        if (os.fechaEjecucionFin != null)
+          return DateTime.tryParse(os.fechaEjecucionFin!) ?? DateTime(2000);
+        if (os.fechaEjecucionInicio != null)
+          return DateTime.tryParse(os.fechaEjecucionInicio!) ?? DateTime(2000);
+        if (os.fechaProgramacion != null)
+          return DateTime.tryParse(os.fechaProgramacion!) ?? DateTime(2000);
         return DateTime(2000);
       }
+
       final dateA = getEffectiveDate(a);
       final dateB = getEffectiveDate(b);
       final cmp = dateB.compareTo(dateA);
@@ -113,7 +117,8 @@ class OsInboxViewModel extends ChangeNotifier {
     for (final os in _osList) {
       if (os.cuadrilla != null) {
         final cod = os.cuadrilla!.codigoGrupo ?? os.cuadrilla!.id.toString();
-        final codeClean = cod.replaceFirst(RegExp(r'^Cuadrilla\s+', caseSensitive: false), '');
+        final codeClean = cod.replaceFirst(
+            RegExp(r'^Cuadrilla\s+', caseSensitive: false), '');
         return '$codeClean · ${os.cuadrilla!.especialidad ?? "Sin especialidad"}';
       }
     }
@@ -209,22 +214,20 @@ class OsInboxViewModel extends ChangeNotifier {
 
   Future<void> startOs(Os os) async {
     final result = await _startOsUseCase(os.id);
-    if (result.queuedOffline) {
-      _osList = _osList
-          .map(
-            (item) => item.id == os.id
-                ? item.copyWith(
-                    estadoOrden: 'EN_PROCESO',
-                    fechaEjecucionInicio: result.startedAt,
-                  )
-                : item,
-          )
-          .toList(growable: false);
-      notifyListeners();
-      return;
+    if (!result.queuedOffline) {
+      await _loadColaLocal();
+      await _cargarOsDelServidor();
     }
-    await _loadColaLocal();
-    await _cargarOsDelServidor();
+    // Both online and offline starts use the actual device event timestamp.
+    _osList = _osList
+        .map((item) => item.id == os.id
+            ? item.copyWith(
+                estadoOrden: 'EN_PROCESO',
+                fechaEjecucionInicio: result.startedAt,
+              )
+            : item)
+        .toList(growable: false);
+    notifyListeners();
   }
 
   Future<void> syncManual() async {

@@ -19,7 +19,7 @@ import '../view_models/supervisor_os_view_model.dart';
 import '../widgets/nueva_cuadrilla_modal.dart';
 import '../widgets/reclamo_tile_data.dart';
 import '../widgets/reclamo_list_tile.dart';
-import '../../os_inbox/widgets/os_inbox_content.dart';
+import '../widgets/supervisor_os_content.dart';
 import '../../os_detail/views/os_detail_view.dart';
 import 'reclamo_detalle_view.dart';
 import 'cuadrilla_detalle_view.dart';
@@ -408,15 +408,21 @@ class _SupervisorBodyState extends State<_SupervisorBody>
                     key: const ValueKey('content'),
                     index: _selectedSubTabIndex,
                     children: [
-                      _buildListaPorEstado(c, vm.reclamosPendientes,
-                          'No hay reclamos pendientes', Icons.schedule_outlined),
+                      _buildListaPorEstado(
+                          c,
+                          vm.reclamosPendientes,
+                          'No hay reclamos pendientes',
+                          Icons.schedule_outlined),
                       _buildListaPorEstado(
                           c,
                           vm.reclamosAsignados,
                           'No hay reclamos asignados',
                           Icons.assignment_turned_in_outlined),
-                      _buildListaPorEstado(c, vm.reclamosCerrados,
-                          'No hay reclamos cerrados', Icons.check_circle_outline),
+                      _buildListaPorEstado(
+                          c,
+                          vm.reclamosCerrados,
+                          'No hay reclamos cerrados',
+                          Icons.check_circle_outline),
                     ],
                   ),
           ),
@@ -604,31 +610,16 @@ class _SupervisorBodyState extends State<_SupervisorBody>
       create: (_) => SupervisorOsViewModel(
         osRepository: context.read<OsRepository>(),
         supervisorRepository: context.read<SupervisorRepository>(),
+        catalogRepository: context.read<CatalogRepository>(),
       ),
-      child: Consumer<SupervisorOsViewModel>(
-        builder: (context, vm, _) => OsInboxContent(
-          osActivas: vm.osActivas,
-          osArchivadas: vm.osArchivadas,
-          isLoading: vm.isLoading,
-          errorMessage: vm.errorMessage,
-          onRefresh: () async => await vm.cargarTodo(),
-          onTapActiva: (os) {
-            Navigator.push(
+      child: SupervisorOsContent(
+        onOpenOrder: (os) {
+          Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => OsDetailView(os: os),
-              ),
-            );
-          },
-          onTapArchivada: (os) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => OsDetailView(os: os),
-              ),
-            );
-          },
-        ),
+              ));
+        },
       ),
     );
   }
@@ -706,7 +697,9 @@ class _SupervisorBodyState extends State<_SupervisorBody>
               const SizedBox(height: 8),
               ...sinClasificar.map((cu) => _buildCuadrillaCard(cu)),
             ],
-            if (agua.isEmpty && alcantarillado.isEmpty && sinClasificar.isEmpty) ...[
+            if (agua.isEmpty &&
+                alcantarillado.isEmpty &&
+                sinClasificar.isEmpty) ...[
               const SizedBox(height: 24),
               Center(
                 child: Text(

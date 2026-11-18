@@ -2,5 +2,6 @@
   "API_BASE_URL": "https://api.example.com/api/v1",
   "MAP_TILE_URL": "https://tiles.example.com/{z}/{x}/{y}.png",
   "MAP_CENTER_LATITUDE": "0",
-  "MAP_CENTER_LONGITUDE": "0"
+  "MAP_CENTER_LONGITUDE": "0",
+  "LOCATION_MAP_TILE_URL": "https://tiles.example.com/streets/{z}/{x}/{y}{r}.png"
 }

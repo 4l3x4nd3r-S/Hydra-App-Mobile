@@ -56,6 +56,11 @@ class _OsDetailBody extends StatelessWidget {
     final c = Theme.of(context).extension<AppColors>()!;
     final vm = context.watch<OsDetailViewModel>();
     final os = vm.os;
+    bool isSignature(String url) =>
+        url.contains('/firma') || url.contains('signature');
+    final solutionPhotos =
+        os.fotosSolucionUrls.where((url) => !isSignature(url)).toList();
+    final signaturePhotos = os.fotosSolucionUrls.where(isSignature).toList();
 
     debugPrint('OsDetailView build - os.id: ${os.id}');
     debugPrint('OsDetailView build - os.reclamo: ${os.reclamo}');
@@ -72,14 +77,26 @@ class _OsDetailBody extends StatelessWidget {
           icon: Icon(Icons.arrow_back_ios_rounded, color: c.primary),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
-          'INFORMACIÓN DE LA ORDEN DE SERVICIO',
-          style: TextStyle(
-            fontFamily: 'Outfit',
-            fontSize: 15,
-            fontWeight: FontWeight.bold,
-            color: c.onSurface,
-          ),
+        toolbarHeight: (MediaQuery.textScalerOf(context).scale(17) * 2.4 +
+                MediaQuery.textScalerOf(context).scale(13) * 1.4 +
+                16)
+            .clamp(76, 160)
+            .toDouble(),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Detalle de la orden',
+                maxLines: 2,
+                style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    color: c.onSurface)),
+            if (os.numeroOrden?.trim().isNotEmpty ?? false)
+              Text('N.º ${os.numeroOrden}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 13, color: c.onSurfaceVariant)),
+          ],
         ),
         actions: [
           if (os.estadoOrden != null)
@@ -107,23 +124,58 @@ class _OsDetailBody extends StatelessWidget {
                     _buildReadOnlyNotice(c),
                     const SizedBox(height: 12),
                   ],
+                  _buildContextSection(
+                    context,
+                    c,
+                    title: 'Información del reclamo',
+                    icon: Icons.assignment_outlined,
+                    storageKey: 'os_claim_${os.id}',
+                    children: [_buildReclamoSection(c, os, embedded: true)],
+                  ),
+                  if (!(isGasfiteroView && os.responsable != null) &&
+                      (os.cuadrilla != null || os.responsable != null)) ...[
+                    const SizedBox(height: 12),
+                    _buildContextSection(
+                      context,
+                      c,
+                      title: 'Cuadrilla y responsables',
+                      icon: Icons.groups_outlined,
+                      storageKey: 'os_team_${os.id}',
+                      children: [
+                        if (os.cuadrilla != null)
+                          _buildCuadrillaSection(c, os, embedded: true),
+                        _buildResponsablesSection(c, os, embedded: true),
+                      ],
+                    ),
+                  ],
+                  if (os.fotosProblemaUrls.isNotEmpty ||
+                      solutionPhotos.isNotEmpty) ...[
+                    const SizedBox(height: 20),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: os.fotosProblemaUrls.isNotEmpty
+                              ? _buildFotosSection(c, 'Fotos del problema',
+                                  os.fotosProblemaUrls, context)
+                              : const SizedBox.shrink(),
+                        ),
+                        Container(
+                          width: 1,
+                          height: 160,
+                          margin: const EdgeInsets.symmetric(horizontal: 8),
+                          color: c.border.withValues(alpha: 0.5),
+                        ),
+                        Expanded(
+                          child: solutionPhotos.isNotEmpty
+                              ? _buildFotosSection(c, 'Fotos de la solución',
+                                  solutionPhotos, context)
+                              : const SizedBox.shrink(),
+                        ),
+                      ],
+                    ),
+                  ],
                   const SizedBox(height: 16),
-                  _buildReclamoSection(c, os),
-                  if (!(isGasfiteroView && os.responsable != null)) ...[
-                    if (os.cuadrilla != null) ...[
-                      const SizedBox(height: 12),
-                      _buildCuadrillaSection(c, os),
-                    ],
-                    const SizedBox(height: 12),
-                    _buildResponsablesSection(c, os),
-                  ],
-                  // Eliminado: Sección de Fecha Inicio a pedido del usuario
-                  if (os.fotosProblemaUrls.isNotEmpty) ...[
-                    const SizedBox(height: 12),
-                    _buildFotosSection(
-                        c, 'Fotos del problema', os.fotosProblemaUrls, context),
-                    const SizedBox(height: 12),
-                  ],
                   if (os.trabajoEjecutado != null &&
                       os.trabajoEjecutado!.isNotEmpty) ...[
                     _buildTrabajoEjecutadoSection(c, os),
@@ -144,30 +196,6 @@ class _OsDetailBody extends StatelessWidget {
                     _buildObservacionesSection(c, os),
                     const SizedBox(height: 12),
                   ],
-                  Builder(
-                    builder: (context) {
-                      bool isSignature(String url) => url.contains('/firma') || url.contains('signature');
-                      final solutionPhotos = os.fotosSolucionUrls.where((url) => !isSignature(url)).toList();
-                      final signaturePhotos = os.fotosSolucionUrls.where((url) => isSignature(url)).toList();
-                      
-                      return Column(
-                        children: [
-                          if (solutionPhotos.isNotEmpty) ...[
-                            const SizedBox(height: 12),
-                            _buildFotosSection(
-                                c, 'Fotos de la solución', solutionPhotos, context),
-                            const SizedBox(height: 12),
-                          ],
-                          if (signaturePhotos.isNotEmpty) ...[
-                            const SizedBox(height: 12),
-                            _buildFotosSection(
-                                c, 'Firma de conformidad del usuario', signaturePhotos, context, isSignature: true),
-                            const SizedBox(height: 12),
-                          ],
-                        ],
-                      );
-                    }
-                  ),
                   if (os.fechaEjecucionFin != null) ...[
                     _buildFechaFinSection(c, os, vm),
                     const SizedBox(height: 12),
@@ -176,33 +204,58 @@ class _OsDetailBody extends StatelessWidget {
                     _buildMapSection(c, os),
                     const SizedBox(height: 12),
                   ],
-                  if (os.trabajoEjecutado != null && os.trabajoEjecutado!.isNotEmpty) ...[
+                  if (signaturePhotos.isNotEmpty) ...[
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      child: _buildFotosSection(
+                          c,
+                          'Firma de conformidad del usuario',
+                          signaturePhotos,
+                          context,
+                          isSignature: true),
+                    ),
+                  ],
+                  if (os.trabajoEjecutado != null &&
+                      os.trabajoEjecutado!.isNotEmpty) ...[
                     const SizedBox(height: 20),
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton.icon(
-                        icon: const Icon(Icons.picture_as_pdf, color: Colors.white),
-                        label: const Text('Exportar Reporte a PDF', style: TextStyle(color: Colors.white, fontSize: 15, fontFamily: 'Outfit', fontWeight: FontWeight.bold)),
+                        icon: const Icon(Icons.picture_as_pdf,
+                            color: Colors.white),
+                        label: const Text('Exportar Reporte a PDF',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontFamily: 'Outfit',
+                                fontWeight: FontWeight.bold)),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: c.primary,
                           padding: const EdgeInsets.symmetric(vertical: 18),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
                           elevation: 0,
                         ),
                         onPressed: () async {
                           showDialog(
                             context: context,
                             barrierDismissible: false,
-                            builder: (context) => const Center(child: CircularProgressIndicator()),
+                            builder: (context) => const Center(
+                                child: CircularProgressIndicator()),
                           );
                           try {
                             final bytes = await OsPdfGenerator.generate(os);
                             if (context.mounted) Navigator.pop(context);
-                            await Printing.layoutPdf(onLayout: (format) async => bytes);
+                            await Printing.layoutPdf(
+                                onLayout: (format) async => bytes);
                           } catch (e) {
                             if (context.mounted) {
                               Navigator.pop(context);
-                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error generando PDF: $e')));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content:
+                                          Text('Error generando PDF: $e')));
                             }
                           }
                         },
@@ -215,8 +268,44 @@ class _OsDetailBody extends StatelessWidget {
             ),
           ),
           if (onRegistrarSolucion != null)
-            _RegistrarSolucionButton(onRegistrarSolucion: onRegistrarSolucion, c: c),
+            _RegistrarSolucionButton(
+                onRegistrarSolucion: onRegistrarSolucion, c: c),
         ],
+      ),
+    );
+  }
+
+  Widget _buildContextSection(
+    BuildContext context,
+    AppColors c, {
+    required String title,
+    required IconData icon,
+    required String storageKey,
+    required List<Widget> children,
+  }) {
+    final shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(16),
+      side: BorderSide(color: c.border.withValues(alpha: 0.6)),
+    );
+    return Theme(
+      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+      child: ExpansionTile(
+        key: PageStorageKey(storageKey),
+        initiallyExpanded: false,
+        minTileHeight: 60,
+        tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        shape: shape,
+        collapsedShape: shape,
+        clipBehavior: Clip.antiAlias,
+        backgroundColor: c.surface,
+        collapsedBackgroundColor: c.surface,
+        iconColor: c.primary,
+        collapsedIconColor: c.onSurfaceVariant,
+        leading: Icon(icon, color: c.primary, size: 22),
+        title: Text(title,
+            style: TextStyle(
+                color: c.onSurface, fontSize: 15, fontWeight: FontWeight.w600)),
+        children: children,
       ),
     );
   }
@@ -251,7 +340,7 @@ class _OsDetailBody extends StatelessWidget {
     );
   }
 
-  Widget _buildReclamoSection(AppColors c, Os os) {
+  Widget _buildReclamoSection(AppColors c, Os os, {bool embedded = false}) {
     final r = os.reclamo;
     debugPrint('_buildReclamoSection - r: $r');
     debugPrint(
@@ -269,6 +358,7 @@ class _OsDetailBody extends StatelessWidget {
     return OsDetailSection(
       title: 'Inf. de Reclamo',
       c: c,
+      embedded: embedded,
       fields: [
         MapEntry('Código de solicitud', r?.codigoSolicitud ?? ''),
         MapEntry('Formato', r?.formato ?? ''),
@@ -287,7 +377,7 @@ class _OsDetailBody extends StatelessWidget {
     );
   }
 
-  Widget _buildCuadrillaSection(AppColors c, Os os) {
+  Widget _buildCuadrillaSection(AppColors c, Os os, {bool embedded = false}) {
     final cuadrilla = os.cuadrilla;
     final codigo = (cuadrilla?.codigoGrupo ?? cuadrilla?.id.toString() ?? '')
         .replaceFirst(RegExp(r'^Cuadrilla\s+', caseSensitive: false), '');
@@ -297,13 +387,15 @@ class _OsDetailBody extends StatelessWidget {
     return OsDetailSection(
       title: 'Cuadrilla',
       c: c,
+      embedded: embedded,
       fields: [
         MapEntry('Identificación', cuadrillaTexto),
       ],
     );
   }
 
-  Widget _buildResponsablesSection(AppColors c, Os os) {
+  Widget _buildResponsablesSection(AppColors c, Os os,
+      {bool embedded = false}) {
     final fields = <MapEntry<String, String>>[];
 
     if (os.responsable != null) {
@@ -329,6 +421,7 @@ class _OsDetailBody extends StatelessWidget {
     return OsDetailSection(
       title: 'Responsables',
       c: c,
+      embedded: embedded,
       fields: fields,
     );
   }
@@ -448,9 +541,12 @@ class _OsDetailBody extends StatelessWidget {
     );
   }
 
-  Widget _buildFotosSection(AppColors c, String title, List<String> urls, BuildContext context, {bool isSignature = false}) {
+  Widget _buildFotosSection(
+      AppColors c, String title, List<String> urls, BuildContext context,
+      {bool isSignature = false}) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment:
+          isSignature ? CrossAxisAlignment.center : CrossAxisAlignment.start,
       children: [
         Text(
           title.toUpperCase(),
@@ -464,9 +560,11 @@ class _OsDetailBody extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         SizedBox(
-          height: 120,
+          width: isSignature ? urls.length * 248.0 : double.infinity,
+          height: 160,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
+            shrinkWrap: isSignature,
             itemCount: urls.length,
             itemBuilder: (context, index) {
               String url = urls[index];
@@ -475,21 +573,24 @@ class _OsDetailBody extends StatelessWidget {
                 url = '$base$url';
               }
               return Padding(
-                padding: const EdgeInsets.only(right: 8.0),
+                padding: isSignature
+                    ? const EdgeInsets.symmetric(horizontal: 4)
+                    : const EdgeInsets.only(right: 8),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: Material(
                     color: isSignature ? Colors.white : Colors.transparent,
                     child: InkWell(
-                      onTap: () => _showPhotoPreview(context, url: url, index: index),
+                      onTap: () =>
+                          _showPhotoPreview(context, url: url, index: index),
                       child: CachedNetworkImage(
                         imageUrl: url,
-                        width: isSignature ? 240 : 120,
-                        height: 120,
+                        width: isSignature ? 240 : 160,
+                        height: 160,
                         fit: isSignature ? BoxFit.contain : BoxFit.cover,
                         placeholder: (context, url) => Container(
-                          width: 120,
-                          height: 120,
+                          width: 160,
+                          height: 160,
                           color: c.surface,
                           child: const Center(
                             child: SizedBox(
@@ -500,8 +601,8 @@ class _OsDetailBody extends StatelessWidget {
                           ),
                         ),
                         errorWidget: (context, url, error) => Container(
-                          width: 120,
-                          height: 120,
+                          width: 160,
+                          height: 160,
                           color: c.surface,
                           child: Icon(Icons.broken_image_rounded,
                               color: c.onSurfaceVariant),
@@ -646,10 +747,12 @@ class _RegistrarSolucionButton extends StatefulWidget {
   final Future<void> Function()? onRegistrarSolucion;
   final AppColors c;
 
-  const _RegistrarSolucionButton({super.key, required this.onRegistrarSolucion, required this.c});
+  const _RegistrarSolucionButton(
+      {super.key, required this.onRegistrarSolucion, required this.c});
 
   @override
-  _RegistrarSolucionButtonState createState() => _RegistrarSolucionButtonState();
+  _RegistrarSolucionButtonState createState() =>
+      _RegistrarSolucionButtonState();
 }
 
 class _RegistrarSolucionButtonState extends State<_RegistrarSolucionButton> {

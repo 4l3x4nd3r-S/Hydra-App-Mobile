@@ -50,7 +50,10 @@ class _FakeAuthRepository implements AuthRepository {
 }
 
 class _FakeStartOsUseCase implements StartOsUseCase {
-  _FakeStartOsUseCase();
+  _FakeStartOsUseCase({OsStartResult? response})
+      : _response = response ?? result;
+
+  final OsStartResult _response;
 
   static const result = OsStartResult(
     startedAt: '2026-07-16T15:00:00.000Z',
@@ -58,7 +61,7 @@ class _FakeStartOsUseCase implements StartOsUseCase {
   );
 
   @override
-  Future<OsStartResult> call(int ordenId) async => result;
+  Future<OsStartResult> call(int ordenId) async => _response;
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -89,6 +92,33 @@ PendingSyncReport _pendingReport(int osId) => PendingSyncReport(
     );
 
 void main() {
+  test(
+      'un inicio en línea conserva la hora local capturada frente al refresco del servidor',
+      () async {
+    const order = Os(
+        id: 21,
+        estadoOrden: 'ASIGNADO',
+        fechaEjecucionInicio: '2026-11-17T15:46:00');
+    const localStart = OsStartResult(
+        startedAt: '2026-11-17T16:17:00.000Z', queuedOffline: false);
+    final repository = _FakeOsRepository(orders: [order], reports: []);
+    final viewModel = OsInboxViewModel(
+      osRepository: repository,
+      authRepository: _FakeAuthRepository(),
+      startOsUseCase: _FakeStartOsUseCase(response: localStart),
+      syncPendingReportsUseCase: _FakeSyncPendingReportsUseCase(),
+    );
+    await Future<void>.delayed(Duration.zero);
+    await viewModel.startOs(order);
+    expect(viewModel.osActivas.single.estadoOrden, 'EN_PROCESO');
+    expect(
+        viewModel.osActivas.single.fechaEjecucionInicio, localStart.startedAt);
+    expect(repository.orders.single.fechaEjecucionInicio,
+        order.fechaEjecucionInicio);
+    viewModel.dispose();
+    await repository.close();
+  });
+
   test('una O.S. pendiente de sincronización aparece en Archivadas', () async {
     final repository = _FakeOsRepository(
       orders: const [

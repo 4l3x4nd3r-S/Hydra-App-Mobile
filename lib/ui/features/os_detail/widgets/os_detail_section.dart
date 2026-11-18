@@ -6,6 +6,7 @@ class OsDetailSection extends StatelessWidget {
   final List<MapEntry<String, String>> fields;
   final List<Widget>? extraActions;
   final AppColors c;
+  final bool embedded;
 
   const OsDetailSection({
     super.key,
@@ -13,10 +14,33 @@ class OsDetailSection extends StatelessWidget {
     required this.fields,
     this.extraActions,
     required this.c,
+    this.embedded = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final content = Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (!embedded) ...[
+            _buildHeader(),
+            const SizedBox(height: 16),
+            Divider(height: 1, color: c.border.withValues(alpha: 0.7)),
+            const SizedBox(height: 14),
+          ],
+          LayoutBuilder(
+            builder: (context, constraints) => _buildGrid(constraints),
+          ),
+          if (extraActions != null && extraActions!.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            ...extraActions!,
+          ],
+        ],
+      ),
+    );
+    if (embedded) return content;
     return Card(
       color: c.surface,
       elevation: 0,
@@ -25,25 +49,7 @@ class OsDetailSection extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         side: BorderSide(color: c.border.withValues(alpha: 0.8)),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(),
-            const SizedBox(height: 16),
-            Divider(height: 1, color: c.border.withValues(alpha: 0.7)),
-            const SizedBox(height: 14),
-            LayoutBuilder(
-              builder: (context, constraints) => _buildGrid(constraints),
-            ),
-            if (extraActions != null && extraActions!.isNotEmpty) ...[
-              const SizedBox(height: 14),
-              ...extraActions!,
-            ],
-          ],
-        ),
-      ),
+      child: content,
     );
   }
 
@@ -61,25 +67,15 @@ class OsDetailSection extends StatelessWidget {
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                _normalizedTitle(),
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: c.primary,
-                  letterSpacing: 0.7,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                _sectionSubtitle(),
-                style: TextStyle(color: c.onSurfaceVariant, fontSize: 11),
-              ),
-            ],
+          child: Text(
+            _normalizedTitle(),
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+              color: c.primary,
+              letterSpacing: 0.7,
+            ),
           ),
         ),
       ],
@@ -130,41 +126,44 @@ class OsDetailSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            height: 28,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 1),
-                  child:
-                      Icon(_fieldIcon(field.key), color: c.primary, size: 15),
-                ),
-                const SizedBox(width: 7),
-                Expanded(
-                  child: Text(
-                    _normalizedLabel(field.key).toUpperCase(),
-                    maxLines: 2,
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 9.5,
-                      height: 1.25,
-                      fontWeight: FontWeight.bold,
-                      color: c.onSurfaceVariant,
-                      letterSpacing: 0.35,
+          if (!(title == 'Trabajo Ejecutado' || title == 'Fecha Hora Fin')) ...[
+            SizedBox(
+              height: 28,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 1),
+                    child:
+                        Icon(_fieldIcon(field.key), color: c.primary, size: 15),
+                  ),
+                  const SizedBox(width: 7),
+                  Expanded(
+                    child: Text(
+                      _normalizedLabel(field.key).toUpperCase(),
+                      maxLines: 2,
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 9.5,
+                        height: 1.25,
+                        fontWeight: FontWeight.bold,
+                        color: c.onSurfaceVariant,
+                        letterSpacing: 0.35,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 4),
+            const SizedBox(height: 4),
+          ],
           if (isDate)
             _buildDateTimeValue(value)
           else if (_isEmailField(field.key))
             SizedBox(
               width: double.infinity,
               child: SingleChildScrollView(
+                key: PageStorageKey('detail_${title}_${field.key}_scroll'),
                 scrollDirection: Axis.horizontal,
                 child: Text(
                   value,
@@ -330,18 +329,6 @@ class OsDetailSection extends StatelessWidget {
       'Fecha Hora Fin': 'Fecha y hora de finalización',
     };
     return labels[label] ?? label;
-  }
-
-  String _sectionSubtitle() {
-    final key = title.toLowerCase();
-    if (key.contains('reclamo')) return 'Datos asociados a la solicitud';
-    if (key.contains('cuadrilla')) return 'Equipo asignado a la orden';
-    if (key.contains('responsable')) return 'Personal encargado del trabajo';
-    if (key.contains('fecha') || key.contains('hora')) {
-      return 'Registro temporal de la atención';
-    }
-    if (key.contains('foto')) return 'Evidencia registrada en campo';
-    return 'Información registrada en la orden';
   }
 
   IconData _sectionIcon() {

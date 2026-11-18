@@ -18,7 +18,7 @@ class SyncQueueStorageService {
 
     return await openDatabase(
       path,
-      version: 9,
+      version: 10,
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
@@ -41,6 +41,7 @@ class SyncQueueStorageService {
         fotos_solucion_urls TEXT,
         fecha_ejecucion_inicio TEXT,
         fecha_ejecucion_fin TEXT,
+        pasos_confirmados TEXT,
         status TEXT NOT NULL,
         created_at TEXT NOT NULL
       )
@@ -120,6 +121,12 @@ class SyncQueueStorageService {
     }
     if (oldVersion < 9) {
       await _createPendingOrderStarts(db);
+    }
+    if (oldVersion < 10) {
+      // Qué pasos del formulario confirmó el técnico. No se infiere de los
+      // datos: el avance solo ocurre cuando se presiona el botón.
+      await db.execute(
+          'ALTER TABLE offline_sync_queue ADD COLUMN pasos_confirmados TEXT');
     }
   }
 
@@ -236,6 +243,7 @@ class SyncQueueStorageService {
     String? fotosSolucionUrls,
     String? fechaEjecucionInicio,
     String? fechaEjecucionFin,
+    String? pasosConfirmados,
   }) async {
     final db = await database;
     await db.insert(
@@ -255,6 +263,7 @@ class SyncQueueStorageService {
         'fotos_solucion_urls': fotosSolucionUrls,
         'fecha_ejecucion_inicio': fechaEjecucionInicio,
         'fecha_ejecucion_fin': fechaEjecucionFin,
+        'pasos_confirmados': pasosConfirmados,
         'status': 'DRAFT',
         'created_at': DateTime.now().toIso8601String(),
       },

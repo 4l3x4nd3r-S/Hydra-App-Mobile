@@ -12,10 +12,10 @@ class _FakeSaveOsReportUseCase implements SaveOsReportUseCase {
 class _FakeSyncQueueStorageService implements SyncQueueStorageService {
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-  
+
   @override
   Future<Map<String, dynamic>?> getDraft(int osId) async => null;
-  
+
   @override
   Future<void> saveDraft({
     required int osId,
@@ -32,6 +32,7 @@ class _FakeSyncQueueStorageService implements SyncQueueStorageService {
     String? fotosSolucionUrls,
     String? fechaEjecucionInicio,
     String? fechaEjecucionFin,
+    String? pasosConfirmados,
   }) async {}
 }
 
@@ -42,9 +43,10 @@ OsExecutionViewModel _createViewModel() => OsExecutionViewModel(
     );
 
 void main() {
-  test('actualiza correctamente fechaInicio', () {
+  test('actualiza correctamente fechaInicio', () async {
     final viewModel = _createViewModel();
-    final start = DateTime.now().add(const Duration(hours: 2));
+    await viewModel.listo;
+    final start = DateTime.now().subtract(const Duration(hours: 2));
 
     viewModel.updateFechaInicio(start);
 
@@ -53,9 +55,10 @@ void main() {
     viewModel.dispose();
   });
 
-  test('rechaza una finalizacion igual o anterior al inicio', () {
+  test('rechaza una finalizacion igual o anterior al inicio', () async {
     final viewModel = _createViewModel();
-    final start = DateTime.now().add(const Duration(hours: 2));
+    await viewModel.listo;
+    final start = DateTime.now().subtract(const Duration(hours: 2));
     viewModel.updateFechaInicio(start);
 
     viewModel.updateFechaFin(start);

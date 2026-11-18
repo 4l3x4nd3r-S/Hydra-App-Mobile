@@ -1,6 +1,10 @@
 class AppEnvironment {
   static const apiBaseUrl = String.fromEnvironment('API_BASE_URL');
   static const mapTileUrl = String.fromEnvironment('MAP_TILE_URL');
+  static const _locationMapTileUrl =
+      String.fromEnvironment('LOCATION_MAP_TILE_URL');
+  static String get locationMapTileUrl =>
+      _locationMapTileUrl.trim().isEmpty ? mapTileUrl : _locationMapTileUrl;
   static const mapCenterLatitude =
       String.fromEnvironment('MAP_CENTER_LATITUDE');
   static const mapCenterLongitude =

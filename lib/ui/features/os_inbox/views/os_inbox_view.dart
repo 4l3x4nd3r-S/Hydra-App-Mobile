@@ -110,7 +110,6 @@ class _OsInboxBody extends StatelessWidget {
                       context,
                       userName: vm.userName,
                       role: vm.userRole,
-                      codigo: vm.userCode,
                       cuadrilla: vm.cuadrillaNombre,
                     );
                     break;
@@ -213,6 +212,7 @@ class _OsInboxBody extends StatelessWidget {
         ],
       ),
       body: OsInboxContent(
+        showOperationalDetails: false,
         osActivas: vm.osActivas,
         osArchivadas: vm.osArchivadas,
         isLoading: vm.recargandoOs,
@@ -225,7 +225,7 @@ class _OsInboxBody extends StatelessWidget {
         isLiderOfOs: vm.canExecuteOs,
         onTapActiva: (os) {
           final isLider = vm.canExecuteOs(os);
-          
+
           if (isLider && os.estadoOrden != 'ASIGNADO') {
             Navigator.push(
               context,
