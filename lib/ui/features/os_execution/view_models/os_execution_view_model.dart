@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/utils/fecha_servidor.dart';
 import '../../../../domain/models/os.dart';
 import '../../../../domain/use_cases/save_os_report_use_case.dart';
 import '../../../../data/services/sync_queue_storage_service.dart';
@@ -106,14 +107,17 @@ class OsExecutionViewModel extends ChangeNotifier {
     try {
       final draft = await _syncQueueStorageService.getDraft(os.id);
       if (_disposed) return;
-      final localStart = _validStart(draft?['fecha_ejecucion_inicio']);
-      // Server timestamps without an offset are ambiguous. A new form starts
-      // from the device event instead of assuming a timezone for those values.
-      final remoteRaw = os.fechaEjecucionInicio?.trim();
-      final remoteStart = remoteRaw != null &&
-              RegExp(r'(?:[zZ]|[+-]\d{2}:?\d{2})$').hasMatch(remoteRaw)
-          ? _validStart(remoteRaw)
-          : null;
+      var localStart = _validStart(draft?['fecha_ejecucion_inicio']);
+      // Si la O.S. se reprogramó, el borrador conserva el inicio de la
+      // ejecución anterior. Un inicio anterior a la programación vigente no
+      // puede ser de esta ejecución: se descarta y manda la hora del servidor.
+      final programacion = parseFechaServidor(os.fechaProgramacion);
+      if (localStart != null &&
+          programacion != null &&
+          localStart.isBefore(programacion)) {
+        localStart = null;
+      }
+      final remoteStart = _validStart(os.fechaEjecucionInicio);
       fechaInicio = localStart ?? remoteStart ?? _openedAt;
       final persistStart = localStart == null;
 
@@ -180,8 +184,7 @@ class OsExecutionViewModel extends ChangeNotifier {
   }
 
   DateTime? _validStart(Object? raw) {
-    if (raw is! String || raw.trim().isEmpty) return null;
-    final parsed = DateTime.tryParse(raw.trim())?.toLocal();
+    final parsed = parseFechaServidor(raw);
     return parsed == null || parsed.isAfter(_openedAt) ? null : parsed;
   }
 

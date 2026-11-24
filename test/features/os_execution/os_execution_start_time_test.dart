@@ -70,8 +70,20 @@ void main() {
     storage = _DraftStorage();
   });
 
-  OsExecutionViewModel create({String? serverStart}) => OsExecutionViewModel(
-        os: Os(id: 1, fechaEjecucionInicio: serverStart),
+  /// Formato en que el backend envía las fechas: hora de Perú sin zona.
+  String horaPeru(DateTime instante) => instante
+      .toUtc()
+      .subtract(const Duration(hours: 5))
+      .toIso8601String()
+      .replaceFirst('Z', '');
+
+  OsExecutionViewModel create({String? serverStart, String? programacion}) =>
+      OsExecutionViewModel(
+        os: Os(
+          id: 1,
+          fechaEjecucionInicio: serverStart,
+          fechaProgramacion: programacion,
+        ),
         saveOsReportUseCase: _SaveReport(),
         syncQueueStorageService: storage,
         clock: () => now,
@@ -180,6 +192,55 @@ void main() {
             now.add(const Duration(hours: 5)).toUtc().toIso8601String());
     await vm.listo;
     expect(vm.fechaInicio, now);
+    vm.dispose();
+  });
+
+  test('una hora del servidor sin zona se interpreta como hora de Perú',
+      () async {
+    final inicio = now.subtract(const Duration(minutes: 20));
+    final vm = create(serverStart: horaPeru(inicio));
+    await vm.listo;
+    expect(vm.fechaInicio!.isAtSameMomentAs(inicio), isTrue);
+    vm.dispose();
+  });
+
+  test(
+      'tras reprogramar, descarta el inicio del borrador anterior y usa el del servidor',
+      () async {
+    // Caso real: primera ejecución abierta a las 07:53, reprogramada a las
+    // 07:57 y reiniciada a las 08:00. La app seguía mostrando 07:53.
+    final inicioViejo = now.subtract(const Duration(minutes: 12));
+    final reprogramada = now.subtract(const Duration(minutes: 8));
+    final inicioNuevo = now.subtract(const Duration(minutes: 5));
+    storage.draft = {
+      'fecha_ejecucion_inicio': inicioViejo.toUtc().toIso8601String(),
+      'trabajo_ejecutado': 'Trabajo previo',
+    };
+    final vm = create(
+      serverStart: horaPeru(inicioNuevo),
+      programacion: horaPeru(reprogramada),
+    );
+    await vm.listo;
+    expect(vm.fechaInicio!.isAtSameMomentAs(inicioNuevo), isTrue);
+    expect(vm.trabajoEjecutadoController.text, 'Trabajo previo');
+    expect(storage.draft?['fecha_ejecucion_inicio'],
+        inicioNuevo.toUtc().toIso8601String());
+    vm.dispose();
+  });
+
+  test('conserva un inicio editado a mano posterior a la programación',
+      () async {
+    final programacion = now.subtract(const Duration(hours: 1));
+    final editado = now.subtract(const Duration(minutes: 40));
+    storage.draft = {
+      'fecha_ejecucion_inicio': editado.toUtc().toIso8601String(),
+    };
+    final vm = create(
+      serverStart: horaPeru(now.subtract(const Duration(minutes: 30))),
+      programacion: horaPeru(programacion),
+    );
+    await vm.listo;
+    expect(vm.fechaInicio!.isAtSameMomentAs(editado), isTrue);
     vm.dispose();
   });
 

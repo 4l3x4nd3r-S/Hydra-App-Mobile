@@ -112,7 +112,11 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('00123'), findsOneWidget);
     expect(find.text('Solicitante de prueba'), findsOneWidget);
-    expect(find.text('Fuga en la conexión'), findsOneWidget);
+    expect(find.text('OP-1'), findsOneWidget);
+    // Email y descripción ya no se muestran en el detalle.
+    expect(find.text('Fuga en la conexión'), findsNothing);
+    expect(find.text('EMAIL'), findsNothing);
+    expect(find.text('DESCRIPCIÓN'), findsNothing);
     await tester.ensureVisible(find.text('Información del reclamo'));
     await tester.tap(find.text('Información del reclamo'));
     await tester.pumpAndSettle();

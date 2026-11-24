@@ -284,6 +284,19 @@ class SyncQueueStorageService {
     return null;
   }
 
+  /// Olvida la hora de inicio del borrador sin tocar fotos ni textos.
+  /// Se usa al iniciar una nueva ejecución (p. ej. tras una reprogramación),
+  /// para que el formulario no muestre el inicio de la ejecución anterior.
+  Future<void> clearDraftStart(int osId) async {
+    final db = await database;
+    await db.update(
+      'offline_sync_queue',
+      {'fecha_ejecucion_inicio': null},
+      where: 'os_id = ? AND status = ?',
+      whereArgs: [osId, 'DRAFT'],
+    );
+  }
+
   Future<void> deleteDraft(int osId) async {
     final db = await database;
     await db.delete(

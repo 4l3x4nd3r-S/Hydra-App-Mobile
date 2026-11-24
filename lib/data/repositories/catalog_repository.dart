@@ -27,6 +27,29 @@ class CatalogRepository {
     return options.where((option) => option.group == group).toList();
   }
 
+  /// Devuelve "CÓDIGO - descripción" para un tipo de problema usando el
+  /// catálogo importado desde Excel. Si no hay descripción, devuelve el código.
+  Future<String> tipoProblemaLabel(String? code) async {
+    final trimmed = code?.trim() ?? '';
+    if (trimmed.isEmpty) return '';
+    try {
+      final options = await getGroup('TIPO_PROBLEMA');
+      for (final option in options) {
+        if (option.code.trim().toUpperCase() != trimmed.toUpperCase()) continue;
+        final description = option.description?.trim() ?? '';
+        if (description.isNotEmpty) return '$trimmed - $description';
+        final label = option.label.trim();
+        if (label.isNotEmpty && label.toUpperCase() != trimmed.toUpperCase()) {
+          return '$trimmed - $label';
+        }
+        break;
+      }
+    } catch (_) {
+      // Sin catálogo disponible: se muestra solo el código.
+    }
+    return trimmed;
+  }
+
   CatalogOption _toDomain(CatalogOptionDto dto) => CatalogOption(
         group: dto.group,
         code: dto.code,

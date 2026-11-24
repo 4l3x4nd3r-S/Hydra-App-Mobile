@@ -70,6 +70,9 @@ class OsRepository {
 
   Future<OsStartResult> startOrder(int ordenId) async {
     final startedAt = DateTime.now().toUtc().toIso8601String();
+    // Es una ejecución nueva: si quedó un borrador de una ejecución anterior
+    // (O.S. reprogramada), su hora de inicio ya no vale.
+    await _syncQueueStorage.clearDraftStart(ordenId);
     try {
       final response = await _osApiService.iniciarOrden(ordenId);
       if (response.data is Map) {

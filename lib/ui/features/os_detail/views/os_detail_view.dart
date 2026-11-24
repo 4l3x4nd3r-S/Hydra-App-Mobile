@@ -4,6 +4,7 @@ import '../../../../data/services/app_environment.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/status_chip.dart';
 import 'package:provider/provider.dart';
+import '../../../../data/repositories/catalog_repository.dart';
 import '../../../../domain/models/os.dart';
 import '../view_models/os_detail_view_model.dart';
 import '../widgets/os_detail_section.dart';
@@ -30,13 +31,24 @@ class OsDetailView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => OsDetailViewModel(os: os),
+      create: (_) => OsDetailViewModel(
+        os: os,
+        catalogRepository: _readCatalog(context),
+      ),
       child: _OsDetailBody(
         showReadOnlyBanner: showReadOnlyBanner,
         isGasfiteroView: isGasfiteroView,
         onRegistrarSolucion: onRegistrarSolucion,
       ),
     );
+  }
+}
+
+CatalogRepository? _readCatalog(BuildContext context) {
+  try {
+    return context.read<CatalogRepository>();
+  } catch (_) {
+    return null;
   }
 }
 
@@ -130,7 +142,10 @@ class _OsDetailBody extends StatelessWidget {
                     title: 'Información del reclamo',
                     icon: Icons.assignment_outlined,
                     storageKey: 'os_claim_${os.id}',
-                    children: [_buildReclamoSection(c, os, embedded: true)],
+                    children: [
+                      _buildReclamoSection(c, os, vm.tipoProblemaLabel,
+                          embedded: true)
+                    ],
                   ),
                   if (!(isGasfiteroView && os.responsable != null) &&
                       (os.cuadrilla != null || os.responsable != null)) ...[
@@ -340,7 +355,8 @@ class _OsDetailBody extends StatelessWidget {
     );
   }
 
-  Widget _buildReclamoSection(AppColors c, Os os, {bool embedded = false}) {
+  Widget _buildReclamoSection(AppColors c, Os os, String tipoLabel,
+      {bool embedded = false}) {
     final r = os.reclamo;
     debugPrint('_buildReclamoSection - r: $r');
     debugPrint(
@@ -362,16 +378,11 @@ class _OsDetailBody extends StatelessWidget {
       fields: [
         MapEntry('Código de solicitud', r?.codigoSolicitud ?? ''),
         MapEntry('Formato', r?.formato ?? ''),
-        MapEntry(
-          'Tipo',
-          r?.tipoProblema ?? '',
-        ),
+        MapEntry('Tipo', tipoLabel),
         MapEntry('Suministro', r?.numeroSuministro ?? ''),
         MapEntry('Telefono', r?.telefono ?? ''),
         MapEntry('Solicitante', r?.nombreSolicitante ?? ''),
-        MapEntry('Email', r?.email ?? ''),
         MapEntry('Direccion', r?.direccion ?? ''),
-        MapEntry('Descripcion', r?.descripcion ?? ''),
         MapEntry('Fecha registro', r?.fechaRegistro ?? ''),
       ],
     );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../../data/repositories/catalog_repository.dart';
 import '../../../../domain/models/os.dart';
 import '../../../../domain/use_cases/save_os_report_use_case.dart';
 import '../../../../data/services/sync_queue_storage_service.dart';
@@ -54,6 +55,28 @@ class _OsExecutionBodyState extends State<_OsExecutionBody> {
   };
 
   int? _ultimoPaso;
+
+  /// Tipo de problema con la descripción del catálogo (importado desde Excel).
+  String? _tipoProblemaLabel;
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarTipoProblemaLabel();
+  }
+
+  Future<void> _cargarTipoProblemaLabel() async {
+    CatalogRepository? repository;
+    try {
+      repository = context.read<CatalogRepository>();
+    } catch (_) {
+      return;
+    }
+    final code = context.read<OsExecutionViewModel>().os.reclamo?.tipoProblema;
+    final label = await repository.tipoProblemaLabel(code);
+    if (!mounted || label.isEmpty || label == code?.trim()) return;
+    setState(() => _tipoProblemaLabel = label);
+  }
 
   @override
   void dispose() {
@@ -921,16 +944,12 @@ class _OsExecutionBodyState extends State<_OsExecutionBody> {
       fields: [
         MapEntry('Cód. Solicitud', r?.codigoSolicitud ?? ''),
         MapEntry('Formato', r?.formato ?? ''),
-        MapEntry(
-          'Tipo',
-          _getTipoProblemaLabel(r?.tipoProblema),
-        ),
+        MapEntry('Tipo',
+            _tipoProblemaLabel ?? _getTipoProblemaLabel(r?.tipoProblema)),
         MapEntry('Suministro', r?.numeroSuministro ?? ''),
         MapEntry('Telefono', r?.telefono ?? ''),
         MapEntry('Solicitante', r?.nombreSolicitante ?? ''),
-        MapEntry('Email', r?.email ?? ''),
         MapEntry('Direccion', r?.direccion ?? ''),
-        MapEntry('Descripcion', r?.descripcion ?? ''),
         MapEntry('Fecha registro', r?.fechaRegistro ?? ''),
       ],
     );

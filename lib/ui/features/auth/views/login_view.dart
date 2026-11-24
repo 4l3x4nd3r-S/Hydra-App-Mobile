@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../../core/utils/mayusculas_input_formatter.dart';
 import '../../../../domain/use_cases/login_use_case.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../theme_view_model.dart';
@@ -136,8 +137,15 @@ class _LoginBodyState extends State<_LoginBody> {
                         controller: vm.codigoController,
                         style: TextStyle(color: c.onSurface),
                         textInputAction: TextInputAction.next,
+                        // El código es el primer nombre en mayúsculas (RAUL):
+                        // lo que se escriba en minúsculas se convierte solo.
+                        textCapitalization: TextCapitalization.characters,
+                        autocorrect: false,
+                        enableSuggestions: false,
+                        inputFormatters: const [MayusculasInputFormatter()],
                         decoration: InputDecoration(
                           labelText: 'Código de Empleado',
+                          hintText: 'Ej. RAUL',
                           labelStyle: TextStyle(color: c.onSurfaceVariant),
                           prefixIcon: Icon(Icons.badge_outlined,
                               color: c.onSurfaceVariant),

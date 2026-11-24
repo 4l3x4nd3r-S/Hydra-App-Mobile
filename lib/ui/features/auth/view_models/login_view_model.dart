@@ -30,7 +30,7 @@ class LoginViewModel extends ChangeNotifier {
   }
 
   Future<SessionInfo?> login() async {
-    final codigo = codigoController.text.trim();
+    final codigo = codigoController.text.trim().toUpperCase();
     final password = passController.text.trim();
     if (codigo.isEmpty || password.isEmpty) {
       _errorMsg = 'Ingrese codigo de empleado y contrasena';
