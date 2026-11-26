@@ -101,9 +101,9 @@ class _NuevoReclamoBodyState extends State<_NuevoReclamoBody> {
                 keyboardType: TextInputType.number,
                 inputFormatters: [
                   FilteringTextInputFormatter.digitsOnly,
-                  LengthLimitingTextInputFormatter(7),
+                  LengthLimitingTextInputFormatter(8),
                 ],
-                maxLength: 7,
+                maxLength: 8,
                 error: vm.fieldErrors['numero_suministro'],
                 onChanged: (_) => vm.clearFieldError('numero_suministro'),
               ),

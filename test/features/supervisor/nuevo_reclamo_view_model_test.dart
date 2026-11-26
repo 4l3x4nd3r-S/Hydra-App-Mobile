@@ -84,22 +84,48 @@ void main() {
     expect(viewModel.fieldErrors['codigo_solicitud'], 'No puede ser 00000');
   });
 
-  test('número de suministro requiere exactamente siete dígitos', () async {
+  test('número de suministro rechaza menos de cuatro dígitos', () async {
     completarCamposValidos();
-    viewModel.numeroSuministroController.text = '123456';
+    viewModel.numeroSuministroController.text = '123';
 
     expect(await viewModel.submit(), isFalse);
     expect(
       viewModel.fieldErrors['numero_suministro'],
-      'Debe tener exactamente 7 dígitos',
+      'Debe tener entre 4 y 8 dígitos',
     );
   });
 
-  test('número de suministro rechaza 0000000', () async {
+  test('número de suministro rechaza más de ocho dígitos', () async {
     completarCamposValidos();
-    viewModel.numeroSuministroController.text = '0000000';
+    viewModel.numeroSuministroController.text = '123456789';
 
     expect(await viewModel.submit(), isFalse);
-    expect(viewModel.fieldErrors['numero_suministro'], 'No puede ser 0000000');
+    expect(
+      viewModel.fieldErrors['numero_suministro'],
+      'Debe tener entre 4 y 8 dígitos',
+    );
   });
+
+  for (final valido in ['1234', '12345', '004444', '1041998', '12345678']) {
+    test('número de suministro acepta $valido', () async {
+      completarCamposValidos();
+      viewModel.numeroSuministroController.text = valido;
+
+      await viewModel.submit();
+      expect(viewModel.fieldErrors['numero_suministro'], isNull);
+    });
+  }
+
+  for (final ceros in ['0000', '000000', '0000000', '00000000']) {
+    test('número de suministro rechaza $ceros', () async {
+      completarCamposValidos();
+      viewModel.numeroSuministroController.text = ceros;
+
+      expect(await viewModel.submit(), isFalse);
+      expect(
+        viewModel.fieldErrors['numero_suministro'],
+        'No puede ser todo ceros',
+      );
+    });
+  }
 }

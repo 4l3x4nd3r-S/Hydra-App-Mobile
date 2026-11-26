@@ -175,9 +175,9 @@ class NuevoReclamoViewModel extends ChangeNotifier {
     }
     if (numeroSuministro.isEmpty) {
       fieldErrors['numero_suministro'] = 'Requerido';
-    } else if (!RegExp(r'^\d{6,7}$').hasMatch(numeroSuministro)) {
-      fieldErrors['numero_suministro'] = 'Debe tener 6 o 7 dígitos';
-    } else if (numeroSuministro == '0000000' || numeroSuministro == '000000') {
+    } else if (!RegExp(r'^\d{4,8}$').hasMatch(numeroSuministro)) {
+      fieldErrors['numero_suministro'] = 'Debe tener entre 4 y 8 dígitos';
+    } else if (RegExp(r'^0+$').hasMatch(numeroSuministro)) {
       fieldErrors['numero_suministro'] = 'No puede ser todo ceros';
     }
 

@@ -99,8 +99,9 @@ void main() {
         tester.getTopLeft(find.text('Trabajo ejecutado registrado')).dy;
     expect(tester.getTopLeft(find.text('FOTOS DE LA SOLUCIÓN')).dy,
         lessThan(work));
+    // La firma de conformidad va al final, debajo del trabajo ejecutado.
     expect(tester.getTopLeft(find.text('FIRMA DE CONFORMIDAD DEL USUARIO')).dy,
-        lessThan(work));
+        greaterThan(work));
     expect(tester.takeException(), isNull);
   });
 
